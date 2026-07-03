@@ -1,3 +1,17 @@
+# Fork of Rodinia 3.1 OpenMP Benchmarks
+
+I made this for two reasons.
+
+First is that whenever I try to use Rodinia's openmp benchmarks, almost all of them fail to compile out of the box on my machine.
+
+Second is that for one of my projects, I need to compare different compilers (gcc versus clang with and without ltom plus wllvm), hence why I have copied makefiles with hardcoded compiler choices.
+
+You will still need the original release to get the input data for hte benchmarks. I did not include it in this repo because the data is a little large (around 1 gig).
+
+### TODO:
+Mummergpu does not work.
+
+
 Rodinia Benchmark Suite 3.1
 ===========================
 
