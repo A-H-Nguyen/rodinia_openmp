@@ -1,5 +1,5 @@
 CC = clang
-CCFLAGS = -flto -g -fopenmp -O3
+CCFLAGS = -fuse-ld=lld -flto=full -g -fopenmp -O3
 OUTPUT = *.out
 
 3D:

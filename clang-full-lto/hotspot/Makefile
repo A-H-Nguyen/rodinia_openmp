@@ -1,6 +1,6 @@
 # C compiler
 CC = clang++
-CC_FLAGS = -flto -g -fopenmp -O2
+CC_FLAGS = -fuse-ld=lld -flto=full -g -fopenmp -O2
 # OFFLOAD_CC_FLAGS = -offload-option,mic,compiler,"-no-opt-prefetch"
 
 all: hotspot 
