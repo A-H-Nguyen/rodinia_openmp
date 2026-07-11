@@ -2,16 +2,14 @@
 
 RODINIA_BASE_DIR := $(shell pwd)
 
-OMP_BIN_DIR := $(RODINIA_BASE_DIR)/bin/linux/omp
+DIRS := backprop bfs b+tree cfd heartwall hotspot hotspot3D kmeans lavaMD leukocyte lud myocyte nn nw particlefilter pathfinder srad streamcluster
 
-OMP_DIRS := backprop bfs b+tree cfd heartwall hotspot hotspot3D kmeans lavaMD leukocyte lud myocyte nn nw particlefilter pathfinder srad streamcluster
-
-all: OMP_GCC 
-# all: OMP_GCC OMP_GCC_LTO OMP_CLANG OMP_CLANG_THIN_LTO OMP_CLANG_FULL_LTO OMP_CLANG_WLLVM 
+all: GCC 
+# all: GCC GCC_LTO CLANG CLANG_THIN_LTO CLANG_FULL_LTO CLANG_WLLVM 
 	
-# cd openmp/mummergpu;  			make;	cp bin/mummergpu $(OMP_BIN_DIR)
+# cd openmp/mummergpu;  			make;	cp bin/mummergpu $(BIN_DIR)
 
-OMP_GCC:
+GCC:
 	cd gcc/backprop;      	make
 	cd gcc/bfs;           	make
 	cd gcc/b+tree;        	make
@@ -31,26 +29,27 @@ OMP_GCC:
 	cd gcc/srad;          	make
 	cd gcc/streamcluster; 	make
 
-# OMP_GCC_LTO:
-# 	cd openmp/backprop;				make;	cp backprop $(OMP_BIN_DIR)
-# 	cd openmp/bfs; 					make;	cp bfs $(OMP_BIN_DIR)
-# 	cd openmp/cfd; 					make;	cp euler3d_cpu euler3d_cpu_double pre_euler3d_cpu pre_euler3d_cpu_double $(OMP_BIN_DIR)
-# 	cd openmp/heartwall;  				make;	cp heartwall $(OMP_BIN_DIR)
-# 	cd openmp/hotspot; 				make;	cp hotspot $(OMP_BIN_DIR)
-# 	cd openmp/kmeans/kmeans_openmp;			make;	cp kmeans $(OMP_BIN_DIR)
-# 	cd openmp/lavaMD;				make;	cp lavaMD $(OMP_BIN_DIR)
-# 	cd openmp/leukocyte;  				make;	cp OpenMP/leukocyte $(OMP_BIN_DIR)
-# 	cd openmp/lud; 					make;	cp omp/lud_omp $(OMP_BIN_DIR)
-# 	cd openmp/nn;					make;	cp nn $(OMP_BIN_DIR)
-# 	cd openmp/nw; 					make;	cp needle $(OMP_BIN_DIR)
-# 	cd openmp/srad/srad_v1; 			make;	cp srad $(OMP_BIN_DIR)/srad_v1
-# 	cd openmp/srad/srad_v2; 			make;   cp srad $(OMP_BIN_DIR)/srad_v2
-# 	cd openmp/streamcluster;			make;	cp sc_omp $(OMP_BIN_DIR)
-# 	cd openmp/particlefilter;			make;	cp particle_filter $(OMP_BIN_DIR)
-# 	cd openmp/pathfinder;			make;	cp pathfinder $(OMP_BIN_DIR)
-# 	cd openmp/mummergpu;  				make;	cp bin/mummergpu $(OMP_BIN_DIR)
+GCC_LTO:
+	cd gcc-lto/backprop;      	make
+	cd gcc-lto/bfs;           	make
+	cd gcc-lto/b+tree;        	make
+	cd gcc-lto/cfd;           	make
+	cd gcc-lto/heartwall;     	make
+	cd gcc-lto/hotspot;       	make
+	cd gcc-lto/hotspot3D;     	make
+	cd gcc-lto/kmeans;        	make
+	cd gcc-lto/lavaMD;        	make
+	cd gcc-lto/leukocyte;     	make
+	cd gcc-lto/lud;           	make
+	cd gcc-lto/myocyte;       	make
+	cd gcc-lto/nn;            	make
+	cd gcc-lto/nw;            	make
+	cd gcc-lto/particlefilter; 	make
+	cd gcc-lto/pathfinder;    	make
+	cd gcc-lto/srad;          	make
+	cd gcc-lto/streamcluster; 	make
 
-OMP_CLANG:
+CLANG:
 	cd clang/backprop;      	make
 	cd clang/bfs;           	make
 	cd clang/b+tree;        	make
@@ -70,65 +69,70 @@ OMP_CLANG:
 	cd clang/srad;          	make
 	cd clang/streamcluster; 	make
 
-# OMP_CLANG_THIN_LTO:
-# 	cd openmp/backprop;				make;	cp backprop $(OMP_BIN_DIR)
-# 	cd openmp/bfs; 					make;	cp bfs $(OMP_BIN_DIR)
-# 	cd openmp/cfd; 					make;	cp euler3d_cpu euler3d_cpu_double pre_euler3d_cpu pre_euler3d_cpu_double $(OMP_BIN_DIR)
-# 	cd openmp/heartwall;  				make;	cp heartwall $(OMP_BIN_DIR)
-# 	cd openmp/hotspot; 				make;	cp hotspot $(OMP_BIN_DIR)
-# 	cd openmp/kmeans/kmeans_openmp;			make;	cp kmeans $(OMP_BIN_DIR)
-# 	cd openmp/lavaMD;				make;	cp lavaMD $(OMP_BIN_DIR)
-# 	cd openmp/leukocyte;  				make;	cp OpenMP/leukocyte $(OMP_BIN_DIR)
-# 	cd openmp/lud; 					make;	cp omp/lud_omp $(OMP_BIN_DIR)
-# 	cd openmp/nn;					make;	cp nn $(OMP_BIN_DIR)
-# 	cd openmp/nw; 					make;	cp needle $(OMP_BIN_DIR)
-# 	cd openmp/srad/srad_v1; 			make;	cp srad $(OMP_BIN_DIR)/srad_v1
-# 	cd openmp/srad/srad_v2; 			make;   cp srad $(OMP_BIN_DIR)/srad_v2
-# 	cd openmp/streamcluster;			make;	cp sc_omp $(OMP_BIN_DIR)
-# 	cd openmp/particlefilter;			make;	cp particle_filter $(OMP_BIN_DIR)
-# 	cd openmp/pathfinder;			make;	cp pathfinder $(OMP_BIN_DIR)
-# 	cd openmp/mummergpu;  				make;	cp bin/mummergpu $(OMP_BIN_DIR)
+# CLANG_THIN_LTO:
+# 	cd openmp/backprop;				make;	cp backprop $(BIN_DIR)
+# 	cd openmp/bfs; 					make;	cp bfs $(BIN_DIR)
+# 	cd openmp/cfd; 					make;	cp euler3d_cpu euler3d_cpu_double pre_euler3d_cpu pre_euler3d_cpu_double $(BIN_DIR)
+# 	cd openmp/heartwall;  				make;	cp heartwall $(BIN_DIR)
+# 	cd openmp/hotspot; 				make;	cp hotspot $(BIN_DIR)
+# 	cd openmp/kmeans/kmeans_openmp;			make;	cp kmeans $(BIN_DIR)
+# 	cd openmp/lavaMD;				make;	cp lavaMD $(BIN_DIR)
+# 	cd openmp/leukocyte;  				make;	cp OpenMP/leukocyte $(BIN_DIR)
+# 	cd openmp/lud; 					make;	cp omp/lud_omp $(BIN_DIR)
+# 	cd openmp/nn;					make;	cp nn $(BIN_DIR)
+# 	cd openmp/nw; 					make;	cp needle $(BIN_DIR)
+# 	cd openmp/srad/srad_v1; 			make;	cp srad $(BIN_DIR)/srad_v1
+# 	cd openmp/srad/srad_v2; 			make;   cp srad $(BIN_DIR)/srad_v2
+# 	cd openmp/streamcluster;			make;	cp sc_omp $(BIN_DIR)
+# 	cd openmp/particlefilter;			make;	cp particle_filter $(BIN_DIR)
+# 	cd openmp/pathfinder;			make;	cp pathfinder $(BIN_DIR)
+# 	cd openmp/mummergpu;  				make;	cp bin/mummergpu $(BIN_DIR)
 
-# OMP_CLANG_FULL_LTO:
-# 	cd openmp/backprop;				make;	cp backprop $(OMP_BIN_DIR)
-# 	cd openmp/bfs; 					make;	cp bfs $(OMP_BIN_DIR)
-# 	cd openmp/cfd; 					make;	cp euler3d_cpu euler3d_cpu_double pre_euler3d_cpu pre_euler3d_cpu_double $(OMP_BIN_DIR)
-# 	cd openmp/heartwall;  				make;	cp heartwall $(OMP_BIN_DIR)
-# 	cd openmp/hotspot; 				make;	cp hotspot $(OMP_BIN_DIR)
-# 	cd openmp/kmeans/kmeans_openmp;			make;	cp kmeans $(OMP_BIN_DIR)
-# 	cd openmp/lavaMD;				make;	cp lavaMD $(OMP_BIN_DIR)
-# 	cd openmp/leukocyte;  				make;	cp OpenMP/leukocyte $(OMP_BIN_DIR)
-# 	cd openmp/lud; 					make;	cp omp/lud_omp $(OMP_BIN_DIR)
-# 	cd openmp/nn;					make;	cp nn $(OMP_BIN_DIR)
-# 	cd openmp/nw; 					make;	cp needle $(OMP_BIN_DIR)
-# 	cd openmp/srad/srad_v1; 			make;	cp srad $(OMP_BIN_DIR)/srad_v1
-# 	cd openmp/srad/srad_v2; 			make;   cp srad $(OMP_BIN_DIR)/srad_v2
-# 	cd openmp/streamcluster;			make;	cp sc_omp $(OMP_BIN_DIR)
-# 	cd openmp/particlefilter;			make;	cp particle_filter $(OMP_BIN_DIR)
-# 	cd openmp/pathfinder;			make;	cp pathfinder $(OMP_BIN_DIR)
-# 	cd openmp/mummergpu;  				make;	cp bin/mummergpu $(OMP_BIN_DIR)
+# CLANG_FULL_LTO:
+# 	cd openmp/backprop;				make;	cp backprop $(BIN_DIR)
+# 	cd openmp/bfs; 					make;	cp bfs $(BIN_DIR)
+# 	cd openmp/cfd; 					make;	cp euler3d_cpu euler3d_cpu_double pre_euler3d_cpu pre_euler3d_cpu_double $(BIN_DIR)
+# 	cd openmp/heartwall;  				make;	cp heartwall $(BIN_DIR)
+# 	cd openmp/hotspot; 				make;	cp hotspot $(BIN_DIR)
+# 	cd openmp/kmeans/kmeans_openmp;			make;	cp kmeans $(BIN_DIR)
+# 	cd openmp/lavaMD;				make;	cp lavaMD $(BIN_DIR)
+# 	cd openmp/leukocyte;  				make;	cp OpenMP/leukocyte $(BIN_DIR)
+# 	cd openmp/lud; 					make;	cp omp/lud_omp $(BIN_DIR)
+# 	cd openmp/nn;					make;	cp nn $(BIN_DIR)
+# 	cd openmp/nw; 					make;	cp needle $(BIN_DIR)
+# 	cd openmp/srad/srad_v1; 			make;	cp srad $(BIN_DIR)/srad_v1
+# 	cd openmp/srad/srad_v2; 			make;   cp srad $(BIN_DIR)/srad_v2
+# 	cd openmp/streamcluster;			make;	cp sc_omp $(BIN_DIR)
+# 	cd openmp/particlefilter;			make;	cp particle_filter $(BIN_DIR)
+# 	cd openmp/pathfinder;			make;	cp pathfinder $(BIN_DIR)
+# 	cd openmp/mummergpu;  				make;	cp bin/mummergpu $(BIN_DIR)
 
-# OMP_CLANG_WLLVM:
-# 	cd openmp/backprop;				make;	cp backprop $(OMP_BIN_DIR)
-# 	cd openmp/bfs; 					make;	cp bfs $(OMP_BIN_DIR)
-# 	cd openmp/cfd; 					make;	cp euler3d_cpu euler3d_cpu_double pre_euler3d_cpu pre_euler3d_cpu_double $(OMP_BIN_DIR)
-# 	cd openmp/heartwall;  				make;	cp heartwall $(OMP_BIN_DIR)
-# 	cd openmp/hotspot; 				make;	cp hotspot $(OMP_BIN_DIR)
-# 	cd openmp/kmeans/kmeans_openmp;			make;	cp kmeans $(OMP_BIN_DIR)
-# 	cd openmp/lavaMD;				make;	cp lavaMD $(OMP_BIN_DIR)
-# 	cd openmp/leukocyte;  				make;	cp OpenMP/leukocyte $(OMP_BIN_DIR)
-# 	cd openmp/lud; 					make;	cp omp/lud_omp $(OMP_BIN_DIR)
-# 	cd openmp/nn;					make;	cp nn $(OMP_BIN_DIR)
-# 	cd openmp/nw; 					make;	cp needle $(OMP_BIN_DIR)
-# 	cd openmp/srad/srad_v1; 			make;	cp srad $(OMP_BIN_DIR)/srad_v1
-# 	cd openmp/srad/srad_v2; 			make;   cp srad $(OMP_BIN_DIR)/srad_v2
-# 	cd openmp/streamcluster;			make;	cp sc_omp $(OMP_BIN_DIR)
-# 	cd openmp/particlefilter;			make;	cp particle_filter $(OMP_BIN_DIR)
-# 	cd openmp/pathfinder;			make;	cp pathfinder $(OMP_BIN_DIR)
-# 	cd openmp/mummergpu;  				make;	cp bin/mummergpu $(OMP_BIN_DIR)
+# CLANG_WLLVM:
+# 	cd openmp/backprop;				make;	cp backprop $(BIN_DIR)
+# 	cd openmp/bfs; 					make;	cp bfs $(BIN_DIR)
+# 	cd openmp/cfd; 					make;	cp euler3d_cpu euler3d_cpu_double pre_euler3d_cpu pre_euler3d_cpu_double $(BIN_DIR)
+# 	cd openmp/heartwall;  				make;	cp heartwall $(BIN_DIR)
+# 	cd openmp/hotspot; 				make;	cp hotspot $(BIN_DIR)
+# 	cd openmp/kmeans/kmeans_openmp;			make;	cp kmeans $(BIN_DIR)
+# 	cd openmp/lavaMD;				make;	cp lavaMD $(BIN_DIR)
+# 	cd openmp/leukocyte;  				make;	cp OpenMP/leukocyte $(BIN_DIR)
+# 	cd openmp/lud; 					make;	cp omp/lud_omp $(BIN_DIR)
+# 	cd openmp/nn;					make;	cp nn $(BIN_DIR)
+# 	cd openmp/nw; 					make;	cp needle $(BIN_DIR)
+# 	cd openmp/srad/srad_v1; 			make;	cp srad $(BIN_DIR)/srad_v1
+# 	cd openmp/srad/srad_v2; 			make;   cp srad $(BIN_DIR)/srad_v2
+# 	cd openmp/streamcluster;			make;	cp sc_omp $(BIN_DIR)
+# 	cd openmp/particlefilter;			make;	cp particle_filter $(BIN_DIR)
+# 	cd openmp/pathfinder;			make;	cp pathfinder $(BIN_DIR)
+# 	cd openmp/mummergpu;  				make;	cp bin/mummergpu $(BIN_DIR)
 
-clean: OMP_GCC_clean 
+clean: GCC_clean GCC_LTO_clean 
 
-OMP_GCC_clean :
-	cd $(OMP_BIN_DIR); rm -f *
-	for dir in $(OMP_DIRS) ; do cd gcc/$$dir ; make clean ; cd ../.. ; done
+GCC_clean :
+	for dir in $(DIRS) ; do cd gcc/$$dir ; make clean ; cd ../.. ; done
+
+GCC_LTO_clean :
+	for dir in $(DIRS) ; do cd gcc/$$dir ; make clean ; cd ../.. ; done
+
+CLANG_clean :
+	for dir in $(DIRS) ; do cd clang/$$dir ; make clean ; cd ../.. ; done
