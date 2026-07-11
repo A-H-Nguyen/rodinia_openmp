@@ -89,24 +89,25 @@ CLANG_FULL_LTO:
 	cd clang-full-lto/srad;          	make
 	cd clang-full-lto/streamcluster; 	make
 
-# CLANG_THIN_LTO:
-# 	cd openmp/backprop;				make;	cp backprop $(BIN_DIR)
-# 	cd openmp/bfs; 					make;	cp bfs $(BIN_DIR)
-# 	cd openmp/cfd; 					make;	cp euler3d_cpu euler3d_cpu_double pre_euler3d_cpu pre_euler3d_cpu_double $(BIN_DIR)
-# 	cd openmp/heartwall;  				make;	cp heartwall $(BIN_DIR)
-# 	cd openmp/hotspot; 				make;	cp hotspot $(BIN_DIR)
-# 	cd openmp/kmeans/kmeans_openmp;			make;	cp kmeans $(BIN_DIR)
-# 	cd openmp/lavaMD;				make;	cp lavaMD $(BIN_DIR)
-# 	cd openmp/leukocyte;  				make;	cp OpenMP/leukocyte $(BIN_DIR)
-# 	cd openmp/lud; 					make;	cp omp/lud_omp $(BIN_DIR)
-# 	cd openmp/nn;					make;	cp nn $(BIN_DIR)
-# 	cd openmp/nw; 					make;	cp needle $(BIN_DIR)
-# 	cd openmp/srad/srad_v1; 			make;	cp srad $(BIN_DIR)/srad_v1
-# 	cd openmp/srad/srad_v2; 			make;   cp srad $(BIN_DIR)/srad_v2
-# 	cd openmp/streamcluster;			make;	cp sc_omp $(BIN_DIR)
-# 	cd openmp/particlefilter;			make;	cp particle_filter $(BIN_DIR)
-# 	cd openmp/pathfinder;			make;	cp pathfinder $(BIN_DIR)
-# 	cd openmp/mummergpu;  				make;	cp bin/mummergpu $(BIN_DIR)
+CLANG_THIN_LTO:
+	cd clang-thin-lto/backprop;      	make
+	cd clang-thin-lto/bfs;           	make
+	cd clang-thin-lto/b+tree;        	make
+	cd clang-thin-lto/cfd;           	make
+	cd clang-thin-lto/heartwall;     	make
+	cd clang-thin-lto/hotspot;       	make
+	cd clang-thin-lto/hotspot3D;     	make
+	cd clang-thin-lto/kmeans;        	make
+	cd clang-thin-lto/lavaMD;        	make
+	cd clang-thin-lto/leukocyte;     	make
+	cd clang-thin-lto/lud;           	make
+	cd clang-thin-lto/myocyte;       	make
+	cd clang-thin-lto/nn;            	make
+	cd clang-thin-lto/nw;            	make
+	cd clang-thin-lto/particlefilter; 	make
+	cd clang-thin-lto/pathfinder;    	make
+	cd clang-thin-lto/srad;          	make
+	cd clang-thin-lto/streamcluster; 	make
 
 # CLANG_WLLVM:
 # 	cd openmp/backprop;				make;	cp backprop $(BIN_DIR)
@@ -140,3 +141,6 @@ CLANG_clean :
 
 CLANG_FULL_LTO_clean :
 	for dir in $(DIRS) ; do cd clang-full-lto/$$dir ; make clean ; cd ../.. ; done
+
+CLANG_THIN_LTO_clean :
+	for dir in $(DIRS) ; do cd clang-thin-lto/$$dir ; make clean ; cd ../.. ; done
