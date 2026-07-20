@@ -10,7 +10,6 @@ ifdef OUTPUT
 override OUTPUT = -DOUTPUT
 endif
 
-C_C = clang
 OMP_LIB = -lgomp
 OMP_FLAG = -fopenmp
 
@@ -25,7 +24,7 @@ a.out:		main.o \
 			./util/timer/timer.o \
 			-lm \
 			$(OMP_LIB) \
-			-o lavaMD
+			-o lavaMD.out
 # compile function files into objects (binaries)
 main.o:		main.h \
 			main.c \
@@ -69,4 +68,4 @@ clean:
 		./util/num/*.o \
 		./util/timer/*.o \
                 ./util/device/*.o \
-		lavaMD
+		lavaMD.out

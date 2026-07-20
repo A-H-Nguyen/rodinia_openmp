@@ -1,12 +1,11 @@
 # C compiler
-CC = clang++
 CC_FLAGS = -g -O3 -fopenmp
 
 all: needle 
 
 needle: 
-	$(CC) $(CC_FLAGS) needle.cpp -o needle 
+	$(CXX) $(CC_FLAGS) needle.cpp -o needle.out 
 
 clean:
-	rm -f needle result.txt
+	rm -f needle.out result.txt
 

@@ -1,5 +1,4 @@
 # C compiler
-CC = clang
 CC_FLAGS = -g -fopenmp  -O2
 
 

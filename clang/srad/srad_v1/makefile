@@ -9,16 +9,16 @@
 
 # link objects(binaries) together
 a.out:	main.o
-	clang	main.o \
-			-lm -fopenmp -o srad
+	$(CC)	main.o \
+			-lm -fopenmp -o srad.out
 
 # compile main function file into object (binary)
 main.o: 	main.c \
 				define.c \
 				graphics.c
-	clang	main.c \
+	$(CC)	main.c \
 			-c -O3 -fopenmp
 
 # delete all object files
 clean:
-	rm *.o srad
+	rm *.o srad.out

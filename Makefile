@@ -4,7 +4,6 @@ RODINIA_BASE_DIR := $(shell pwd)
 
 DIRS := backprop bfs b+tree cfd heartwall hotspot hotspot3D kmeans lavaMD leukocyte lud myocyte nn nw particlefilter pathfinder srad streamcluster
 
-all: GCC GCC_LTO CLANG CLANG_FULL_LTO
 # all: GCC GCC_LTO CLANG CLANG_THIN_LTO CLANG_FULL_LTO CLANG_WLLVM 
 	
 # cd openmp/mummergpu;  			make;	cp bin/mummergpu $(BIN_DIR)

@@ -10,8 +10,6 @@
 srcdir = .
 VPATH = .
 
-CC = clang
-
 DEFS = -DHAVE_CONFIG_H
 LIBS =  -lm 
 RANLIB = ranlib

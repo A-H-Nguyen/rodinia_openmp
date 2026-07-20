@@ -9,7 +9,7 @@
 
 # link objects(binaries) together
 myocyte.out:	main.o
-	clang	main.o \
+	$(CC)	main.o \
 			-lm -fopenmp \
 	-o myocyte.out
 
@@ -24,7 +24,7 @@ main.o: 	main.c \
 				solver.c \
 				file.c \
 				timer.c
-	clang	main.c \
+	$(CC)	main.c \
 			-c -O3 -fopenmp
 
 # delete all object files

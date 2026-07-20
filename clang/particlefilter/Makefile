@@ -1,12 +1,8 @@
 #makefile
 
 openmp: ex_particle_OPENMP_seq.c
-	clang -O3 -ffast-math -fopenmp ex_particle_OPENMP_seq.c -o particle_filter -lm 
-
-
-icc_openmp: ex_particle_OPENMP_seq.c
-	icc -O3 -fast -openmp ex_particle_OPENMP_seq.c -o particle_filter
+	$(CC) -O3 -ffast-math -fopenmp ex_particle_OPENMP_seq.c -o particle_filter.out -lm 
 
 
 clean:
-	rm particle_filter
+	rm particle_filter.out

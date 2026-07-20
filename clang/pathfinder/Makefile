@@ -1,6 +1,6 @@
 CC = clang++
 SRC = pathfinder.cpp
-EXE = pathfinder
+EXE = pathfinder.out
 FLAGS = -fopenmp -O3
 
 release:
@@ -10,6 +10,4 @@ debug:
 	$(CC) $(SRC) -g -Wall -o $(EXE)
 
 clean:
-	rm -f pathfinder out
-
-
+	rm -f pathfinder.out out

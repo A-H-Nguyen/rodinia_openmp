@@ -1,9 +1,8 @@
 # C compiler
-CC = clang++
 CC_FLAGS = -g -fopenmp -O2
 
 bfs: 
-	$(CC) $(CC_FLAGS) srad.cpp -o srad 
+	$(CXX) $(CC_FLAGS) srad.cpp -o srad.out 
 
 clean:
-	rm -f srad
+	rm -f srad.out

@@ -1,9 +1,8 @@
 # C compiler
-CC = clang
 CC_FLAGS = -g -fopenmp -O2 
 
 kmeans: cluster.o getopt.o kmeans.o kmeans_clustering.o 
-	$(CC) $(CC_FLAGS) cluster.o getopt.o kmeans.o kmeans_clustering.o  -o kmeans
+	$(CC) $(CC_FLAGS) cluster.o getopt.o kmeans.o kmeans_clustering.o -o kmeans.out
 
 %.o: %.[ch]
 	$(CC) $(CC_FLAGS) $< -c
@@ -21,4 +20,4 @@ kmeans_clustering.o: kmeans_clustering.c kmeans.h
 	$(CC) $(CC_FLAGS) kmeans_clustering.c -c
 
 clean:
-	rm -f *.o *~ kmeans 
+	rm -f *.o *~ kmeans.out

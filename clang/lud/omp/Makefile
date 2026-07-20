@@ -9,7 +9,7 @@ DEBUG          := NO
 PROFILE        := NO
 
 # ------------  name of the executable  ----------------------------------------
-EXECUTABLE      := lud_omp
+EXECUTABLE      := lud_omp.out
 
 # ------------  list of all source files  --------------------------------------
 SOURCES         := lud.c lud_omp.c ../common/common.c 
