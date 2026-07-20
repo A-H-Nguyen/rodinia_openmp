@@ -1,4 +1,3 @@
-C_C = clang
 OMP_LIB = -lgomp
 OMP_FLAG = -fopenmp
 
@@ -11,7 +10,7 @@ b+tree.out:	./main.o \
 		./kernel/kernel_cpu_2.o \
 		./util/timer/timer.o \
 		./util/num/num.o
-	$(C_C)	./main.o \
+	$(CC)	./main.o \
 			./kernel/kernel_cpu.o \
 			./kernel/kernel_cpu_2.o \
 			./util/timer/timer.o \
@@ -30,7 +29,7 @@ b+tree.out:	./main.o \
 main.o:	./common.h \
 		./main.h \
 		./main.c
-	$(C_C)	./main.c \
+	$(CC)	./main.c \
 			-c \
 			-o ./main.o \
 			-O3
@@ -42,7 +41,7 @@ main.o:	./common.h \
 ./kernel/kernel_cpu.o:	./common.h \
 						./kernel/kernel_cpu.h \
 						./kernel/kernel_cpu.c
-	$(C_C)	./kernel/kernel_cpu.c \
+	$(CC)	./kernel/kernel_cpu.c \
 			-c \
 			-o ./kernel/kernel_cpu.o \
 			-O3 \
@@ -51,7 +50,7 @@ main.o:	./common.h \
 ./kernel/kernel_cpu_2.o:./common.h \
 						./kernel/kernel_cpu_2.h \
 						./kernel/kernel_cpu_2.c
-	$(C_C)	./kernel/kernel_cpu_2.c \
+	$(CC)	./kernel/kernel_cpu_2.c \
 			-c \
 			-o ./kernel/kernel_cpu_2.o \
 			-O3 \
@@ -64,7 +63,7 @@ main.o:	./common.h \
 ./util/timer/timer.o:	./common.h \
 						./util/timer/timer.h \
 						./util/timer/timer.c
-	$(C_C)	./util/timer/timer.c \
+	$(CC)	./util/timer/timer.c \
 			-c \
 			-o ./util/timer/timer.o \
 			-O3
@@ -72,7 +71,7 @@ main.o:	./common.h \
 ./util/num/num.o:	./common.h \
 					./util/num/num.h \
 					./util/num/num.c
-	$(C_C)	./util/num/num.c \
+	$(CC)	./util/num/num.c \
 			-c \
 			-o ./util/num/num.o \
 			-O3

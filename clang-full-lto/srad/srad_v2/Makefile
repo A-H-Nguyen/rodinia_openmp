@@ -1,5 +1,5 @@
 # C compiler
-CC = g++
+CC = clang++
 CC_FLAGS = -fuse-ld=lld -flto=full -g -fopenmp -O2
 
 bfs: 

@@ -10,7 +10,7 @@
 srcdir = .
 VPATH = .
 
-CC = gcc
+CC = clang
 
 DEFS = -DHAVE_CONFIG_H
 LIBS =  -lm
