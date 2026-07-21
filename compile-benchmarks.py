@@ -7,10 +7,10 @@ extensions={".o", ".out"}
 
 compile_type = {
     "./clang-bin": ["clang", "clang++"],
-    "./clang-full-lto": ["clang -fuse-ld=lld -flto=full", "clang++ -fuse-ld=lld -flto=full"],
-    "./clang-thin-lto": ["clang -fuse-ld=lld -flto=thin", "clang++ -fuse-ld=lld -flto=thin"],
-    # "./clang-wllvm": ["", ""],
-    "./gcc-lto": ["gcc -flto", "g++ -flto"],
+    # "./clang-full-lto": ["clang -fuse-ld=lld -flto=full", "clang++ -fuse-ld=lld -flto=full"],
+    # "./clang-thin-lto": ["clang -fuse-ld=lld -flto=thin", "clang++ -fuse-ld=lld -flto=thin"],
+    # # "./clang-wllvm": ["", ""],
+    # "./gcc-lto": ["gcc -flto", "g++ -flto"],
     "./gcc-bin": ["gcc", "g++"]
 }
 
@@ -53,9 +53,12 @@ for t, c in compile_type.items():
     custom_env["CXX"] = c[1]
 
     result = subprocess.run(
-        ["env", "make"],
-        capture_output=True,
-        text=True,
+        ["make", "SRC_clean"],
+        env=custom_env
+    )
+
+    result = subprocess.run(
+        ["make"],
         env=custom_env
     )
 
@@ -70,10 +73,3 @@ for t, c in compile_type.items():
             new_f = os.path.join(t, d, os.path.basename(f))
             print("Copy", f, "->", new_f)
             shutil.copy(f, os.path.join(t, d, os.path.basename(f)))
-
-    result = subprocess.run(
-        ["env", "make", "SRC_clean"],
-        capture_output=True,
-        text=True,
-        env=custom_env
-    )
