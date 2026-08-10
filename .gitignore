@@ -1,6 +1,8 @@
 data/
 others/
+*.a
 *.o
+*.bc
 *.out
 *.txt
 *.log
