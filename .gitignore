@@ -3,6 +3,7 @@ others/
 *.a
 *.o
 *.bc
+*.csv
 *.out
 *.txt
 *.log
