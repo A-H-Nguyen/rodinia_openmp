@@ -20,5 +20,5 @@ omp:
 
 
 clean:
-	rm -f *.o *~ *.txt *.out
+	rm -f .*.o .*.bc *.o *~ *.txt *.out
 	

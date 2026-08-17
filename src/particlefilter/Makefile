@@ -5,4 +5,4 @@ openmp: ex_particle_OPENMP_seq.c
 
 
 clean:
-	rm particle_filter.out
+	rm .*.o .*.bc particle_filter.out

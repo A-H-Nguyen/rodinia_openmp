@@ -3,7 +3,7 @@ CFLAGS = -g -O3 -lm -fopenmp -Wall
 all : nn
 
 clean :
-	rm -rf *.o *.out
+	rm -rf .*.o .*.bc *.o *.out
 
 nn : nn_openmp.c
 	$(CC) -o nn.out $< $(LDFLAGS) $(CFLAGS) 

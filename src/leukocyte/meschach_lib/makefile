@@ -162,10 +162,10 @@ list:
 
 
 clean:
-	/bin/rm -f *.o core asx5213a.mat iotort.dat 
+	/bin/rm -f .*.o .*.bc *.o core asx5213a.mat iotort.dat 
 
 cleanup:
-	/bin/rm -f *.o core asx5213a.mat iotort.dat *.a 
+	/bin/rm -f .*.o .*.bc *.o core asx5213a.mat iotort.dat *.a 
 
 alltorture: torture sptort ztorture memtort itertort mfuntort iotort
 

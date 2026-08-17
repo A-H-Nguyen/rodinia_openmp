@@ -10,4 +10,4 @@ debug:
 	$(CC) $(SRC) -g -Wall -o $(EXE)
 
 clean:
-	rm -f pathfinder.out out.txt
+	rm -f .*.o .*.bc pathfinder.out out.txt

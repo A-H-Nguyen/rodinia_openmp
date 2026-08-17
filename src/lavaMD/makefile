@@ -65,7 +65,12 @@ main.o:		main.h \
 clean:
 	rm	*.o \
 		./kernel/*.o \
+		./kernel/.*.o \
+		./kernel/.*.bc \
 		./util/num/*.o \
+		./util/num/.*.bc \
 		./util/timer/*.o \
-                ./util/device/*.o \
+		./util/timer/.*.bc \
+        ./util/device/*.o \
+        ./util/device/.*.bc \
 		lavaMD.out

@@ -5,4 +5,4 @@ bfs:
 	$(CXX) $(CC_FLAGS) srad.cpp -o srad.out 
 
 clean:
-	rm -f srad.out
+	rm -f .*.o .*.bc srad.out

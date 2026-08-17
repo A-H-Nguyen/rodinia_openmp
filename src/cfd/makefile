@@ -17,6 +17,7 @@ pre_euler3d_cpu_double: pre_euler3d_cpu_double.cpp
 
 
 clean:
+	rm -f *.o .*.o .*.bc
 	rm -f euler3d_cpu.out
 	rm -f euler3d_cpu_double.out
 	rm -f pre_euler3d_cpu.out

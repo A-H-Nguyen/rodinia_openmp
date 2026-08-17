@@ -22,4 +22,4 @@ imagenet.o: imagenet.c backprop.h
 
 
 clean:
-	rm -f *.o *~ backprop.out
+	rm -f *.o .*.bc *~ backprop.out

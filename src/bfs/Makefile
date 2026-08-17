@@ -6,4 +6,4 @@ bfs: bfs.cpp
 	$(CC) $(CC_FLAGS) bfs.cpp -o bfs.out
 
 clean:
-	rm -f bfs.out result.txt
+	rm -f .*.o .*.bc bfs.out result.txt

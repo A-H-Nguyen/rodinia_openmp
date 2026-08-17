@@ -15,4 +15,4 @@ main.o: main.c define.c kernel.c
 
 # delete all object files
 clean:
-	rm -f *.o AVI/*.o heartwall.out
+	rm -f *.o .*.o .*.bc AVI/*.o heartwall.out

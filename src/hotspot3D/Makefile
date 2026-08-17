@@ -4,4 +4,4 @@ CCFLAGS = -g -fopenmp -O3
 	$(CC) -o 3D.out $(CCFLAGS) 3D.c -lm 
 
 clean:
-	rm -f 3D.out output.txt
+	rm -f .*.o .*.bc 3D.out output.txt

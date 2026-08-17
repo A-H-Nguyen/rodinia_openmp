@@ -7,5 +7,5 @@ needle:
 	$(CXX) $(CC_FLAGS) needle.cpp -o needle.out 
 
 clean:
-	rm -f needle.out result.txt
+	rm -f .*.o .*.bc needle.out result.txt
 

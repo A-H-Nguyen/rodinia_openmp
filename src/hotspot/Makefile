@@ -7,4 +7,4 @@ hotspot: hotspot_openmp.cpp Makefile
 	$(CXX) $(CC_FLAGS) hotspot_openmp.cpp -o hotspot.out 
 
 clean:
-	rm -f *.out *.txt
+	rm -f .*.o .*.bc *.out *.txt
