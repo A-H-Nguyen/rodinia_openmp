@@ -1,3 +1,4 @@
+include ../../common.mk
 # Makefile for LU Decomposition
 #
 #
@@ -15,8 +16,6 @@ EXECUTABLE      := lud_base
 SOURCES         := lud.c lud_base.c ../common/common.c 
 
 # ------------  compiler  ------------------------------------------------------
-CC              := clang
-CXX             := clang++
 
 # ------------  compiler flags  ------------------------------------------------
 DEBUG_CFLAGS    := -Wall -O0 -g
