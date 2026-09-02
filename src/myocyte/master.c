@@ -60,10 +60,19 @@ void master(fp timeinst,
 		}
 
 		// run pieces of work in parallel
+		//
+		// th_id was declared private and never assigned, so all four of these
+		// comparisons tested uninitialised stack -- and the branches are what set
+		// initvalu_offset_ecc/Dyad/SL/Cyt, which fin() reads after the region.
+		// Miss them all and fin() runs with garbage offsets: it segfaulted at -O0
+		// and -O1 under plain clang and survived only at -O3. The indices were off
+		// by one as well: the loop above fills th_count[0..3] and this read
+		// th_count[1..4], one past the end of a 4-element array.
 		#pragma omp parallel private(th_id)
 		{
+			th_id = omp_get_thread_num();
 
-			if (th_id == th_count[1]) {
+			if (th_id == th_count[0]) {
 
 				// ecc function
 				initvalu_offset_ecc = 0;												// 46 points
@@ -77,7 +86,7 @@ void master(fp timeinst,
 
 			}
 
-			if (th_id == th_count[2]) {
+			if (th_id == th_count[1]) {
 
 				// cam function for Dyad
 				initvalu_offset_Dyad = 46;											// 15 points
@@ -93,7 +102,7 @@ void master(fp timeinst,
 
 			}
 
-			if (th_id == th_count[3]) {
+			if (th_id == th_count[2]) {
 
 				// cam function for SL
 				initvalu_offset_SL = 61;											// 15 points
@@ -109,7 +118,7 @@ void master(fp timeinst,
 
 			}
 
-			if (th_id == th_count[4]) {
+			if (th_id == th_count[3]) {
 
 				// cam function for Cyt
 				initvalu_offset_Cyt = 76;												// 15 poitns

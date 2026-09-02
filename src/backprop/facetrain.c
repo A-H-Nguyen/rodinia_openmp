@@ -24,14 +24,21 @@ void backprop_face()
   printf("Training done\n");
 }
 
-int setup(int argc, char *argv)
+// The prototype in backprop_kernel.c:20 is `int setup(int, char**)`, and main
+// passes argv. Declaring the parameter `char *` here made the two disagree, so
+// `&argv[1]` took the address of the SECOND BYTE of the argv pointer value and
+// atoi read whatever bytes followed. The command-line size was never used:
+// `./backprop.out 65536` trained a network of size 2 under clang and 0 under the
+// lifter -- different garbage from the same undefined behaviour, which is also
+// why the two configurations disagreed.
+int setup(int argc, char **argv)
 {
   if(argc!=2){
   fprintf(stderr, "usage: backprop <num of input elements>\n");
   exit(0);
   }
 
-  layer_size = atoi(&argv[1]);
+  layer_size = atoi(argv[1]);
   
   int seed;
 

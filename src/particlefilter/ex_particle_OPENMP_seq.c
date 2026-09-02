@@ -583,8 +583,12 @@ int main(int argc, char * argv[]){
 	//establish seed
 	int * seed = (int *)malloc(sizeof(int)*Nparticles);
 	int i;
+	// Fixed, not time(0)*i. A wall-clock seed makes every run produce
+	// different numbers, so two compilers' outputs can never be compared --
+	// and the benchmark is not measuring the same work twice either. The
+	// arithmetic is identical; only the starting point is now reproducible.
 	for(i = 0; i < Nparticles; i++)
-		seed[i] = time(0)*i;
+		seed[i] = 7*i + 1;
 	//malloc matrix
 	int * I = (int *)malloc(sizeof(int)*IszX*IszY*Nfr);
 	long long start = get_time();
