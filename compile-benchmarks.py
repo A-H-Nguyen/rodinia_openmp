@@ -1,145 +1,278 @@
+#!/usr/bin/env python3
+"""Build every Rodinia benchmark under each compiler configuration and record
+what the build cost.
+
+Three metrics, all of them about the BUILD:
+
+  * wall-clock compilation time
+  * peak RSS during compilation
+  * total size of the artifacts the build leaves behind
+        (the third is measured separately, by measure-binary-file-sizes.py,
+         over the per-configuration directories this script populates)
+
+Everything is a command-line argument, because the full evaluation runs on a
+cluster where editing the script to change the iteration count is not an option.
+Defaults are deliberately small: one iteration, so a bare invocation is a smoke
+test rather than an overnight run.
+"""
+
+import argparse
 import os
 import shutil
 import subprocess
+import sys
 
-extensions={".o", ".out"}
+# What gets copied into <config>-bin/<bench>/ for the size metric to measure.
+#
+# This set is the size metric's input. It used to be {".o", ".out"} -- objects and
+# the executable -- which is exactly where every configuration looks alike: the
+# artifacts that distinguish them (ThinLTO's bitcode and index, wllvm's .bc, the
+# lifter's MLIR sidecars) were never copied, so they could not be counted.
+OBJECT_EXTS = (".o",)
+EXECUTABLE_EXTS = (".out",)
+INTERMEDIATE_EXTS = (".bc", ".mlirbc", ".cmdfg.mlir", ".dfg.mlirbc",
+                     ".thinlto.bc", ".imports", ".a")
+COPY_EXTS = OBJECT_EXTS + EXECUTABLE_EXTS + INTERMEDIATE_EXTS
 
-compilers = {
-    "./clang-bin": ["clang", "clang++"],
-    "./clang-full-lto-bin": ["clang -fuse-ld=lld -flto=full", "clang++ -fuse-ld=lld -flto=full"],
-    "./clang-thin-lto-bin": ["clang -fuse-ld=lld -flto=thin", "clang++ -fuse-ld=lld -flto=thin"],
-    "./clang-wllvm-bin": ["wllvm", "wllvm++"],
-    "./gcc-lto": ["gcc -flto", "g++ -flto"],
-    "./gcc-bin": ["gcc", "g++"]
+# A configuration is an environment overlay, not a command string.
+#
+# CC used to hold flags as well ("clang -fuse-ld=lld -flto=thin"). That works for
+# a Makefile recipe and breaks everywhere a bare program name is expected -- most
+# visibly leukocyte's meschach, whose autoconf probe runs `$CC` directly. Flags
+# now go through a one-line wrapper script generated per configuration, so CC is
+# always a single executable path and no benchmark Makefile has to learn a new
+# variable.
+CONFIGS = {
+    "clang":          dict(cc="clang",  cxx="clang++",  cflags=""),
+    "clang-full-lto": dict(cc="clang",  cxx="clang++",
+                           cflags="-fuse-ld=lld -flto=full"),
+    "clang-thin-lto": dict(cc="clang",  cxx="clang++",
+                           cflags="-fuse-ld=lld -flto=thin"),
+    "clang-wllvm":    dict(cc="wllvm",  cxx="wllvm++",  cflags="",
+                           env={"LLVM_COMPILER": "clang"}),
+    "gcc":            dict(cc="gcc",    cxx="g++",      cflags=""),
+    "gcc-lto":        dict(cc="gcc",    cxx="g++",      cflags="-flto"),
+    "lifter":         dict(cc="lifter-cc", cxx="lifter-c++", cflags=""),
+    # Whole-program CMDFG. The compile leaves a summary beside each object and
+    # the link runs the cross-module phase over all of them.
+    "lifter-cmdfg":   dict(cc="lifter-cc", cxx="lifter-c++", cflags="",
+                           env={"LIFTER_CMDFG": "1"}),
 }
 
-benchmarks = [
-    "backprop", "bfs", "b+tree", "cfd", "heartwall", "hotspot", "hotspot3D", 
-    "kmeans", "lavaMD", "leukocyte", "lud", "myocyte", "nn", "nw", 
-    "particlefilter", "pathfinder", "srad", "streamcluster"
+BENCHMARKS = [
+    "backprop", "bfs", "b+tree", "cfd", "heartwall", "hotspot", "hotspot3D",
+    "kmeans", "lavaMD", "leukocyte", "lud", "myocyte", "nn", "nw",
+    "particlefilter", "pathfinder", "srad/srad_v1", "srad/srad_v2",
+    "streamcluster",
 ]
 
-custom_env = os.environ.copy()
+
+def make_wrapper(out_dir, name, real, flags):
+    """A single-executable stand-in for `real` plus `flags`.
+
+    Keeps CC a bare program name so autoconf-style probes that exec it directly
+    still work, while the flags still reach both the compile and the link.
+    """
+    path = os.path.join(out_dir, "wrappers", name)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        f.write("#!/bin/sh\nexec %s %s \"$@\"\n" % (real, flags))
+    os.chmod(path, 0o755)
+    return os.path.abspath(path)
 
 
-class benchmark_data_entry:
-    def __init__(self, compiler, benchmark, iteration):
-        self.compiler = compiler
-        self.benchmark = benchmark
-        self.iteration = iteration
-        self.status = "passed"
-        self.data = 0
+def run_with_time(command, env=None, cwd=None, temp_file="time_metrics.txt"):
+    """Run a command under GNU time, returning peak RSS and wall-clock seconds.
 
-    def __str__(self):
-        return f"{self.compiler},{self.benchmark},{self.iteration},{self.status},{self.data}\n"
-    
+    %M = max resident set size in KB, %e = elapsed real time in seconds.
+    """
+    time_cmd = ["/usr/bin/time", "-f", "%M,%e", "-o", temp_file] + command
+    result = subprocess.run(time_cmd, env=env, cwd=cwd,
+                            capture_output=True, text=True)
+
+    max_rss_kb, wall_time_sec = None, None
+    try:
+        with open(temp_file) as f:
+            for line in f:
+                parts = line.strip().split(",")
+                if len(parts) == 2:
+                    try:
+                        max_rss_kb = int(parts[0])
+                        wall_time_sec = float(parts[1])
+                        break
+                    except ValueError:
+                        # GNU time prepends lines like "Command exited with
+                        # non-zero status 1" when the child fails.
+                        continue
+        os.remove(temp_file)
+    except FileNotFoundError:
+        pass
+
+    return {
+        "max_rss_kb": max_rss_kb,
+        "wall_time_sec": wall_time_sec,
+        "returncode": result.returncode,
+        "success": result.returncode == 0,
+    }
+
 
 def find_files_by_ext(search_dir):
-    """
-    Recursively finds all files ending with given extensions using os.scandir().
-    
-    :param search_dir: The directory path to search.
-    :return: A list of file path strings.
-    """
+    """Every build artifact under search_dir, recursively."""
     matches = []
-    ext_tuple = tuple(extensions) if not isinstance(extensions, tuple) else extensions
+
     def _scan(directory):
         try:
             with os.scandir(directory) as entries:
                 for entry in entries:
-                    # Check if it's a directory (and skip symlinks to avoid infinite loops)
                     if entry.is_dir(follow_symlinks=False):
                         _scan(entry.path)
                     elif entry.is_file(follow_symlinks=False):
-                        if entry.name.endswith(ext_tuple):
+                        if entry.name.endswith(COPY_EXTS):
                             matches.append(entry.path)
-        except PermissionError:
+        except (PermissionError, FileNotFoundError):
             pass
+
     _scan(search_dir)
     return matches
 
 
-def compile_and_measure(compile_type, bench, bench_dir, iteration) -> str:
-    time_cmd = ["/usr/bin/time", "-f", "%M", "-o", "temp_mem_usage.txt", "make", "-C", bench_dir]
-    result = subprocess.run(time_cmd, 
-                            env=custom_env,
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
-    entry = benchmark_data_entry(compile_type, bench, iteration)
-    entry.status = "failed" if result.returncode != 0 else "passed"
-    print(f"Iteration {iteration}: Compilation {entry.status}")
+def sweep_artifacts(search_dir):
+    """Delete every artifact the size metric measures, from the SOURCE tree.
 
-    # Read the memory usage from the temporary file
-    try:
-        with open("temp_mem_usage.txt", "r") as f:
-            lines = f.readlines()
-            max_rss_kb = None
-            
-            # Iterate through lines to find the memory integer, ignoring exit status text
-            for line in lines:
-                try:
-                    max_rss_kb = int(line.strip())
-                    break  # Found the metric!
-                except ValueError:
-                    continue  # Skip lines like "Command exited with non-zero status 1"
-            
-            if max_rss_kb is not None:
-                entry.data = max_rss_kb 
-            else:
-                entry.data = -1
-        os.remove("temp_mem_usage.txt")
-        return str(entry)
-    except FileNotFoundError:
-        print(f"--> Error: Temp file for {bench} missing.")
-        entry.data = -1
-        return str(entry)
+    `make clean` is not enough and cannot be made enough. Each benchmark's clean
+    rule names the extensions that benchmark's author knew about, all of which
+    predate the lifter, so `.cmdfg.mlir` and `.dfg.mlirbc` survive it -- and so do
+    ThinLTO's `.thinlto.bc` and wllvm's `.bc`. Whatever survives is still sitting
+    in the source directory when the NEXT configuration is measured, and gets
+    copied into that configuration's bin directory as if it had produced it.
+
+    That silently corrupts the headline size metric rather than failing: with the
+    lifter's sidecars left behind, clang, gcc, both LTO configurations and even a
+    configuration that failed to build all reported an identical
+    intermediates_bytes of 74572 -- the lifter's numbers, attributed to everyone.
+    """
+    for path in find_files_by_ext(search_dir):
+        try:
+            os.remove(path)
+        except OSError:
+            pass
 
 
-results = []
-NUM_ITER = 11
-custom_env["LLVM_COMPILER"] = "clang"
-for compile_type, commands in compilers.items():
-    print(compile_type, commands)
-    custom_env["CC"] = commands[0]
-    custom_env["CXX"] = commands[1]
+def main():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--iterations", type=int, default=1,
+                    help="measured builds per benchmark (default: 1)")
+    ap.add_argument("--configs", default=",".join(CONFIGS),
+                    help="comma-separated configuration names")
+    ap.add_argument("--benchmarks", default=",".join(BENCHMARKS),
+                    help="comma-separated benchmark names")
+    ap.add_argument("--out-dir", default="results",
+                    help="where CSVs, wrappers and manifests are written")
+    ap.add_argument("--warmup", action="store_true",
+                    help="discard one unmeasured build per benchmark first")
+    args = ap.parse_args()
 
-    print("\n=======================================================")
-    print(f"Testing Compiler: {compile_type} | {commands}")
-    print("=======================================================\n")
+    configs = [c.strip() for c in args.configs.split(",") if c.strip()]
+    benches = [b.strip() for b in args.benchmarks.split(",") if b.strip()]
+    for c in configs:
+        if c not in CONFIGS:
+            sys.exit("unknown configuration %r; known: %s"
+                     % (c, ", ".join(CONFIGS)))
 
-    result = subprocess.run(
-        ["make", "SRC_clean"],
-        env=custom_env,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
+    out_dir = os.path.abspath(args.out_dir)
+    os.makedirs(out_dir, exist_ok=True)
 
-    # Compile each benchmark individually
-    for bench in benchmarks:
-        print(f"\n--- Building Benchmark: {bench} ---")
-        bench_dir = os.path.join("./src", bench)
+    compile_rows = []
+    runtime_rows = []
 
-        for i in range(NUM_ITER):
-            # Throw out the first run
-            if i > 0:
-                results.append(compile_and_measure(compile_type, bench, bench_dir, i))
+    for config in configs:
+        spec = CONFIGS[config]
+        env = os.environ.copy()
+        env.update(spec.get("env", {}))
+        env["CC"] = make_wrapper(out_dir, config + "-cc",
+                                 spec["cc"], spec["cflags"])
+        env["CXX"] = make_wrapper(out_dir, config + "-cxx",
+                                  spec["cxx"], spec["cflags"])
 
-        # Proceed to copy over the resulting binaries for this specific benchmark
-        bin_files = find_files_by_ext(bench_dir)
-        if not bin_files:
-            print(f"--> Error: No binaries found to copy for {bench} (likely due to build failure).")
-        else:
-            print("Copy built files")
-            for f in bin_files:
-                target_dir = os.path.join(compile_type, bench)
-                os.makedirs(target_dir, exist_ok=True)
-                new_f = os.path.join(target_dir, os.path.basename(f))
-                shutil.copy(f, new_f)
+        print("\n=======================================================")
+        print("Configuration: %s (%s / %s %s)"
+              % (config, spec["cc"], spec["cxx"], spec["cflags"]))
+        print("=======================================================\n")
 
-with open('compiler_mem_usage.csv', 'w') as f:
-    print("\n=======================================================")
-    print("\nPrint Results")
-    print("=======================================================\n")
-    f.write("compile_type,benchmark,iteration,status,peak_ram_usage_kb\n")
-    for r in results:
-        f.write(r)
+        subprocess.run(["make", "SRC_clean"], env=env,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        for bench in benches:
+            print("--- %s / %s ---" % (config, bench))
+            bench_dir = os.path.join("./src", bench)
+
+            # Attribute every manifest row to a benchmark. Without this the
+            # lifter's manifest reads "?" throughout and cannot answer which
+            # benchmark's translation units fell back to clang -- which is what
+            # tells you how much of a lifter timing was actually clang.
+            env["LIFTER_BENCH"] = bench.replace("/", "_")
+            env["LIFTER_MANIFEST"] = os.path.join(out_dir,
+                                                  "%s-manifest.csv" % config)
+
+            sweep_artifacts(bench_dir)
+
+            if args.warmup:
+                subprocess.run(["make", "-C", bench_dir], env=env,
+                               stdout=subprocess.DEVNULL,
+                               stderr=subprocess.DEVNULL)
+
+            for i in range(args.iterations):
+                subprocess.run(["make", "-C", bench_dir, "clean"], env=env,
+                               stdout=subprocess.DEVNULL,
+                               stderr=subprocess.DEVNULL)
+                sweep_artifacts(bench_dir)
+
+                build = run_with_time(
+                    ["make", "-C", bench_dir], env=env,
+                    temp_file=os.path.join(out_dir, "build_time.txt"))
+                status = "passed" if build["success"] else "failed"
+                print("  iteration %d: %s, %ss, %s KB"
+                      % (i, status, build["wall_time_sec"], build["max_rss_kb"]))
+                compile_rows.append("%s,%s,%d,%s,%s,%s\n"
+                                    % (config, bench, i, status,
+                                       build["wall_time_sec"],
+                                       build["max_rss_kb"]))
+
+                if not build["success"]:
+                    continue
+
+                # Run from the benchmark directory: every `run` script reaches
+                # its inputs with a relative path like ../../data/..., so
+                # invoking it from the repo root finds nothing.
+                run = run_with_time(
+                    ["./run"], env=env, cwd=bench_dir,
+                    temp_file=os.path.join(out_dir, "run_time.txt"))
+                runtime_rows.append("%s,%s,%d,%s,%s\n"
+                                    % (config, bench, i,
+                                       run["max_rss_kb"], run["wall_time_sec"]))
+
+            # Keep the artifacts for the size metric.
+            artifacts = find_files_by_ext(bench_dir)
+            if not artifacts:
+                print("  no artifacts to copy (build failed?)")
+                continue
+            target = os.path.join(out_dir, config + "-bin", bench)
+            os.makedirs(target, exist_ok=True)
+            for path in artifacts:
+                shutil.copy(path, os.path.join(target, os.path.basename(path)))
+
+    with open(os.path.join(out_dir, "compile_metrics.csv"), "w") as f:
+        f.write("config,benchmark,iteration,status,compile_time_sec,"
+                "peak_ram_kb\n")
+        f.writelines(compile_rows)
+
+    with open(os.path.join(out_dir, "runtime_metrics.csv"), "w") as f:
+        f.write("config,benchmark,iteration,peak_ram_kb,runtime_sec\n")
+        f.writelines(runtime_rows)
+
+    print("\nWrote %s/{compile_metrics,runtime_metrics}.csv" % out_dir)
+
+
+if __name__ == "__main__":
+    main()

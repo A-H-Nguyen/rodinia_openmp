@@ -7,3 +7,11 @@ others/
 *.out
 *.txt
 *.log
+
+# Lifter sidecars. compile-benchmarks.py sweeps these from the source tree
+# between configurations -- no benchmark's `make clean` knows about them, and
+# leaving them behind attributes one configuration's intermediates to every
+# other one in the size metric.
+*.mlirbc
+*.cmdfg.mlir
+*.imports
