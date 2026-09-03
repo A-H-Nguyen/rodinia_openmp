@@ -14,8 +14,11 @@ Per file the pipeline is exactly:
 """
 
 import argparse
+import collections
 import csv
 import os
+import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -66,11 +69,26 @@ def find_llvm_ir_files(search_dir):
     return matches
 
 
-def lift_one(job, translate, lifter, pipeline):
+# "  <count> <pass-name> - <description>" from lifter-opt -stats.
+STAT_RE = re.compile(r'^\s*(\d+)\s+([\w-]+)\s+-\s+(.*?)\s*$')
+
+
+def parse_stats(raw):
+    """Counters from a `-stats` run, keyed by (pass, description)."""
+    text = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else raw
+    out = {}
+    for line in text.splitlines():
+        m = STAT_RE.match(line)
+        if m:
+            out[(m.group(2), m.group(3))] = int(m.group(1))
+    return out
+
+
+def lift_one(job, translate, lifter, pipeline, stats=False):
     """mlir-translate --import-llvm | lifter-opt, for one file.
 
-    Returns (job, ok, stage, message). `stage` names which half failed so a
-    lifter bug is never reported as a bad .ll or vice versa.
+    Returns (job, ok, stage, message, stats). `stage` names which half failed so
+    a lifter bug is never reported as a bad .ll or vice versa.
     """
     src, dst = job
     os.makedirs(os.path.dirname(dst), exist_ok=True)
@@ -79,10 +97,12 @@ def lift_one(job, translate, lifter, pipeline):
         tr = subprocess.Popen(
             [translate, src, "--import-llvm", "-o", "-"],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        cmd = [lifter, "--pass-pipeline=builtin.module(%s)" % pipeline,
+               "-o", dst]
+        if stats:
+            cmd.append("-stats")
         lift = subprocess.Popen(
-            [lifter, "--pass-pipeline=builtin.module(%s)" % pipeline,
-             "-o", dst],
-            stdin=tr.stdout, stdout=subprocess.DEVNULL,
+            cmd, stdin=tr.stdout, stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE)
         # Let mlir-translate see a broken pipe if the lifter dies early.
         tr.stdout.close()
@@ -91,18 +111,18 @@ def lift_one(job, translate, lifter, pipeline):
         tr_err = tr.stderr.read()
         tr.stderr.close()
     except OSError as e:
-        return job, False, "spawn", str(e)
+        return job, False, "spawn", str(e), {}
 
     if tr.returncode != 0:
-        return job, False, "translate", first_error(tr_err)
+        return job, False, "translate", first_error(tr_err), {}
     if lift.returncode != 0:
         # A failed lifter-opt can still have created an empty or partial file;
         # leaving it behind would look like a successful lift to everything
         # downstream.
         if os.path.exists(dst):
             os.remove(dst)
-        return job, False, "lift", first_error(lift_err)
-    return job, True, "", ""
+        return job, False, "lift", first_error(lift_err), {}
+    return job, True, "", "", parse_stats(lift_err) if stats else {}
 
 
 def first_error(raw):
@@ -112,6 +132,80 @@ def first_error(raw):
         if "error" in line:
             return line.strip()
     return text.strip().splitlines()[0].strip() if text.strip() else "(no output)"
+
+
+def arglist(sig):
+    """The parameter list of a `func.func` line, paren/angle-balanced.
+
+    Splitting on the first ')' undercounts: a struct type in a signature carries
+    its own parens, e.g. !llvm.struct<"dim_str", (i32, i32)>, and truncating there
+    hid most of lavaMD's parameters from an earlier version of this count.
+    """
+    i = sig.find("(")
+    if i < 0:
+        return ""
+    depth = 0
+    for j in range(i, len(sig)):
+        c = sig[j]
+        if c in "(<[":
+            depth += 1
+        elif c in ")>]":
+            depth -= 1
+            if depth == 0:
+                return sig[i + 1:j]
+    return sig[i + 1:]
+
+
+def coverage(out_dir):
+    """Per-benchmark pointer-parameter lifting rate, from the generated MLIR.
+
+    This is the number the lifting work is judged by: how many parameters that
+    were !llvm.ptr came out as memref. Counted from the output rather than from
+    pass counters so it reflects what downstream actually receives.
+    """
+    per = collections.OrderedDict()
+    name_re = re.compile(r"func\.func\s+(?:private\s+)?@([\w.$]+)")
+    for f in sorted(pathlib.Path(out_dir).rglob("*.mlir")):
+        bench = f.relative_to(out_dir).parts[0]
+        lines = [l.strip() for l in f.read_text().splitlines()
+                 if l.strip().startswith("func.func")]
+
+        # Every externally visible function that lifts gains an ABI thunk keeping
+        # the ORIGINAL pointer signature, so counting both @f and @f.lifted charges
+        # each successful lift with the pointers it just removed. Count the lifted
+        # body and ignore the thunk that shadows it.
+        lifted_names = set()
+        for l in lines:
+            m0 = name_re.search(l)
+            if m0 and m0.group(1).endswith(".lifted"):
+                lifted_names.add(m0.group(1)[:-len(".lifted")])
+
+        p = m = 0
+        for l in lines:
+            m0 = name_re.search(l)
+            if m0 and m0.group(1) in lifted_names:
+                continue                      # this is the thunk
+            a = arglist(l)
+            p += len(re.findall(r"!llvm\.ptr", a))
+            m += len(re.findall(r"memref<", a))
+        x, y = per.get(bench, (0, 0))
+        per[bench] = (x + p, y + m)
+    return per
+
+
+def print_coverage(per):
+    print("\nPointer parameters lifted to memref:")
+    print("  %-16s %7s %8s %8s" % ("benchmark", "ptr", "memref", "lifted"))
+    tp = tm = 0
+    for k in sorted(per):
+        p, m = per[k]
+        tp += p
+        tm += m
+        pct = 100.0 * m / (m + p) if (m + p) else 0.0
+        print("  %-16s %7d %8d %7.0f%%" % (k, p, m, pct))
+    pct = 100.0 * tm / (tm + tp) if (tm + tp) else 0.0
+    print("  %-16s %7d %8d %7.1f%%  <-- headline" % ("TOTAL", tp, tm, pct))
+    return tm, tm + tp
 
 
 def main():
@@ -134,6 +228,9 @@ def main():
     ap.add_argument("--manifest", default=None,
                     help="CSV of per-file results "
                          "(default: <out-dir>/lift-manifest.csv)")
+    ap.add_argument("--stats", action="store_true",
+                    help="also run lifter-opt with -stats and report why "
+                         "pointer parameters were not lifted")
     ap.add_argument("--clean", action="store_true",
                     help="delete out-dir first, so a stale .mlir from an earlier "
                          "run cannot be mistaken for a fresh one")
@@ -186,10 +283,13 @@ def main():
     results = []
     with ThreadPoolExecutor(max_workers=args.jobs) as pool:
         futures = [pool.submit(lift_one, j, args.mlir_translate, args.lifter,
-                               args.pass_pipeline) for j in jobs]
+                               args.pass_pipeline, args.stats) for j in jobs]
+        totals = collections.Counter()
         for fut in futures:
-            job, ok, stage, msg = fut.result()
+            job, ok, stage, msg, st = fut.result()
             results.append((job, ok, stage, msg))
+            for k, v in st.items():
+                totals[k] += v
             src = job[0]
             if ok:
                 print("  ok    %s" % src)
@@ -219,6 +319,16 @@ def main():
 
     lifted = sum(1 for _, ok, _, _ in results if ok)
     print("\n%d of %d lifted; manifest: %s" % (lifted, len(results), manifest))
+
+    print_coverage(coverage(out))
+
+    if args.stats:
+        rows = [(d, c) for (p, d), c in totals.items()
+                if p == "lift-ptr-to-memref"]
+        if rows:
+            print("\nWhy pointer parameters were or were not lifted:")
+            for d, c in sorted(rows, key=lambda r: -r[1]):
+                print("  %6d  %s" % (c, d))
 
     # A partial result is the normal case, not an error: some translation units
     # are known not to lift yet. Exit non-zero anyway so a caller that needs a
