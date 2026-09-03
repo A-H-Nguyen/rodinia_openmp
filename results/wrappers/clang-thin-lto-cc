@@ -1,0 +1,2 @@
+#!/bin/sh
+exec clang -fuse-ld=lld -flto=thin "$@"
