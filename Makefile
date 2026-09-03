@@ -24,4 +24,32 @@ clean:
 verify:
 	@./verify-ll.sh
 
-.PHONY: all clean verify
+# The second half: lift the IR into the standard dialects, which is what the
+# evaluation actually consumes. Depends on `verify` rather than `all` so a
+# silently empty csrc/ cannot produce a silently empty mlir-src/.
+#
+# Two of the 44 translation units do not lift today (a memref.cast the lifter
+# cannot reconcile, and an llvm.return type mismatch), so this does NOT fail on a
+# partial result -- a target that is red every single time is a target people stop
+# reading. It prints the count instead, and mlir-src/lift-manifest.csv says which
+# files and why.
+#
+# Use `mlir-strict` where an incomplete input set must be an error: it propagates
+# generate-mlir.py's exit status, which is non-zero unless every unit lifted.
+# Recursive rather than `mlir: all verify`, because prerequisite order is not
+# guaranteed under -j and lifting a half-built csrc/ would silently produce a
+# short input set -- the exact class of bug `verify` exists to catch.
+mlir:
+	@$(MAKE) --no-print-directory all
+	@$(MAKE) --no-print-directory verify
+	@./generate-mlir.py || true
+
+mlir-strict:
+	@$(MAKE) --no-print-directory all
+	@$(MAKE) --no-print-directory verify
+	@./generate-mlir.py
+
+mlir-clean:
+	rm -rf mlir-src
+
+.PHONY: all clean verify mlir mlir-strict mlir-clean
