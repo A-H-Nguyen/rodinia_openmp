@@ -2229,8 +2229,8 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %10 = llvm.mlir.constant(1053 : i32) : i32
     %11 = llvm.mlir.constant(1048 : i32) : i32
     %12 = llvm.mlir.constant(1043 : i32) : i32
-    %alloc = memref.alloc() : memref<40xi8>
-    %13 = lifter.memref2pointer(%alloc) : memref<40xi8> -> !llvm.ptr
+    %alloc = memref.alloc() : memref<10xi32>
+    %13 = lifter.memref2pointer(%alloc) : memref<10xi32> -> !llvm.ptr
     %14 = llvm.icmp "eq" %13, %0 : !llvm.ptr
     %15:2 = scf.if %14 -> (i32, i32) {
       scf.yield %12, %c0_i32 : i32, i32
@@ -2256,9 +2256,9 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
         scf.if %30 {
         } else {
           llvm.store %29, %13 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr, !llvm.ptr
-          memref.store %5, %alloc[%c24] : memref<40xi8>
-          %33 = lifter.pointer2memref(%13) : !llvm.ptr -> memref<?xi32>
-          memref.store %6, %33[%c7] : memref<?xi32>
+          %33 = lifter.pointer2memref(%13) : !llvm.ptr -> memref<?xi8>
+          memref.store %5, %33[%c24] : memref<?xi8>
+          memref.store %6, %alloc[%c7] : memref<10xi32>
           %34 = llvm.getelementptr inbounds|nuw %13[16] : (!llvm.ptr) -> !llvm.ptr, i8
           llvm.store %0, %34 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr, !llvm.ptr
           %35 = llvm.getelementptr inbounds|nuw %13[32] : (!llvm.ptr) -> !llvm.ptr, i8
@@ -2287,56 +2287,73 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     llvm.store %0, %2 : i8, !llvm.ptr
     return %1 : !llvm.ptr
   }
-  func.func private @get_left_index(%arg0: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg1: !llvm.ptr {llvm.noundef, llvm.readnone}) -> i32 attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
+  func.func private @get_left_index.lifted(%arg0: memref<?xi32> {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg1: !llvm.ptr {llvm.noundef, llvm.readnone}) -> i32 attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %true = arith.constant true
     %c2_i32 = arith.constant 2 : i32
     %0 = ub.poison : i64
     %c0_i32 = arith.constant 0 : i32
-    %1 = llvm.mlir.constant(0 : i32) : i32
-    %2 = llvm.mlir.constant(1 : i32) : i32
-    %3 = llvm.mlir.constant(0 : i64) : i64
-    %4 = llvm.mlir.constant(1 : i64) : i64
-    %5 = llvm.getelementptr %arg0[7] : (!llvm.ptr) -> !llvm.ptr, i32
-    %6 = llvm.load %5 : !llvm.ptr -> i32
-    %7 = llvm.icmp "slt" %6, %1 : i32
-    %8 = scf.if %7 -> (i32) {
-      scf.yield %1 : i32
+    %c7 = arith.constant 7 : index
+    %1 = llvm.mlir.constant(1 : i64) : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.constant(1 : i32) : i32
+    %4 = llvm.mlir.constant(0 : i32) : i32
+    %intptr = memref.extract_aligned_pointer_as_index %arg0 : memref<?xi32> -> index
+    %5 = arith.index_cast %intptr : index to i64
+    %6 = llvm.inttoptr %5 : i64 to !llvm.ptr
+    %7 = memref.load %arg0[%c7] : memref<?xi32>
+    %8 = llvm.icmp "slt" %7, %4 : i32
+    %9 = scf.if %8 -> (i32) {
+      scf.yield %4 : i32
     } else {
-      %9 = llvm.load %arg0 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-      %10 = llvm.add %6, %2 overflow<nuw> : i32
-      %11 = llvm.zext %10 : i32 to i64
-      %12:3 = scf.while (%arg2 = %3) : (i64) -> (i64, i64, i32) {
-        %15 = llvm.getelementptr inbounds|nuw %9[%arg2] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %16 = llvm.load %15 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %17 = llvm.icmp "eq" %16, %arg1 : !llvm.ptr
-        %18:3 = scf.if %17 -> (i64, i32, i32) {
+      %10 = llvm.load %6 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+      %11 = llvm.add %7, %3 overflow<nuw> : i32
+      %12 = llvm.zext %11 : i32 to i64
+      %13:3 = scf.while (%arg2 = %2) : (i64) -> (i64, i64, i32) {
+        %16 = llvm.getelementptr inbounds|nuw %10[%arg2] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %17 = llvm.load %16 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %18 = llvm.icmp "eq" %17, %arg1 : !llvm.ptr
+        %19:3 = scf.if %18 -> (i64, i32, i32) {
           scf.yield %0, %c2_i32, %c0_i32 : i64, i32, i32
         } else {
-          %20 = llvm.add %arg2, %4 overflow<nsw, nuw> : i64
-          %21 = llvm.icmp "eq" %20, %11 : i64
-          %22 = arith.extui %21 : i1 to i32
-          %23 = arith.xori %21, %true : i1
-          %24 = arith.extui %23 : i1 to i32
-          scf.yield %20, %22, %24 : i64, i32, i32
+          %21 = llvm.add %arg2, %1 overflow<nsw, nuw> : i64
+          %22 = llvm.icmp "eq" %21, %12 : i64
+          %23 = arith.extui %22 : i1 to i32
+          %24 = arith.xori %22, %true : i1
+          %25 = arith.extui %24 : i1 to i32
+          scf.yield %21, %23, %25 : i64, i32, i32
         }
-        %19 = arith.trunci %18#2 : i32 to i1
-        scf.condition(%19) %18#0, %arg2, %18#1 : i64, i64, i32
+        %20 = arith.trunci %19#2 : i32 to i1
+        scf.condition(%20) %19#0, %arg2, %19#1 : i64, i64, i32
       } do {
       ^bb0(%arg2: i64, %arg3: i64, %arg4: i32):
         scf.yield %arg2 : i64
       }
-      %13 = arith.index_castui %12#2 : i32 to index
-      %14 = scf.index_switch %13 -> i32 
+      %14 = arith.index_castui %13#2 : i32 to index
+      %15 = scf.index_switch %14 -> i32 
       case 1 {
-        scf.yield %10 : i32
+        scf.yield %11 : i32
       }
       default {
-        %15 = llvm.trunc %12#1 overflow<nsw, nuw> : i64 to i32
-        scf.yield %15 : i32
+        %16 = llvm.trunc %13#1 overflow<nsw, nuw> : i64 to i32
+        scf.yield %16 : i32
       }
-      scf.yield %14 : i32
+      scf.yield %15 : i32
     }
-    return %8 : i32
+    return %9 : i32
+  }
+  func.func private @get_left_index(%arg0: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg1: !llvm.ptr {llvm.noundef, llvm.readnone}) -> i32 attributes {llvm.linkage = #llvm.linkage<external>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %10 = call @get_left_index.lifted(%9, %arg1) : (memref<?xi32>, !llvm.ptr) -> i32
+    return %10 : i32
   }
   func.func private @insert_into_leaf(%arg0: !llvm.ptr {llvm.noundef, llvm.returned}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %true = arith.constant true
@@ -2429,379 +2446,444 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
   }
   func.func private @insert_into_leaf_after_splitting(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %true = arith.constant true
-    %0 = ub.poison : !llvm.ptr
+    %0 = llvm.mlir.poison : i64
+    %1 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %2 = ub.poison : !llvm.ptr
     %c0_i32 = arith.constant 0 : i32
-    %1 = llvm.mlir.addressof @order : !llvm.ptr
-    %2 = llvm.mlir.constant(2 : i64) : i64
-    %3 = llvm.mlir.zero : !llvm.ptr
-    %4 = llvm.mlir.constant(3 : i64) : i64
-    %5 = llvm.mlir.constant(-1 : i32) : i32
-    %6 = llvm.mlir.constant(0 : i64) : i64
-    %7 = llvm.mlir.constant(false) : i1
-    %8 = llvm.mlir.constant(1 : i64) : i64
-    %9 = llvm.mlir.constant(0 : i32) : i32
-    %10 = llvm.mlir.constant(1 : i32) : i32
-    %11 = llvm.mlir.addressof @stderr : !llvm.ptr
-    %12 = llvm.mlir.addressof @".str" : !llvm.ptr
-    %13 = llvm.mlir.addressof @".str.1" : !llvm.ptr
-    %14 = llvm.mlir.constant(1128 : i32) : i32
-    %15 = llvm.mlir.constant(1122 : i32) : i32
-    %16 = call @make_leaf() : () -> !llvm.ptr
-    %17 = llvm.load %1 : !llvm.ptr -> i32
-    %18 = llvm.sext %17 : i32 to i64
-    %19 = llvm.shl %18, %2 overflow<nsw> : i64
-    %20 = arith.index_cast %19 : i64 to index
-    %alloc = memref.alloc(%20) : memref<?xi32>
+    %3 = llvm.mlir.addressof @order : !llvm.ptr
+    %4 = llvm.mlir.constant(2 : i64) : i64
+    %5 = llvm.mlir.zero : !llvm.ptr
+    %6 = llvm.mlir.constant(3 : i64) : i64
+    %7 = llvm.mlir.constant(-1 : i32) : i32
+    %8 = llvm.mlir.constant(0 : i64) : i64
+    %9 = llvm.mlir.constant(false) : i1
+    %10 = llvm.mlir.constant(1 : i64) : i64
+    %11 = llvm.mlir.constant(0 : i32) : i32
+    %12 = llvm.mlir.constant(1 : i32) : i32
+    %13 = llvm.mlir.addressof @stderr : !llvm.ptr
+    %14 = llvm.mlir.addressof @".str" : !llvm.ptr
+    %15 = llvm.mlir.addressof @".str.1" : !llvm.ptr
+    %16 = llvm.mlir.constant(1128 : i32) : i32
+    %17 = llvm.mlir.constant(1122 : i32) : i32
+    %18 = call @make_leaf() : () -> !llvm.ptr
+    %19 = llvm.load %3 : !llvm.ptr -> i32
+    %20 = llvm.sext %19 : i32 to i64
+    %21 = llvm.shl %20, %4 overflow<nsw> : i64
+    %22 = arith.index_cast %21 : i64 to index
+    %alloc = memref.alloc(%22) : memref<?xi32>
     %intptr = memref.extract_aligned_pointer_as_index %alloc : memref<?xi32> -> index
-    %21 = arith.index_cast %intptr : index to i64
-    %22 = llvm.inttoptr %21 : i64 to !llvm.ptr
-    %23 = llvm.icmp "eq" %22, %3 : !llvm.ptr
-    %24 = arith.select %23, %15, %14 : i32
-    %25:2 = scf.if %23 -> (!llvm.ptr, i32) {
-      scf.yield %0, %c0_i32 : !llvm.ptr, i32
+    %23 = arith.index_cast %intptr : index to i64
+    %24 = llvm.inttoptr %23 : i64 to !llvm.ptr
+    %25 = llvm.icmp "eq" %24, %5 : !llvm.ptr
+    %26 = arith.select %25, %17, %16 : i32
+    %27:2 = scf.if %25 -> (!llvm.ptr, i32) {
+      scf.yield %2, %c0_i32 : !llvm.ptr, i32
     } else {
-      %28 = llvm.shl %18, %4 overflow<nsw> : i64
-      %29 = llvm.call tail @malloc(%28) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = readwrite>, no_unwind} : (i64 {llvm.noundef}) -> (!llvm.ptr {llvm.noalias})
-      %30 = llvm.icmp "eq" %29, %3 : !llvm.ptr
-      %31 = arith.xori %30, %true : i1
-      %32 = arith.extui %31 : i1 to i32
-      %33 = scf.if %30 -> (!llvm.ptr) {
-        scf.yield %0 : !llvm.ptr
+      %30 = llvm.shl %20, %6 overflow<nsw> : i64
+      %31 = llvm.call tail @malloc(%30) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = readwrite>, no_unwind} : (i64 {llvm.noundef}) -> (!llvm.ptr {llvm.noalias})
+      %32 = llvm.icmp "eq" %31, %5 : !llvm.ptr
+      %33 = arith.xori %32, %true : i1
+      %34 = arith.extui %33 : i1 to i32
+      %35 = scf.if %32 -> (!llvm.ptr) {
+        scf.yield %2 : !llvm.ptr
       } else {
-        %34 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %35 = llvm.load %34 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %36 = llvm.add %17, %5 overflow<nsw> : i32
-        %37 = llvm.sext %36 : i32 to i64
-        %38:2 = scf.while (%arg4 = %6) : (i64) -> (i64, i64) {
-          %76 = llvm.getelementptr %35[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-          %77 = llvm.load %76 : !llvm.ptr -> i32
-          %78 = llvm.icmp "slt" %77, %arg2 : i32
-          %79 = llvm.icmp "slt" %arg4, %37 : i64
-          %80 = llvm.select %78, %79, %7 : i1, i1
-          %81 = llvm.add %arg4, %8 overflow<nsw, nuw> : i64
-          scf.condition(%80) %81, %arg4 : i64, i64
+        %36 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %37 = llvm.load %36 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        %38 = llvm.add %19, %7 overflow<nsw> : i32
+        %39 = llvm.sext %38 : i32 to i64
+        %40:2 = scf.while (%arg4 = %8) : (i64) -> (i64, i64) {
+          %84 = llvm.getelementptr %37[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+          %85 = llvm.load %84 : !llvm.ptr -> i32
+          %86 = llvm.icmp "slt" %85, %arg2 : i32
+          %87 = llvm.icmp "slt" %arg4, %39 : i64
+          %88 = llvm.select %86, %87, %9 : i1, i1
+          %89 = llvm.add %arg4, %10 overflow<nsw, nuw> : i64
+          scf.condition(%88) %89, %arg4 : i64, i64
         } do {
         ^bb0(%arg4: i64, %arg5: i64):
           scf.yield %arg4 : i64
         }
-        %39 = llvm.trunc %38#1 overflow<nsw, nuw> : i64 to i32
-        %40 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %41 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %42 = llvm.load %41 : !llvm.ptr -> i32
-        %43 = llvm.icmp "sgt" %42, %9 : i32
-        scf.if %43 {
-          %76 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-          %77 = llvm.zext nneg %42 : i32 to i64
-          %78:2 = scf.while (%arg4 = %6, %arg5 = %9) : (i64, i32) -> (i64, i32) {
-            %79 = llvm.icmp "eq" %arg5, %39 : i32
-            %80 = llvm.zext %79 : i1 to i32
-            %81 = llvm.add %arg5, %80 overflow<nsw> : i32
-            %82 = llvm.getelementptr %35[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-            %83 = llvm.load %82 : !llvm.ptr -> i32
-            %84 = llvm.sext %81 : i32 to i64
-            %85 = arith.index_cast %84 : i64 to index
-            memref.store %83, %alloc[%85] : memref<?xi32>
-            %86 = llvm.getelementptr inbounds|nuw %76[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-            %87 = llvm.load %86 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-            %88 = llvm.getelementptr inbounds %29[%84] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-            llvm.store %87, %88 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-            %89 = llvm.add %arg4, %8 overflow<nsw, nuw> : i64
-            %90 = llvm.add %81, %10 overflow<nsw> : i32
-            %91 = llvm.icmp "eq" %89, %77 : i64
-            %92 = arith.xori %91, %true : i1
-            scf.condition(%92) %89, %90 : i64, i32
+        %41 = llvm.trunc %40#1 overflow<nsw, nuw> : i64 to i32
+        %42 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %43 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
+        %44 = llvm.load %43 : !llvm.ptr -> i32
+        %45 = llvm.icmp "sgt" %44, %11 : i32
+        scf.if %45 {
+          %84 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+          %85 = llvm.zext nneg %44 : i32 to i64
+          %86:2 = scf.while (%arg4 = %8, %arg5 = %11) : (i64, i32) -> (i64, i32) {
+            %87 = llvm.icmp "eq" %arg5, %41 : i32
+            %88 = llvm.zext %87 : i1 to i32
+            %89 = llvm.add %arg5, %88 overflow<nsw> : i32
+            %90 = llvm.getelementptr %37[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+            %91 = llvm.load %90 : !llvm.ptr -> i32
+            %92 = llvm.sext %89 : i32 to i64
+            %93 = arith.index_cast %92 : i64 to index
+            memref.store %91, %alloc[%93] : memref<?xi32>
+            %94 = llvm.getelementptr inbounds|nuw %84[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+            %95 = llvm.load %94 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+            %96 = llvm.getelementptr inbounds %31[%92] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+            llvm.store %95, %96 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+            %97 = llvm.add %arg4, %10 overflow<nsw, nuw> : i64
+            %98 = llvm.add %89, %12 overflow<nsw> : i32
+            %99 = llvm.icmp "eq" %97, %85 : i64
+            %100 = arith.xori %99, %true : i1
+            scf.condition(%100) %97, %98 : i64, i32
           } do {
           ^bb0(%arg4: i64, %arg5: i32):
             scf.yield %arg4, %arg5 : i64, i32
           }
         }
-        %44 = arith.index_cast %38#1 : i64 to index
-        memref.store %arg2, %alloc[%44] : memref<?xi32>
-        %45 = llvm.getelementptr inbounds|nuw %29[%38#1] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        llvm.store %arg3, %45 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-        %46 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        llvm.store %9, %46 : i32, !llvm.ptr
-        %47 = func.call @cut(%36) : (i32) -> i32
-        %48 = llvm.icmp "sgt" %47, %9 : i32
-        scf.if %48 {
-          %76 = llvm.zext nneg %47 : i32 to i64
-          %77 = scf.while (%arg4 = %6) : (i64) -> i64 {
-            %78 = llvm.getelementptr inbounds|nuw %29[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-            %79 = llvm.load %78 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-            %80 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-            %81 = llvm.getelementptr inbounds|nuw %80[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-            llvm.store %79, %81 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-            %82 = arith.index_cast %arg4 : i64 to index
-            %83 = memref.load %alloc[%82] : memref<?xi32>
-            %84 = llvm.load %40 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-            %85 = llvm.getelementptr %84[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-            llvm.store %83, %85 : i32, !llvm.ptr
-            %86 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-            %87 = llvm.load %86 : !llvm.ptr -> i32
-            %88 = llvm.add %87, %10 overflow<nsw> : i32
-            %89 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-            llvm.store %88, %89 : i32, !llvm.ptr
-            %90 = llvm.add %arg4, %8 overflow<nsw, nuw> : i64
-            %91 = llvm.icmp "eq" %90, %76 : i64
-            %92 = arith.xori %91, %true : i1
-            scf.condition(%92) %90 : i64
+        %46 = arith.index_cast %40#1 : i64 to index
+        memref.store %arg2, %alloc[%46] : memref<?xi32>
+        %47 = llvm.getelementptr inbounds|nuw %31[%40#1] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        llvm.store %arg3, %47 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %48 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
+        llvm.store %11, %48 : i32, !llvm.ptr
+        %49 = func.call @cut(%38) : (i32) -> i32
+        %50 = llvm.icmp "sgt" %49, %11 : i32
+        scf.if %50 {
+          %84 = llvm.zext nneg %49 : i32 to i64
+          %85 = scf.while (%arg4 = %8) : (i64) -> i64 {
+            %86 = llvm.getelementptr inbounds|nuw %31[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+            %87 = llvm.load %86 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+            %88 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+            %89 = llvm.getelementptr inbounds|nuw %88[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+            llvm.store %87, %89 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+            %90 = arith.index_cast %arg4 : i64 to index
+            %91 = memref.load %alloc[%90] : memref<?xi32>
+            %92 = llvm.load %42 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+            %93 = llvm.getelementptr %92[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+            llvm.store %91, %93 : i32, !llvm.ptr
+            %94 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
+            %95 = llvm.load %94 : !llvm.ptr -> i32
+            %96 = llvm.add %95, %12 overflow<nsw> : i32
+            %97 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
+            llvm.store %96, %97 : i32, !llvm.ptr
+            %98 = llvm.add %arg4, %10 overflow<nsw, nuw> : i64
+            %99 = llvm.icmp "eq" %98, %84 : i64
+            %100 = arith.xori %99, %true : i1
+            scf.condition(%100) %98 : i64
           } do {
           ^bb0(%arg4: i64):
             scf.yield %arg4 : i64
           }
         }
-        %49 = llvm.load %1 : !llvm.ptr -> i32
-        %50 = llvm.icmp "slt" %47, %49 : i32
-        %51 = scf.if %50 -> (i32) {
-          %76 = llvm.getelementptr inbounds|nuw %16[8] : (!llvm.ptr) -> !llvm.ptr, i8
-          %77 = llvm.sext %47 : i32 to i64
-          %78:3 = scf.while (%arg4 = %6, %arg5 = %77) : (i64, i64) -> (i64, i64, i32) {
-            %79 = llvm.getelementptr inbounds %29[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-            %80 = llvm.load %79 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-            %81 = llvm.load %16 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-            %82 = llvm.getelementptr inbounds|nuw %81[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-            llvm.store %80, %82 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-            %83 = arith.index_cast %arg5 : i64 to index
-            %84 = memref.load %alloc[%83] : memref<?xi32>
-            %85 = llvm.load %76 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-            %86 = llvm.getelementptr %85[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-            llvm.store %84, %86 : i32, !llvm.ptr
-            %87 = llvm.getelementptr %16[7] : (!llvm.ptr) -> !llvm.ptr, i32
-            %88 = llvm.load %87 : !llvm.ptr -> i32
-            %89 = llvm.add %88, %10 overflow<nsw> : i32
-            %90 = llvm.getelementptr %16[7] : (!llvm.ptr) -> !llvm.ptr, i32
-            llvm.store %89, %90 : i32, !llvm.ptr
-            %91 = llvm.add %arg5, %8 overflow<nsw> : i64
-            %92 = llvm.add %arg4, %8 overflow<nsw, nuw> : i64
-            %93 = llvm.load %1 : !llvm.ptr -> i32
-            %94 = llvm.sext %93 : i32 to i64
-            %95 = llvm.icmp "slt" %91, %94 : i64
-            scf.condition(%95) %92, %91, %93 : i64, i64, i32
+        %51 = llvm.load %3 : !llvm.ptr -> i32
+        %52 = llvm.icmp "slt" %49, %51 : i32
+        %53 = scf.if %52 -> (i32) {
+          %84 = llvm.getelementptr inbounds|nuw %18[8] : (!llvm.ptr) -> !llvm.ptr, i8
+          %85 = llvm.sext %49 : i32 to i64
+          %86:3 = scf.while (%arg4 = %8, %arg5 = %85) : (i64, i64) -> (i64, i64, i32) {
+            %87 = llvm.getelementptr inbounds %31[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+            %88 = llvm.load %87 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+            %89 = llvm.load %18 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+            %90 = llvm.getelementptr inbounds|nuw %89[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+            llvm.store %88, %90 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+            %91 = arith.index_cast %arg5 : i64 to index
+            %92 = memref.load %alloc[%91] : memref<?xi32>
+            %93 = llvm.load %84 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+            %94 = llvm.getelementptr %93[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+            llvm.store %92, %94 : i32, !llvm.ptr
+            %95 = llvm.getelementptr %18[7] : (!llvm.ptr) -> !llvm.ptr, i32
+            %96 = llvm.load %95 : !llvm.ptr -> i32
+            %97 = llvm.add %96, %12 overflow<nsw> : i32
+            %98 = llvm.getelementptr %18[7] : (!llvm.ptr) -> !llvm.ptr, i32
+            llvm.store %97, %98 : i32, !llvm.ptr
+            %99 = llvm.add %arg5, %10 overflow<nsw> : i64
+            %100 = llvm.add %arg4, %10 overflow<nsw, nuw> : i64
+            %101 = llvm.load %3 : !llvm.ptr -> i32
+            %102 = llvm.sext %101 : i32 to i64
+            %103 = llvm.icmp "slt" %99, %102 : i64
+            scf.condition(%103) %100, %99, %101 : i64, i64, i32
           } do {
           ^bb0(%arg4: i64, %arg5: i64, %arg6: i32):
             scf.yield %arg4, %arg5 : i64, i64
           }
-          scf.yield %78#2 : i32
+          scf.yield %86#2 : i32
         } else {
-          scf.yield %49 : i32
+          scf.yield %51 : i32
         }
-        llvm.call tail @free(%29) {memory_effects = #llvm.memory_effects<other = none, argMem = readwrite, inaccessibleMem = readwrite>, no_unwind} : (!llvm.ptr {llvm.noundef}) -> ()
+        llvm.call tail @free(%31) {memory_effects = #llvm.memory_effects<other = none, argMem = readwrite, inaccessibleMem = readwrite>, no_unwind} : (!llvm.ptr {llvm.noundef}) -> ()
         memref.dealloc %alloc : memref<?xi32>
-        %52 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %53 = llvm.add %51, %5 overflow<nsw> : i32
-        %54 = llvm.sext %53 : i32 to i64
-        %55 = llvm.getelementptr inbounds %52[%54] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %56 = llvm.load %55 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %57 = llvm.load %16 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %58 = llvm.getelementptr inbounds %57[%54] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        llvm.store %56, %58 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-        %59 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %60 = llvm.sext %51 : i32 to i64
-        %61 = llvm.getelementptr %59[%60] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %62 = llvm.getelementptr %61[-8] : (!llvm.ptr) -> !llvm.ptr, i8
-        llvm.store %16, %62 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-        %63 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %64 = llvm.load %63 : !llvm.ptr -> i32
-        %65 = llvm.icmp "slt" %64, %53 : i32
-        scf.if %65 {
-          %76 = llvm.sext %64 : i32 to i64
-          %77 = llvm.sext %53 : i32 to i64
-          %78 = scf.while (%arg4 = %76) : (i64) -> i64 {
-            %79 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-            %80 = llvm.getelementptr inbounds %79[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-            llvm.store %3, %80 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-            %81 = llvm.add %arg4, %8 overflow<nsw> : i64
-            %82 = llvm.icmp "eq" %81, %77 : i64
-            %83 = arith.xori %82, %true : i1
-            scf.condition(%83) %81 : i64
+        %54 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %55 = llvm.add %53, %7 overflow<nsw> : i32
+        %56 = llvm.sext %55 : i32 to i64
+        %57 = llvm.getelementptr inbounds %54[%56] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %58 = llvm.load %57 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %59 = llvm.load %18 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %60 = llvm.getelementptr inbounds %59[%56] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        llvm.store %58, %60 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %61 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %62 = llvm.sext %53 : i32 to i64
+        %63 = llvm.getelementptr %61[%62] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %64 = llvm.getelementptr %63[-8] : (!llvm.ptr) -> !llvm.ptr, i8
+        llvm.store %18, %64 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %65 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
+        %66 = llvm.load %65 : !llvm.ptr -> i32
+        %67 = llvm.icmp "slt" %66, %55 : i32
+        scf.if %67 {
+          %84 = llvm.sext %66 : i32 to i64
+          %85 = llvm.sext %55 : i32 to i64
+          %86 = scf.while (%arg4 = %84) : (i64) -> i64 {
+            %87 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+            %88 = llvm.getelementptr inbounds %87[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+            llvm.store %5, %88 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+            %89 = llvm.add %arg4, %10 overflow<nsw> : i64
+            %90 = llvm.icmp "eq" %89, %85 : i64
+            %91 = arith.xori %90, %true : i1
+            scf.condition(%91) %89 : i64
           } do {
           ^bb0(%arg4: i64):
             scf.yield %arg4 : i64
           }
         }
-        %66 = llvm.getelementptr %16[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %67 = llvm.load %66 : !llvm.ptr -> i32
-        %68 = llvm.icmp "slt" %67, %53 : i32
-        scf.if %68 {
-          %76 = llvm.sext %67 : i32 to i64
-          %77 = llvm.sext %53 : i32 to i64
-          %78 = scf.while (%arg4 = %76) : (i64) -> i64 {
-            %79 = llvm.load %16 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-            %80 = llvm.getelementptr inbounds %79[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-            llvm.store %3, %80 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-            %81 = llvm.add %arg4, %8 overflow<nsw> : i64
-            %82 = llvm.icmp "eq" %81, %77 : i64
-            %83 = arith.xori %82, %true : i1
-            scf.condition(%83) %81 : i64
+        %68 = llvm.getelementptr %18[7] : (!llvm.ptr) -> !llvm.ptr, i32
+        %69 = llvm.load %68 : !llvm.ptr -> i32
+        %70 = llvm.icmp "slt" %69, %55 : i32
+        scf.if %70 {
+          %84 = llvm.sext %69 : i32 to i64
+          %85 = llvm.sext %55 : i32 to i64
+          %86 = scf.while (%arg4 = %84) : (i64) -> i64 {
+            %87 = llvm.load %18 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+            %88 = llvm.getelementptr inbounds %87[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+            llvm.store %5, %88 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+            %89 = llvm.add %arg4, %10 overflow<nsw> : i64
+            %90 = llvm.icmp "eq" %89, %85 : i64
+            %91 = arith.xori %90, %true : i1
+            scf.condition(%91) %89 : i64
           } do {
           ^bb0(%arg4: i64):
             scf.yield %arg4 : i64
           }
         }
-        %69 = llvm.getelementptr inbounds|nuw %arg1[16] : (!llvm.ptr) -> !llvm.ptr, i8
-        %70 = llvm.load %69 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
-        %71 = llvm.getelementptr inbounds|nuw %16[16] : (!llvm.ptr) -> !llvm.ptr, i8
-        llvm.store %70, %71 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr, !llvm.ptr
-        %72 = llvm.getelementptr inbounds|nuw %16[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %73 = llvm.load %72 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %74 = llvm.load %73 : !llvm.ptr -> i32
-        %75 = func.call @insert_into_parent(%arg0, %arg1, %74, %16) : (!llvm.ptr, !llvm.ptr, i32, !llvm.ptr) -> !llvm.ptr
-        scf.yield %75 : !llvm.ptr
+        %71 = llvm.getelementptr inbounds|nuw %arg1[16] : (!llvm.ptr) -> !llvm.ptr, i8
+        %72 = llvm.load %71 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
+        %73 = llvm.getelementptr inbounds|nuw %18[16] : (!llvm.ptr) -> !llvm.ptr, i8
+        llvm.store %72, %73 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr, !llvm.ptr
+        %74 = llvm.getelementptr inbounds|nuw %18[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %75 = llvm.load %74 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        %76 = llvm.load %75 : !llvm.ptr -> i32
+        %77 = llvm.insertvalue %arg1, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %78 = llvm.insertvalue %arg1, %77[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %79 = llvm.insertvalue %8, %78[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %80 = llvm.insertvalue %0, %79[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %81 = llvm.insertvalue %10, %80[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %82 = builtin.unrealized_conversion_cast %81 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+        %83 = func.call @insert_into_parent.lifted(%arg0, %82, %76, %18) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
+        scf.yield %83 : !llvm.ptr
       }
-      scf.yield %33, %32 : !llvm.ptr, i32
+      scf.yield %35, %34 : !llvm.ptr, i32
     }
-    cf.switch %25#1 : i32, [
+    cf.switch %27#1 : i32, [
       default: ^bb2,
       0: ^bb1
     ]
   ^bb1:  // pred: ^bb0
-    %26 = llvm.load %11 {alignment = 8 : i64, tbaa = [#tbaa_tag2]} : !llvm.ptr -> !llvm.ptr
-    %27 = llvm.call tail @fprintf(%26, %12, %13, %24) vararg(!llvm.func<i32 (ptr, ptr, ...)>) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}, i32 {llvm.noundef}) -> i32
-    llvm.call tail @exit(%5) {no_unwind} : (i32 {llvm.noundef}) -> ()
+    %28 = llvm.load %13 {alignment = 8 : i64, tbaa = [#tbaa_tag2]} : !llvm.ptr -> !llvm.ptr
+    %29 = llvm.call tail @fprintf(%28, %14, %15, %26) vararg(!llvm.func<i32 (ptr, ptr, ...)>) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}, i32 {llvm.noundef}) -> i32
+    llvm.call tail @exit(%7) {no_unwind} : (i32 {llvm.noundef}) -> ()
     llvm.unreachable
   ^bb2:  // pred: ^bb0
-    return %25#0 : !llvm.ptr
+    return %27#0 : !llvm.ptr
   }
-  func.func private @insert_into_parent(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
-    %0 = llvm.mlir.zero : !llvm.ptr
-    %1 = llvm.mlir.addressof @order : !llvm.ptr
-    %2 = llvm.mlir.constant(-1 : i32) : i32
-    %3 = llvm.getelementptr inbounds|nuw %arg1[16] : (!llvm.ptr) -> !llvm.ptr, i8
-    %4 = llvm.load %3 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
-    %5 = llvm.icmp "eq" %4, %0 : !llvm.ptr
-    %6 = scf.if %5 -> (!llvm.ptr) {
-      %7 = func.call @insert_into_new_root(%arg1, %arg2, %arg3) : (!llvm.ptr, i32, !llvm.ptr) -> !llvm.ptr
-      scf.yield %7 : !llvm.ptr
+  func.func private @insert_into_parent.lifted(%arg0: !llvm.ptr {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.mlir.constant(-1 : i32) : i32
+    %5 = llvm.mlir.addressof @order : !llvm.ptr
+    %6 = llvm.mlir.zero : !llvm.ptr
+    %intptr = memref.extract_aligned_pointer_as_index %arg1 : memref<?xi32> -> index
+    %7 = arith.index_cast %intptr : index to i64
+    %8 = llvm.inttoptr %7 : i64 to !llvm.ptr
+    %9 = llvm.getelementptr inbounds|nuw %8[16] : (!llvm.ptr) -> !llvm.ptr, i8
+    %10 = llvm.load %9 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
+    %11 = llvm.icmp "eq" %10, %6 : !llvm.ptr
+    %12 = scf.if %11 -> (!llvm.ptr) {
+      %13 = func.call @insert_into_new_root(%8, %arg2, %arg3) : (!llvm.ptr, i32, !llvm.ptr) -> !llvm.ptr
+      scf.yield %13 : !llvm.ptr
     } else {
-      %7 = func.call @get_left_index(%4, %arg1) : (!llvm.ptr, !llvm.ptr) -> i32
-      %8 = llvm.getelementptr %4[7] : (!llvm.ptr) -> !llvm.ptr, i32
-      %9 = llvm.load %8 : !llvm.ptr -> i32
-      %10 = llvm.load %1 : !llvm.ptr -> i32
-      %11 = llvm.add %10, %2 overflow<nsw> : i32
-      %12 = llvm.icmp "slt" %9, %11 : i32
-      %13 = scf.if %12 -> (!llvm.ptr) {
-        %14 = func.call @insert_into_node(%arg0, %4, %7, %arg2, %arg3) : (!llvm.ptr, !llvm.ptr, i32, i32, !llvm.ptr) -> !llvm.ptr
+      %13 = llvm.insertvalue %10, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %14 = llvm.insertvalue %10, %13[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %15 = llvm.insertvalue %2, %14[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %16 = llvm.insertvalue %1, %15[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %17 = llvm.insertvalue %0, %16[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %18 = builtin.unrealized_conversion_cast %17 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+      %19 = func.call @get_left_index.lifted(%18, %8) : (memref<?xi32>, !llvm.ptr) -> i32
+      %20 = llvm.getelementptr %10[7] : (!llvm.ptr) -> !llvm.ptr, i32
+      %21 = llvm.load %20 : !llvm.ptr -> i32
+      %22 = llvm.load %5 : !llvm.ptr -> i32
+      %23 = llvm.add %22, %4 overflow<nsw> : i32
+      %24 = llvm.icmp "slt" %21, %23 : i32
+      %25 = scf.if %24 -> (!llvm.ptr) {
+        %26 = llvm.insertvalue %10, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %27 = llvm.insertvalue %10, %26[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %28 = llvm.insertvalue %2, %27[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %29 = llvm.insertvalue %1, %28[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %30 = llvm.insertvalue %0, %29[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %31 = builtin.unrealized_conversion_cast %30 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+        %32 = func.call @insert_into_node.lifted(%arg0, %31, %19, %arg2, %arg3) : (!llvm.ptr, memref<?xi32>, i32, i32, !llvm.ptr) -> !llvm.ptr
         scf.yield %arg0 : !llvm.ptr
       } else {
-        %14 = func.call @insert_into_node_after_splitting(%arg0, %4, %7, %arg2, %arg3) : (!llvm.ptr, !llvm.ptr, i32, i32, !llvm.ptr) -> !llvm.ptr
-        scf.yield %14 : !llvm.ptr
+        %26 = llvm.insertvalue %10, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %27 = llvm.insertvalue %10, %26[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %28 = llvm.insertvalue %2, %27[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %29 = llvm.insertvalue %1, %28[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %30 = llvm.insertvalue %0, %29[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %31 = builtin.unrealized_conversion_cast %30 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+        %32 = func.call @insert_into_node_after_splitting.lifted(%arg0, %31, %19, %arg2, %arg3) : (!llvm.ptr, memref<?xi32>, i32, i32, !llvm.ptr) -> !llvm.ptr
+        scf.yield %32 : !llvm.ptr
       }
-      scf.yield %13 : !llvm.ptr
+      scf.yield %25 : !llvm.ptr
     }
-    return %6 : !llvm.ptr
+    return %12 : !llvm.ptr
   }
-  func.func private @insert_into_node(%arg0: !llvm.ptr {llvm.noundef, llvm.readnone, llvm.returned}, %arg1: !llvm.ptr {llvm.nocapture, llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: !llvm.ptr {llvm.noundef}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
-    %0 = llvm.mlir.constant(-1 : i64) : i64
-    %1 = llvm.mlir.constant(1 : i32) : i32
-    %2 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-    %3 = llvm.load %2 : !llvm.ptr -> i32
-    %4 = llvm.icmp "sgt" %3, %arg2 : i32
-    scf.if %4 {
-      %16 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
-      %17 = llvm.sext %3 : i32 to i64
-      %18 = llvm.sext %arg2 : i32 to i64
-      %19 = scf.while (%arg5 = %17) : (i64) -> i64 {
-        %20 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %21 = llvm.getelementptr inbounds %20[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %22 = llvm.load %21 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %23 = llvm.getelementptr %21[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        llvm.store %22, %23 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-        %24 = llvm.load %16 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %25 = llvm.getelementptr %24[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        %26 = llvm.getelementptr %25[-4] : (!llvm.ptr) -> !llvm.ptr, i8
-        %27 = llvm.load %26 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> i32
-        %28 = llvm.getelementptr %24[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        llvm.store %27, %28 : i32, !llvm.ptr
-        %29 = llvm.add %arg5, %0 overflow<nsw> : i64
-        %30 = llvm.icmp "sgt" %29, %18 : i64
-        scf.condition(%30) %29 : i64
+  func.func private @insert_into_parent(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %10 = call @insert_into_parent.lifted(%arg0, %9, %arg2, %arg3) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
+    return %10 : !llvm.ptr
+  }
+  func.func private @insert_into_node.lifted(%arg0: !llvm.ptr {llvm.noundef, llvm.readnone, llvm.returned}, %arg1: memref<?xi32> {llvm.nocapture, llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: !llvm.ptr {llvm.noundef}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+    %c7 = arith.constant 7 : index
+    %0 = llvm.mlir.constant(1 : i32) : i32
+    %1 = llvm.mlir.constant(-1 : i64) : i64
+    %intptr = memref.extract_aligned_pointer_as_index %arg1 : memref<?xi32> -> index
+    %2 = arith.index_cast %intptr : index to i64
+    %3 = llvm.inttoptr %2 : i64 to !llvm.ptr
+    %4 = memref.load %arg1[%c7] : memref<?xi32>
+    %5 = llvm.icmp "sgt" %4, %arg2 : i32
+    scf.if %5 {
+      %15 = llvm.getelementptr inbounds|nuw %3[8] : (!llvm.ptr) -> !llvm.ptr, i8
+      %16 = llvm.sext %4 : i32 to i64
+      %17 = llvm.sext %arg2 : i32 to i64
+      %18 = scf.while (%arg5 = %16) : (i64) -> i64 {
+        %19 = llvm.load %3 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %20 = llvm.getelementptr inbounds %19[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %21 = llvm.load %20 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %22 = llvm.getelementptr %20[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        llvm.store %21, %22 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %23 = llvm.load %15 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        %24 = llvm.getelementptr %23[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        %25 = llvm.getelementptr %24[-4] : (!llvm.ptr) -> !llvm.ptr, i8
+        %26 = llvm.load %25 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> i32
+        %27 = llvm.getelementptr %23[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        llvm.store %26, %27 : i32, !llvm.ptr
+        %28 = llvm.add %arg5, %1 overflow<nsw> : i64
+        %29 = llvm.icmp "sgt" %28, %17 : i64
+        scf.condition(%29) %28 : i64
       } do {
       ^bb0(%arg5: i64):
         scf.yield %arg5 : i64
       }
     }
-    %5 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-    %6 = llvm.sext %arg2 : i32 to i64
-    %7 = llvm.getelementptr %5[%6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-    %8 = llvm.getelementptr %7[8] : (!llvm.ptr) -> !llvm.ptr, i8
-    llvm.store %arg4, %8 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-    %9 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
-    %10 = llvm.load %9 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-    %11 = llvm.getelementptr %10[%6] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-    llvm.store %arg3, %11 : i32, !llvm.ptr
-    %12 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-    %13 = llvm.load %12 : !llvm.ptr -> i32
-    %14 = llvm.add %13, %1 overflow<nsw> : i32
-    %15 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-    llvm.store %14, %15 : i32, !llvm.ptr
+    %6 = llvm.load %3 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+    %7 = llvm.sext %arg2 : i32 to i64
+    %8 = llvm.getelementptr %6[%7] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+    %9 = llvm.getelementptr %8[8] : (!llvm.ptr) -> !llvm.ptr, i8
+    llvm.store %arg4, %9 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+    %10 = llvm.getelementptr inbounds|nuw %3[8] : (!llvm.ptr) -> !llvm.ptr, i8
+    %11 = llvm.load %10 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+    %12 = llvm.getelementptr %11[%7] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+    llvm.store %arg3, %12 : i32, !llvm.ptr
+    %13 = memref.load %arg1[%c7] : memref<?xi32>
+    %14 = llvm.add %13, %0 overflow<nsw> : i32
+    memref.store %14, %arg1[%c7] : memref<?xi32>
     return %arg0 : !llvm.ptr
   }
-  func.func private @insert_into_node_after_splitting(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
+  func.func private @insert_into_node(%arg0: !llvm.ptr {llvm.noundef, llvm.readnone, llvm.returned}, %arg1: !llvm.ptr {llvm.nocapture, llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %10 = call @insert_into_node.lifted(%arg0, %9, %arg2, %arg3, %arg4) : (!llvm.ptr, memref<?xi32>, i32, i32, !llvm.ptr) -> !llvm.ptr
+    return %10 : !llvm.ptr
+  }
+  func.func private @insert_into_node_after_splitting.lifted(%arg0: !llvm.ptr {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %true = arith.constant true
     %0 = ub.poison : !llvm.ptr
     %c0_i32 = arith.constant 0 : i32
-    %1 = llvm.mlir.addressof @order : !llvm.ptr
-    %2 = llvm.mlir.constant(1 : i32) : i32
-    %3 = llvm.mlir.constant(3 : i64) : i64
-    %4 = llvm.mlir.zero : !llvm.ptr
-    %5 = llvm.mlir.constant(2 : i64) : i64
-    %6 = llvm.mlir.constant(0 : i32) : i32
-    %7 = llvm.mlir.constant(0 : i64) : i64
+    %c7 = arith.constant 7 : index
+    %1 = llvm.mlir.constant(1224 : i32) : i32
+    %2 = llvm.mlir.constant(1229 : i32) : i32
+    %3 = llvm.mlir.addressof @".str.1" : !llvm.ptr
+    %4 = llvm.mlir.addressof @".str" : !llvm.ptr
+    %5 = llvm.mlir.addressof @stderr : !llvm.ptr
+    %6 = llvm.mlir.constant(4294967295 : i64) : i64
+    %7 = llvm.mlir.constant(-1 : i32) : i32
     %8 = llvm.mlir.constant(1 : i64) : i64
-    %9 = llvm.mlir.constant(-1 : i32) : i32
-    %10 = llvm.mlir.constant(4294967295 : i64) : i64
-    %11 = llvm.mlir.addressof @stderr : !llvm.ptr
-    %12 = llvm.mlir.addressof @".str" : !llvm.ptr
-    %13 = llvm.mlir.addressof @".str.1" : !llvm.ptr
-    %14 = llvm.mlir.constant(1229 : i32) : i32
-    %15 = llvm.mlir.constant(1224 : i32) : i32
-    %16 = llvm.load %1 : !llvm.ptr -> i32
-    %17 = llvm.add %16, %2 overflow<nsw> : i32
-    %18 = llvm.sext %17 : i32 to i64
-    %19 = llvm.shl %18, %3 overflow<nsw> : i64
-    %20 = arith.index_cast %19 : i64 to index
-    %alloc = memref.alloc(%20) : memref<?xi8>
-    %intptr = memref.extract_aligned_pointer_as_index %alloc : memref<?xi8> -> index
-    %21 = arith.index_cast %intptr : index to i64
-    %22 = llvm.inttoptr %21 : i64 to !llvm.ptr
-    %23 = llvm.icmp "eq" %22, %4 : !llvm.ptr
-    %24 = arith.select %23, %15, %14 : i32
-    %25:2 = scf.if %23 -> (!llvm.ptr, i32) {
+    %9 = llvm.mlir.constant(0 : i64) : i64
+    %10 = llvm.mlir.constant(0 : i32) : i32
+    %11 = llvm.mlir.constant(2 : i64) : i64
+    %12 = llvm.mlir.zero : !llvm.ptr
+    %13 = llvm.mlir.constant(3 : i64) : i64
+    %14 = llvm.mlir.constant(1 : i32) : i32
+    %15 = llvm.mlir.addressof @order : !llvm.ptr
+    %intptr = memref.extract_aligned_pointer_as_index %arg1 : memref<?xi32> -> index
+    %16 = arith.index_cast %intptr : index to i64
+    %17 = llvm.inttoptr %16 : i64 to !llvm.ptr
+    %18 = llvm.load %15 : !llvm.ptr -> i32
+    %19 = llvm.add %18, %14 overflow<nsw> : i32
+    %20 = llvm.sext %19 : i32 to i64
+    %21 = llvm.shl %20, %13 overflow<nsw> : i64
+    %22 = arith.index_cast %21 : i64 to index
+    %alloc = memref.alloc(%22) : memref<?xi8>
+    %intptr_0 = memref.extract_aligned_pointer_as_index %alloc : memref<?xi8> -> index
+    %23 = arith.index_cast %intptr_0 : index to i64
+    %24 = llvm.inttoptr %23 : i64 to !llvm.ptr
+    %25 = llvm.icmp "eq" %24, %12 : !llvm.ptr
+    %26 = arith.select %25, %1, %2 : i32
+    %27:2 = scf.if %25 -> (!llvm.ptr, i32) {
       scf.yield %0, %c0_i32 : !llvm.ptr, i32
     } else {
-      %28 = llvm.sext %16 : i32 to i64
-      %29 = llvm.shl %28, %5 overflow<nsw> : i64
-      %30 = arith.index_cast %29 : i64 to index
-      %alloc_0 = memref.alloc(%30) : memref<?xi32>
-      %intptr_1 = memref.extract_aligned_pointer_as_index %alloc_0 : memref<?xi32> -> index
-      %31 = arith.index_cast %intptr_1 : index to i64
-      %32 = llvm.inttoptr %31 : i64 to !llvm.ptr
-      %33 = llvm.icmp "eq" %32, %4 : !llvm.ptr
-      %34 = arith.xori %33, %true : i1
-      %35 = arith.extui %34 : i1 to i32
-      %36 = scf.if %33 -> (!llvm.ptr) {
+      %30 = llvm.sext %18 : i32 to i64
+      %31 = llvm.shl %30, %11 overflow<nsw> : i64
+      %32 = arith.index_cast %31 : i64 to index
+      %alloc_1 = memref.alloc(%32) : memref<?xi32>
+      %intptr_2 = memref.extract_aligned_pointer_as_index %alloc_1 : memref<?xi32> -> index
+      %33 = arith.index_cast %intptr_2 : index to i64
+      %34 = llvm.inttoptr %33 : i64 to !llvm.ptr
+      %35 = llvm.icmp "eq" %34, %12 : !llvm.ptr
+      %36 = arith.xori %35, %true : i1
+      %37 = arith.extui %36 : i1 to i32
+      %38 = scf.if %35 -> (!llvm.ptr) {
         scf.yield %0 : !llvm.ptr
       } else {
-        %37 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %38 = llvm.load %37 : !llvm.ptr -> i32
-        %39 = llvm.icmp "slt" %38, %6 : i32
-        scf.if %39 {
+        %39 = memref.load %arg1[%c7] : memref<?xi32>
+        %40 = llvm.icmp "slt" %39, %10 : i32
+        scf.if %40 {
         } else {
-          %75 = llvm.add %arg2, %2 overflow<nsw> : i32
-          %76 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-          %77 = llvm.add %38, %2 overflow<nuw> : i32
+          %75 = llvm.add %arg2, %14 overflow<nsw> : i32
+          %76 = llvm.load %17 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+          %77 = llvm.add %39, %14 overflow<nuw> : i32
           %78 = llvm.zext %77 : i32 to i64
-          %79:2 = scf.while (%arg5 = %7, %arg6 = %6) : (i64, i32) -> (i64, i32) {
+          %79:2 = scf.while (%arg5 = %9, %arg6 = %10) : (i64, i32) -> (i64, i32) {
             %80 = llvm.icmp "eq" %arg6, %75 : i32
             %81 = llvm.zext %80 : i1 to i32
             %82 = llvm.add %arg6, %81 overflow<nsw> : i32
             %83 = llvm.getelementptr inbounds|nuw %76[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
             %84 = llvm.load %83 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
             %85 = llvm.sext %82 : i32 to i64
-            %86 = llvm.getelementptr inbounds %22[%85] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+            %86 = llvm.getelementptr inbounds %24[%85] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
             llvm.store %84, %86 {alignment = 8 : i64, tbaa = [#tbaa_tag7]} : !llvm.ptr, !llvm.ptr
             %87 = llvm.add %arg5, %8 overflow<nsw, nuw> : i64
-            %88 = llvm.add %82, %2 overflow<nsw> : i32
+            %88 = llvm.add %82, %14 overflow<nsw> : i32
             %89 = llvm.icmp "eq" %87, %78 : i64
             %90 = arith.xori %89, %true : i1
             scf.condition(%90) %87, %88 : i64, i32
@@ -2810,12 +2892,12 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
             scf.yield %arg5, %arg6 : i64, i32
           }
         }
-        %40 = llvm.icmp "sgt" %38, %6 : i32
-        scf.if %40 {
-          %75 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %41 = llvm.icmp "sgt" %39, %10 : i32
+        scf.if %41 {
+          %75 = llvm.getelementptr inbounds|nuw %17[8] : (!llvm.ptr) -> !llvm.ptr, i8
           %76 = llvm.load %75 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-          %77 = llvm.zext nneg %38 : i32 to i64
-          %78:2 = scf.while (%arg5 = %7, %arg6 = %6) : (i64, i32) -> (i64, i32) {
+          %77 = llvm.zext nneg %39 : i32 to i64
+          %78:2 = scf.while (%arg5 = %9, %arg6 = %10) : (i64, i32) -> (i64, i32) {
             %79 = llvm.icmp "eq" %arg6, %arg2 : i32
             %80 = llvm.zext %79 : i1 to i32
             %81 = llvm.add %arg6, %80 overflow<nsw> : i32
@@ -2823,9 +2905,9 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
             %83 = llvm.load %82 : !llvm.ptr -> i32
             %84 = llvm.sext %81 : i32 to i64
             %85 = arith.index_cast %84 : i64 to index
-            memref.store %83, %alloc_0[%85] : memref<?xi32>
+            memref.store %83, %alloc_1[%85] : memref<?xi32>
             %86 = llvm.add %arg5, %8 overflow<nsw, nuw> : i64
-            %87 = llvm.add %81, %2 overflow<nsw> : i32
+            %87 = llvm.add %81, %14 overflow<nsw> : i32
             %88 = llvm.icmp "eq" %86, %77 : i64
             %89 = arith.xori %88, %true : i1
             scf.condition(%89) %86, %87 : i64, i32
@@ -2834,41 +2916,38 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
             scf.yield %arg5, %arg6 : i64, i32
           }
         }
-        %41 = llvm.sext %arg2 : i32 to i64
-        %42 = llvm.getelementptr %22[%41] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %43 = llvm.getelementptr %42[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        llvm.store %arg4, %43 {alignment = 8 : i64, tbaa = [#tbaa_tag7]} : !llvm.ptr, !llvm.ptr
-        %44 = arith.index_cast %41 : i64 to index
-        memref.store %arg3, %alloc_0[%44] : memref<?xi32>
-        %45 = func.call @cut(%16) : (i32) -> i32
-        %46 = func.call @make_node() : () -> !llvm.ptr
-        %47 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        llvm.store %6, %47 : i32, !llvm.ptr
-        %48 = llvm.add %45, %9 overflow<nsw> : i32
-        %49 = llvm.icmp "sgt" %45, %2 : i32
+        %42 = llvm.sext %arg2 : i32 to i64
+        %43 = llvm.getelementptr %24[%42] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %44 = llvm.getelementptr %43[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        llvm.store %arg4, %44 {alignment = 8 : i64, tbaa = [#tbaa_tag7]} : !llvm.ptr, !llvm.ptr
+        %45 = arith.index_cast %42 : i64 to index
+        memref.store %arg3, %alloc_1[%45] : memref<?xi32>
+        %46 = func.call @cut(%18) : (i32) -> i32
+        %47 = func.call @make_node() : () -> !llvm.ptr
+        memref.store %10, %arg1[%c7] : memref<?xi32>
+        %48 = llvm.add %46, %7 overflow<nsw> : i32
+        %49 = llvm.icmp "sgt" %46, %14 : i32
         %50 = scf.if %49 -> (i32) {
-          %75 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
+          %75 = llvm.getelementptr inbounds|nuw %17[8] : (!llvm.ptr) -> !llvm.ptr, i8
           %76 = llvm.zext %48 : i32 to i64
-          %77 = scf.while (%arg5 = %7) : (i64) -> i64 {
-            %79 = llvm.getelementptr inbounds|nuw %22[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          %77 = scf.while (%arg5 = %9) : (i64) -> i64 {
+            %79 = llvm.getelementptr inbounds|nuw %24[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
             %80 = llvm.load %79 {alignment = 8 : i64, tbaa = [#tbaa_tag7]} : !llvm.ptr -> !llvm.ptr
-            %81 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+            %81 = llvm.load %17 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
             %82 = llvm.getelementptr inbounds|nuw %81[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
             llvm.store %80, %82 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
             %83 = arith.index_cast %arg5 : i64 to index
-            %84 = memref.load %alloc_0[%83] : memref<?xi32>
+            %84 = memref.load %alloc_1[%83] : memref<?xi32>
             %85 = llvm.load %75 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
             %86 = llvm.getelementptr %85[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, i32
             llvm.store %84, %86 : i32, !llvm.ptr
-            %87 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-            %88 = llvm.load %87 : !llvm.ptr -> i32
-            %89 = llvm.add %88, %2 overflow<nsw> : i32
-            %90 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-            llvm.store %89, %90 : i32, !llvm.ptr
-            %91 = llvm.add %arg5, %8 overflow<nsw, nuw> : i64
-            %92 = llvm.icmp "eq" %91, %76 : i64
-            %93 = arith.xori %92, %true : i1
-            scf.condition(%93) %91 : i64
+            %87 = memref.load %arg1[%c7] : memref<?xi32>
+            %88 = llvm.add %87, %14 overflow<nsw> : i32
+            memref.store %88, %arg1[%c7] : memref<?xi32>
+            %89 = llvm.add %arg5, %8 overflow<nsw, nuw> : i64
+            %90 = llvm.icmp "eq" %89, %76 : i64
+            %91 = arith.xori %90, %true : i1
+            scf.condition(%91) %89 : i64
           } do {
           ^bb0(%arg5: i64):
             scf.yield %arg5 : i64
@@ -2876,43 +2955,43 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
           %78 = llvm.trunc %77 overflow<nsw, nuw> : i64 to i32
           scf.yield %78 : i32
         } else {
-          scf.yield %6 : i32
+          scf.yield %10 : i32
         }
         %51 = llvm.zext nneg %50 : i32 to i64
-        %52 = llvm.getelementptr inbounds|nuw %22[%51] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %52 = llvm.getelementptr inbounds|nuw %24[%51] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
         %53 = llvm.load %52 {alignment = 8 : i64, tbaa = [#tbaa_tag7]} : !llvm.ptr -> !llvm.ptr
-        %54 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %54 = llvm.load %17 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
         %55 = llvm.getelementptr inbounds|nuw %54[%51] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
         llvm.store %53, %55 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
         %56 = llvm.sext %48 : i32 to i64
         %57 = arith.index_cast %56 : i64 to index
-        %58 = memref.load %alloc_0[%57] : memref<?xi32>
-        %59 = llvm.add %50, %2 overflow<nsw, nuw> : i32
-        %60 = llvm.load %1 : !llvm.ptr -> i32
+        %58 = memref.load %alloc_1[%57] : memref<?xi32>
+        %59 = llvm.add %50, %14 overflow<nsw, nuw> : i32
+        %60 = llvm.load %15 : !llvm.ptr -> i32
         %61 = llvm.icmp "slt" %59, %60 : i32
         %62:2 = scf.if %61 -> (i64, i32) {
-          %75 = llvm.getelementptr inbounds|nuw %46[8] : (!llvm.ptr) -> !llvm.ptr, i8
+          %75 = llvm.getelementptr inbounds|nuw %47[8] : (!llvm.ptr) -> !llvm.ptr, i8
           %76 = llvm.zext nneg %50 : i32 to i64
           %77 = llvm.add %76, %8 overflow<nsw, nuw> : i64
-          %78:2 = scf.while (%arg5 = %7, %arg6 = %77) : (i64, i64) -> (i64, i64) {
-            %81 = llvm.getelementptr inbounds|nuw %22[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          %78:2 = scf.while (%arg5 = %9, %arg6 = %77) : (i64, i64) -> (i64, i64) {
+            %81 = llvm.getelementptr inbounds|nuw %24[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
             %82 = llvm.load %81 {alignment = 8 : i64, tbaa = [#tbaa_tag7]} : !llvm.ptr -> !llvm.ptr
-            %83 = llvm.load %46 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+            %83 = llvm.load %47 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
             %84 = llvm.getelementptr inbounds|nuw %83[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
             llvm.store %82, %84 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
             %85 = arith.index_cast %arg6 : i64 to index
-            %86 = memref.load %alloc_0[%85] : memref<?xi32>
+            %86 = memref.load %alloc_1[%85] : memref<?xi32>
             %87 = llvm.load %75 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
             %88 = llvm.getelementptr %87[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, i32
             llvm.store %86, %88 : i32, !llvm.ptr
-            %89 = llvm.getelementptr %46[7] : (!llvm.ptr) -> !llvm.ptr, i32
+            %89 = llvm.getelementptr %47[7] : (!llvm.ptr) -> !llvm.ptr, i32
             %90 = llvm.load %89 : !llvm.ptr -> i32
-            %91 = llvm.add %90, %2 overflow<nsw> : i32
-            %92 = llvm.getelementptr %46[7] : (!llvm.ptr) -> !llvm.ptr, i32
+            %91 = llvm.add %90, %14 overflow<nsw> : i32
+            %92 = llvm.getelementptr %47[7] : (!llvm.ptr) -> !llvm.ptr, i32
             llvm.store %91, %92 : i32, !llvm.ptr
             %93 = llvm.add %arg5, %8 overflow<nsw, nuw> : i64
             %94 = llvm.add %arg6, %8 overflow<nsw, nuw> : i64
-            %95 = llvm.load %1 : !llvm.ptr -> i32
+            %95 = llvm.load %15 : !llvm.ptr -> i32
             %96 = llvm.sext %95 : i32 to i64
             %97 = llvm.icmp "slt" %94, %96 : i64
             scf.condition(%97) %93, %94 : i64, i64
@@ -2921,36 +3000,36 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
             scf.yield %arg5, %arg6 : i64, i64
           }
           %79 = llvm.trunc %78#1 overflow<nsw, nuw> : i64 to i32
-          %80 = llvm.and %78#0, %10 : i64
+          %80 = llvm.and %78#0, %6 : i64
           scf.yield %80, %79 : i64, i32
         } else {
-          scf.yield %7, %59 : i64, i32
+          scf.yield %9, %59 : i64, i32
         }
         %63 = llvm.zext nneg %62#1 : i32 to i64
-        %64 = llvm.getelementptr inbounds|nuw %22[%63] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %64 = llvm.getelementptr inbounds|nuw %24[%63] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
         %65 = llvm.load %64 {alignment = 8 : i64, tbaa = [#tbaa_tag7]} : !llvm.ptr -> !llvm.ptr
-        %66 = llvm.load %46 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %66 = llvm.load %47 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
         %67 = llvm.getelementptr inbounds|nuw %66[%62#0] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
         llvm.store %65, %67 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
         memref.dealloc %alloc : memref<?xi8>
-        memref.dealloc %alloc_0 : memref<?xi32>
-        %68 = llvm.getelementptr inbounds|nuw %arg1[16] : (!llvm.ptr) -> !llvm.ptr, i8
+        memref.dealloc %alloc_1 : memref<?xi32>
+        %68 = llvm.getelementptr inbounds|nuw %17[16] : (!llvm.ptr) -> !llvm.ptr, i8
         %69 = llvm.load %68 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
-        %70 = llvm.getelementptr inbounds|nuw %46[16] : (!llvm.ptr) -> !llvm.ptr, i8
+        %70 = llvm.getelementptr inbounds|nuw %47[16] : (!llvm.ptr) -> !llvm.ptr, i8
         llvm.store %69, %70 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr, !llvm.ptr
-        %71 = llvm.getelementptr %46[7] : (!llvm.ptr) -> !llvm.ptr, i32
+        %71 = llvm.getelementptr %47[7] : (!llvm.ptr) -> !llvm.ptr, i32
         %72 = llvm.load %71 : !llvm.ptr -> i32
-        %73 = llvm.icmp "slt" %72, %6 : i32
+        %73 = llvm.icmp "slt" %72, %10 : i32
         scf.if %73 {
         } else {
-          %75 = llvm.load %46 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-          %76 = llvm.add %72, %2 overflow<nuw> : i32
+          %75 = llvm.load %47 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+          %76 = llvm.add %72, %14 overflow<nuw> : i32
           %77 = llvm.zext %76 : i32 to i64
-          %78 = scf.while (%arg5 = %7) : (i64) -> i64 {
+          %78 = scf.while (%arg5 = %9) : (i64) -> i64 {
             %79 = llvm.getelementptr inbounds|nuw %75[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
             %80 = llvm.load %79 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
             %81 = llvm.getelementptr inbounds|nuw %80[16] : (!llvm.ptr) -> !llvm.ptr, i8
-            llvm.store %46, %81 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr, !llvm.ptr
+            llvm.store %47, %81 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr, !llvm.ptr
             %82 = llvm.add %arg5, %8 overflow<nsw, nuw> : i64
             %83 = llvm.icmp "eq" %82, %77 : i64
             %84 = arith.xori %83, %true : i1
@@ -2960,22 +3039,36 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
             scf.yield %arg5 : i64
           }
         }
-        %74 = func.call @insert_into_parent(%arg0, %arg1, %58, %46) : (!llvm.ptr, !llvm.ptr, i32, !llvm.ptr) -> !llvm.ptr
+        %74 = func.call @insert_into_parent.lifted(%arg0, %arg1, %58, %47) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
         scf.yield %74 : !llvm.ptr
       }
-      scf.yield %36, %35 : !llvm.ptr, i32
+      scf.yield %38, %37 : !llvm.ptr, i32
     }
-    cf.switch %25#1 : i32, [
+    cf.switch %27#1 : i32, [
       default: ^bb2,
       0: ^bb1
     ]
   ^bb1:  // pred: ^bb0
-    %26 = llvm.load %11 {alignment = 8 : i64, tbaa = [#tbaa_tag2]} : !llvm.ptr -> !llvm.ptr
-    %27 = llvm.call tail @fprintf(%26, %12, %13, %24) vararg(!llvm.func<i32 (ptr, ptr, ...)>) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}, i32 {llvm.noundef}) -> i32
-    llvm.call tail @exit(%9) {no_unwind} : (i32 {llvm.noundef}) -> ()
+    %28 = llvm.load %5 {alignment = 8 : i64, tbaa = [#tbaa_tag2]} : !llvm.ptr -> !llvm.ptr
+    %29 = llvm.call tail @fprintf(%28, %4, %3, %26) vararg(!llvm.func<i32 (ptr, ptr, ...)>) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}, i32 {llvm.noundef}) -> i32
+    llvm.call tail @exit(%7) {no_unwind} : (i32 {llvm.noundef}) -> ()
     llvm.unreachable
   ^bb2:  // pred: ^bb0
-    return %25#0 : !llvm.ptr
+    return %27#0 : !llvm.ptr
+  }
+  func.func private @insert_into_node_after_splitting(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %10 = call @insert_into_node_after_splitting.lifted(%arg0, %9, %arg2, %arg3, %arg4) : (!llvm.ptr, memref<?xi32>, i32, i32, !llvm.ptr) -> !llvm.ptr
+    return %10 : !llvm.ptr
   }
   func.func private @insert_into_new_root(%arg0: !llvm.ptr {llvm.noundef}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}) -> (!llvm.ptr {llvm.nonnull, llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %0 = llvm.mlir.constant(1 : i32) : i32
@@ -3061,206 +3154,237 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     }
     return %6 : !llvm.ptr
   }
-  func.func private @get_neighbor_index(%arg0: !llvm.ptr {llvm.noundef, llvm.readonly}) -> (i32 {llvm.range = #llvm.constant_range<i32, -2147483648, 2147483647>}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
+  func.func private @get_neighbor_index.lifted(%arg0: memref<?xi32> {llvm.noundef, llvm.readonly}) -> (i32 {llvm.range = #llvm.constant_range<i32, -2147483648, 2147483647>}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %true = arith.constant true
     %0 = ub.poison : i32
     %c2_i32 = arith.constant 2 : i32
     %1 = ub.poison : i64
     %c1_i32 = arith.constant 1 : i32
     %c0_i32 = arith.constant 0 : i32
-    %2 = llvm.mlir.constant(0 : i32) : i32
-    %3 = llvm.mlir.constant(1 : i32) : i32
-    %4 = llvm.mlir.constant(0 : i64) : i64
-    %5 = llvm.mlir.constant(1 : i64) : i64
-    %6 = llvm.mlir.constant(-1 : i32) : i32
-    %7 = llvm.mlir.addressof @str.117 : !llvm.ptr
-    %8 = llvm.getelementptr inbounds|nuw %arg0[16] : (!llvm.ptr) -> !llvm.ptr, i8
-    %9 = llvm.load %8 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
-    %10 = llvm.getelementptr %9[7] : (!llvm.ptr) -> !llvm.ptr, i32
-    %11 = llvm.load %10 : !llvm.ptr -> i32
-    %12 = llvm.icmp "slt" %11, %2 : i32
-    %13:2 = scf.if %12 -> (i32, i32) {
+    %2 = llvm.mlir.addressof @str.117 : !llvm.ptr
+    %3 = llvm.mlir.constant(-1 : i32) : i32
+    %4 = llvm.mlir.constant(1 : i64) : i64
+    %5 = llvm.mlir.constant(0 : i64) : i64
+    %6 = llvm.mlir.constant(1 : i32) : i32
+    %7 = llvm.mlir.constant(0 : i32) : i32
+    %intptr = memref.extract_aligned_pointer_as_index %arg0 : memref<?xi32> -> index
+    %8 = arith.index_cast %intptr : index to i64
+    %9 = llvm.inttoptr %8 : i64 to !llvm.ptr
+    %10 = llvm.getelementptr inbounds|nuw %9[16] : (!llvm.ptr) -> !llvm.ptr, i8
+    %11 = llvm.load %10 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
+    %12 = llvm.getelementptr %11[7] : (!llvm.ptr) -> !llvm.ptr, i32
+    %13 = llvm.load %12 : !llvm.ptr -> i32
+    %14 = llvm.icmp "slt" %13, %7 : i32
+    %15:2 = scf.if %14 -> (i32, i32) {
       scf.yield %0, %c0_i32 : i32, i32
     } else {
-      %15 = llvm.load %9 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-      %16 = llvm.add %11, %3 overflow<nuw> : i32
-      %17 = llvm.zext %16 : i32 to i64
-      %18:3 = scf.while (%arg1 = %4) : (i64) -> (i64, i64, i32) {
-        %21 = llvm.getelementptr inbounds|nuw %15[%arg1] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %22 = llvm.load %21 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %23 = llvm.icmp "eq" %22, %arg0 : !llvm.ptr
-        %24:3 = scf.if %23 -> (i64, i32, i32) {
+      %17 = llvm.load %11 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+      %18 = llvm.add %13, %6 overflow<nuw> : i32
+      %19 = llvm.zext %18 : i32 to i64
+      %20:3 = scf.while (%arg1 = %5) : (i64) -> (i64, i64, i32) {
+        %23 = llvm.getelementptr inbounds|nuw %17[%arg1] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %24 = llvm.load %23 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %25 = llvm.icmp "eq" %24, %9 : !llvm.ptr
+        %26:3 = scf.if %25 -> (i64, i32, i32) {
           scf.yield %1, %c2_i32, %c0_i32 : i64, i32, i32
         } else {
-          %26 = llvm.add %arg1, %5 overflow<nsw, nuw> : i64
-          %27 = llvm.icmp "eq" %26, %17 : i64
-          %28 = arith.extui %27 : i1 to i32
-          %29 = arith.xori %27, %true : i1
+          %28 = llvm.add %arg1, %4 overflow<nsw, nuw> : i64
+          %29 = llvm.icmp "eq" %28, %19 : i64
           %30 = arith.extui %29 : i1 to i32
-          scf.yield %26, %28, %30 : i64, i32, i32
+          %31 = arith.xori %29, %true : i1
+          %32 = arith.extui %31 : i1 to i32
+          scf.yield %28, %30, %32 : i64, i32, i32
         }
-        %25 = arith.trunci %24#2 : i32 to i1
-        scf.condition(%25) %24#0, %arg1, %24#1 : i64, i64, i32
+        %27 = arith.trunci %26#2 : i32 to i1
+        scf.condition(%27) %26#0, %arg1, %26#1 : i64, i64, i32
       } do {
       ^bb0(%arg1: i64, %arg2: i64, %arg3: i32):
         scf.yield %arg1 : i64
       }
-      %19 = arith.index_castui %18#2 : i32 to index
-      %20:2 = scf.index_switch %19 -> i32, i32 
+      %21 = arith.index_castui %20#2 : i32 to index
+      %22:2 = scf.index_switch %21 -> i32, i32 
       case 1 {
         scf.yield %0, %c0_i32 : i32, i32
       }
       default {
-        %21 = llvm.trunc %18#1 overflow<nsw, nuw> : i64 to i32
-        %22 = llvm.add %21, %6 overflow<nsw> : i32
-        scf.yield %22, %c1_i32 : i32, i32
+        %23 = llvm.trunc %20#1 overflow<nsw, nuw> : i64 to i32
+        %24 = llvm.add %23, %3 overflow<nsw> : i32
+        scf.yield %24, %c1_i32 : i32, i32
       }
-      scf.yield %20#0, %20#1 : i32, i32
+      scf.yield %22#0, %22#1 : i32, i32
     }
-    cf.switch %13#1 : i32, [
+    cf.switch %15#1 : i32, [
       default: ^bb2,
       0: ^bb1
     ]
   ^bb1:  // pred: ^bb0
-    %14 = llvm.call tail @puts(%7) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull}) -> i32
-    llvm.call tail @exit(%3) {no_unwind} : (i32 {llvm.noundef}) -> ()
+    %16 = llvm.call tail @puts(%2) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull}) -> i32
+    llvm.call tail @exit(%6) {no_unwind} : (i32 {llvm.noundef}) -> ()
     llvm.unreachable
   ^bb2:  // pred: ^bb0
-    return %13#0 : i32
+    return %15#0 : i32
   }
-  func.func private @remove_entry_from_node(%arg0: !llvm.ptr {llvm.noundef, llvm.returned}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef, llvm.readnone}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
-    %true = arith.constant true
+  func.func private @get_neighbor_index(%arg0: !llvm.ptr {llvm.noundef, llvm.readonly}) -> i32 attributes {llvm.linkage = #llvm.linkage<external>} {
     %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.constant(0 : i64) : i64
-    %2 = llvm.mlir.constant(1 : i32) : i32
-    %3 = llvm.mlir.constant(4294967295 : i64) : i64
-    %4 = llvm.mlir.constant(true) : i1
-    %5 = llvm.mlir.constant(-1 : i32) : i32
-    %6 = llvm.mlir.addressof @order : !llvm.ptr
-    %7 = llvm.mlir.zero : !llvm.ptr
-    %8 = llvm.getelementptr inbounds|nuw %arg0[8] : (!llvm.ptr) -> !llvm.ptr, i8
-    %9 = llvm.load %8 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-    %10:4 = scf.while (%arg3 = %0, %arg4 = %1) : (i64, i64) -> (i64, i64, i64, i64) {
-      %31 = llvm.getelementptr %9[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-      %32 = llvm.load %31 : !llvm.ptr -> i32
-      %33 = llvm.icmp "eq" %32, %arg1 : i32
-      %34 = llvm.add %arg4, %0 overflow<nsw, nuw> : i64
-      %35 = llvm.add %arg3, %0 overflow<nuw> : i64
-      %36 = arith.xori %33, %true : i1
-      scf.condition(%36) %35, %34, %arg3, %arg4 : i64, i64, i64, i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %10 = call @get_neighbor_index.lifted(%9) : (memref<?xi32>) -> i32
+    return %10 : i32
+  }
+  func.func private @remove_entry_from_node.lifted(%arg0: memref<?xi32> {llvm.noundef, llvm.returned}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef, llvm.readnone}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+    %true = arith.constant true
+    %c24 = arith.constant 24 : index
+    %c7 = arith.constant 7 : index
+    %0 = llvm.mlir.zero : !llvm.ptr
+    %1 = llvm.mlir.addressof @order : !llvm.ptr
+    %2 = llvm.mlir.constant(-1 : i32) : i32
+    %3 = llvm.mlir.constant(true) : i1
+    %4 = llvm.mlir.constant(4294967295 : i64) : i64
+    %5 = llvm.mlir.constant(1 : i32) : i32
+    %6 = llvm.mlir.constant(0 : i64) : i64
+    %7 = llvm.mlir.constant(1 : i64) : i64
+    %8 = lifter.memref2pointer(%arg0) : memref<?xi32> -> !llvm.ptr
+    %9 = llvm.getelementptr inbounds|nuw %8[8] : (!llvm.ptr) -> !llvm.ptr, i8
+    %10 = llvm.load %9 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+    %11:4 = scf.while (%arg3 = %7, %arg4 = %6) : (i64, i64) -> (i64, i64, i64, i64) {
+      %30 = llvm.getelementptr %10[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+      %31 = llvm.load %30 : !llvm.ptr -> i32
+      %32 = llvm.icmp "eq" %31, %arg1 : i32
+      %33 = llvm.add %arg4, %7 overflow<nsw, nuw> : i64
+      %34 = llvm.add %arg3, %7 overflow<nuw> : i64
+      %35 = arith.xori %32, %true : i1
+      scf.condition(%35) %34, %33, %arg3, %arg4 : i64, i64, i64, i64
     } do {
     ^bb0(%arg3: i64, %arg4: i64, %arg5: i64, %arg6: i64):
       scf.yield %arg3, %arg4 : i64, i64
     }
-    %11 = llvm.trunc %10#3 overflow<nsw, nuw> : i64 to i32
-    %12 = llvm.add %11, %2 overflow<nsw, nuw> : i32
-    %13 = llvm.getelementptr %arg0[7] : (!llvm.ptr) -> !llvm.ptr, i32
-    %14 = llvm.load %13 : !llvm.ptr -> i32
-    %15 = llvm.icmp "slt" %12, %14 : i32
+    %12 = llvm.trunc %11#3 overflow<nsw, nuw> : i64 to i32
+    %13 = llvm.add %12, %5 overflow<nsw, nuw> : i32
+    %14 = memref.load %arg0[%c7] : memref<?xi32>
+    %15 = llvm.icmp "slt" %13, %14 : i32
     %16 = scf.if %15 -> (i32) {
-      %31:3 = scf.while (%arg3 = %10#2, %arg4 = %10#3) : (i64, i64) -> (i64, i64, i32) {
-        %32 = llvm.getelementptr %9[%arg3] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        %33 = llvm.load %32 : !llvm.ptr -> i32
-        %34 = llvm.and %arg4, %3 : i64
-        %35 = llvm.getelementptr %9[%34] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        llvm.store %33, %35 : i32, !llvm.ptr
-        %36 = llvm.add %arg3, %0 overflow<nsw, nuw> : i64
-        %37 = llvm.getelementptr %arg0[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %38 = llvm.load %37 : !llvm.ptr -> i32
-        %39 = llvm.trunc %36 overflow<nuw> : i64 to i32
-        %40 = llvm.icmp "sgt" %38, %39 : i32
-        scf.condition(%40) %36, %arg3, %38 : i64, i64, i32
+      %30:3 = scf.while (%arg3 = %11#2, %arg4 = %11#3) : (i64, i64) -> (i64, i64, i32) {
+        %31 = llvm.getelementptr %10[%arg3] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        %32 = llvm.load %31 : !llvm.ptr -> i32
+        %33 = llvm.and %arg4, %4 : i64
+        %34 = llvm.getelementptr %10[%33] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        llvm.store %32, %34 : i32, !llvm.ptr
+        %35 = llvm.add %arg3, %7 overflow<nsw, nuw> : i64
+        %36 = memref.load %arg0[%c7] : memref<?xi32>
+        %37 = llvm.trunc %35 overflow<nuw> : i64 to i32
+        %38 = llvm.icmp "sgt" %36, %37 : i32
+        scf.condition(%38) %35, %arg3, %36 : i64, i64, i32
       } do {
       ^bb0(%arg3: i64, %arg4: i64, %arg5: i32):
         scf.yield %arg3, %arg4 : i64, i64
       }
-      scf.yield %31#2 : i32
+      scf.yield %30#2 : i32
     } else {
       scf.yield %14 : i32
     }
-    %17 = llvm.getelementptr %arg0[24] : (!llvm.ptr) -> !llvm.ptr, i8
-    %18 = llvm.load %17 : !llvm.ptr -> i8
-    %19 = llvm.load %arg0 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-    %20:4 = scf.while (%arg3 = %0, %arg4 = %1) : (i64, i64) -> (i64, i64, i64, i64) {
-      %31 = llvm.getelementptr inbounds|nuw %19[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-      %32 = llvm.load %31 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-      %33 = llvm.icmp "eq" %32, %arg2 : !llvm.ptr
-      %34 = llvm.add %arg4, %0 overflow<nsw, nuw> : i64
-      %35 = llvm.add %arg3, %0 overflow<nuw> : i64
-      %36 = arith.xori %33, %true : i1
-      scf.condition(%36) %35, %34, %arg3, %arg4 : i64, i64, i64, i64
+    %17 = lifter.pointer2memref(%8) : !llvm.ptr -> memref<?xi8>
+    %18 = memref.load %17[%c24] : memref<?xi8>
+    %19 = llvm.load %8 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+    %20:4 = scf.while (%arg3 = %7, %arg4 = %6) : (i64, i64) -> (i64, i64, i64, i64) {
+      %30 = llvm.getelementptr inbounds|nuw %19[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+      %31 = llvm.load %30 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+      %32 = llvm.icmp "eq" %31, %arg2 : !llvm.ptr
+      %33 = llvm.add %arg4, %7 overflow<nsw, nuw> : i64
+      %34 = llvm.add %arg3, %7 overflow<nuw> : i64
+      %35 = arith.xori %32, %true : i1
+      scf.condition(%35) %34, %33, %arg3, %arg4 : i64, i64, i64, i64
     } do {
     ^bb0(%arg3: i64, %arg4: i64, %arg5: i64, %arg6: i64):
       scf.yield %arg3, %arg4 : i64, i64
     }
     %21 = llvm.trunc %18 overflow<nuw> : i8 to i1
-    %22 = llvm.xor %21, %4 : i1
+    %22 = llvm.xor %21, %3 : i1
     %23 = llvm.zext %22 : i1 to i32
     %24 = llvm.add %16, %23 overflow<nsw> : i32
     %25 = llvm.trunc %20#3 overflow<nsw, nuw> : i64 to i32
-    %26 = llvm.add %25, %2 overflow<nsw, nuw> : i32
+    %26 = llvm.add %25, %5 overflow<nsw, nuw> : i32
     %27 = llvm.icmp "slt" %26, %24 : i32
     scf.if %27 {
-      %31 = llvm.zext %24 : i32 to i64
-      %32:2 = scf.while (%arg3 = %20#2, %arg4 = %20#3) : (i64, i64) -> (i64, i64) {
-        %33 = llvm.load %arg0 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %34 = llvm.getelementptr inbounds|nuw %33[%arg3] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %35 = llvm.load %34 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %36 = llvm.and %arg4, %3 : i64
-        %37 = llvm.getelementptr inbounds|nuw %33[%36] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        llvm.store %35, %37 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-        %38 = llvm.add %arg3, %0 overflow<nsw, nuw> : i64
-        %39 = llvm.icmp "eq" %38, %31 : i64
-        %40 = arith.xori %39, %true : i1
-        scf.condition(%40) %38, %arg3 : i64, i64
+      %30 = llvm.zext %24 : i32 to i64
+      %31:2 = scf.while (%arg3 = %20#2, %arg4 = %20#3) : (i64, i64) -> (i64, i64) {
+        %32 = llvm.load %8 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %33 = llvm.getelementptr inbounds|nuw %32[%arg3] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %34 = llvm.load %33 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %35 = llvm.and %arg4, %4 : i64
+        %36 = llvm.getelementptr inbounds|nuw %32[%35] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        llvm.store %34, %36 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %37 = llvm.add %arg3, %7 overflow<nsw, nuw> : i64
+        %38 = llvm.icmp "eq" %37, %30 : i64
+        %39 = arith.xori %38, %true : i1
+        scf.condition(%39) %37, %arg3 : i64, i64
       } do {
       ^bb0(%arg3: i64, %arg4: i64):
         scf.yield %arg3, %arg4 : i64, i64
       }
     }
-    %28 = llvm.add %16, %5 : i32
-    %29 = llvm.getelementptr %arg0[7] : (!llvm.ptr) -> !llvm.ptr, i32
-    llvm.store %28, %29 : i32, !llvm.ptr
-    %30 = llvm.load %6 : !llvm.ptr -> i32
+    %28 = llvm.add %16, %2 : i32
+    memref.store %28, %arg0[%c7] : memref<?xi32>
+    %29 = llvm.load %1 : !llvm.ptr -> i32
     scf.if %21 {
-      %31 = llvm.add %30, %5 : i32
-      %32 = llvm.icmp "slt" %16, %30 : i32
-      scf.if %32 {
-        %33 = llvm.sext %28 : i32 to i64
-        %34 = scf.while (%arg3 = %33) : (i64) -> i64 {
-          %35 = llvm.load %arg0 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-          %36 = llvm.getelementptr inbounds %35[%arg3] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-          llvm.store %7, %36 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-          %37 = llvm.add %arg3, %0 overflow<nsw> : i64
-          %38 = llvm.trunc %37 : i64 to i32
-          %39 = llvm.icmp "eq" %31, %38 : i32
-          %40 = arith.xori %39, %true : i1
-          scf.condition(%40) %37 : i64
+      %30 = llvm.add %29, %2 : i32
+      %31 = llvm.icmp "slt" %16, %29 : i32
+      scf.if %31 {
+        %32 = llvm.sext %28 : i32 to i64
+        %33 = scf.while (%arg3 = %32) : (i64) -> i64 {
+          %34 = llvm.load %8 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+          %35 = llvm.getelementptr inbounds %34[%arg3] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          llvm.store %0, %35 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+          %36 = llvm.add %arg3, %7 overflow<nsw> : i64
+          %37 = llvm.trunc %36 : i64 to i32
+          %38 = llvm.icmp "eq" %30, %37 : i32
+          %39 = arith.xori %38, %true : i1
+          scf.condition(%39) %36 : i64
         } do {
         ^bb0(%arg3: i64):
           scf.yield %arg3 : i64
         }
       }
     } else {
-      %31 = llvm.icmp "slt" %16, %30 : i32
-      scf.if %31 {
-        %32 = llvm.sext %16 : i32 to i64
-        %33 = llvm.sext %30 : i32 to i64
-        %34 = scf.while (%arg3 = %32) : (i64) -> i64 {
-          %35 = llvm.load %arg0 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-          %36 = llvm.getelementptr inbounds %35[%arg3] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-          llvm.store %7, %36 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-          %37 = llvm.add %arg3, %0 overflow<nsw> : i64
-          %38 = llvm.icmp "eq" %37, %33 : i64
-          %39 = arith.xori %38, %true : i1
-          scf.condition(%39) %37 : i64
+      %30 = llvm.icmp "slt" %16, %29 : i32
+      scf.if %30 {
+        %31 = llvm.sext %16 : i32 to i64
+        %32 = llvm.sext %29 : i32 to i64
+        %33 = scf.while (%arg3 = %31) : (i64) -> i64 {
+          %34 = llvm.load %8 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+          %35 = llvm.getelementptr inbounds %34[%arg3] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          llvm.store %0, %35 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+          %36 = llvm.add %arg3, %7 overflow<nsw> : i64
+          %37 = llvm.icmp "eq" %36, %32 : i64
+          %38 = arith.xori %37, %true : i1
+          scf.condition(%38) %36 : i64
         } do {
         ^bb0(%arg3: i64):
           scf.yield %arg3 : i64
         }
       }
     }
-    return %arg0 : !llvm.ptr
+    return %8 : !llvm.ptr
+  }
+  func.func private @remove_entry_from_node(%arg0: !llvm.ptr {llvm.noundef, llvm.returned}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef, llvm.readnone}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %10 = call @remove_entry_from_node.lifted(%9, %arg1, %arg2) : (memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
+    return %10 : !llvm.ptr
   }
   func.func private @adjust_root(%arg0: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %0 = llvm.mlir.constant(0 : i32) : i32
@@ -3293,594 +3417,681 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     }
     return %5 : !llvm.ptr
   }
-  func.func private @coalesce_nodes(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
+  func.func private @coalesce_nodes.lifted(%arg0: !llvm.ptr {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: memref<?xi32> {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %true = arith.constant true
+    %0 = llvm.mlir.poison : i64
+    %1 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
     %c2_i32 = arith.constant 2 : i32
-    %0 = ub.poison : i64
+    %2 = ub.poison : i64
     %c0_i32 = arith.constant 0 : i32
-    %1 = llvm.mlir.constant(-1 : i32) : i32
-    %2 = llvm.mlir.constant(1 : i32) : i32
-    %3 = llvm.mlir.addressof @order : !llvm.ptr
-    %4 = llvm.mlir.constant(0 : i8) : i8
-    %5 = llvm.mlir.constant(-2 : i32) : i32
-    %6 = llvm.mlir.constant(0 : i32) : i32
-    %7 = llvm.mlir.constant(0 : i64) : i64
-    %8 = llvm.mlir.constant(1 : i64) : i64
-    %9 = llvm.mlir.constant(4294967295 : i64) : i64
-    %10 = llvm.mlir.undef : i32
-    %11 = llvm.icmp "eq" %arg3, %1 : i32
-    %12 = llvm.select %11, %arg1, %arg2 : i1, !llvm.ptr
-    %13 = llvm.select %11, %arg2, %arg1 : i1, !llvm.ptr
-    %14 = llvm.getelementptr %12[7] : (!llvm.ptr) -> !llvm.ptr, i32
-    %15 = llvm.load %14 : !llvm.ptr -> i32
-    %16 = llvm.getelementptr %13[24] : (!llvm.ptr) -> !llvm.ptr, i8
-    %17 = llvm.load %16 : !llvm.ptr -> i8
-    %18 = llvm.trunc %17 overflow<nuw> : i8 to i1
-    %19:2 = scf.if %18 -> (i32, i8) {
-      %24 = llvm.getelementptr %13[7] : (!llvm.ptr) -> !llvm.ptr, i32
-      %25 = llvm.load %24 : !llvm.ptr -> i32
-      %26 = llvm.icmp "sgt" %25, %6 : i32
-      scf.if %26 {
-        %35 = llvm.getelementptr inbounds|nuw %13[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %36 = llvm.getelementptr inbounds|nuw %12[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %37 = llvm.sext %15 : i32 to i64
-        %38:2 = scf.while (%arg5 = %37, %arg6 = %7) : (i64, i64) -> (i64, i64) {
-          %39 = llvm.load %35 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-          %40 = llvm.getelementptr %39[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-          %41 = llvm.load %40 : !llvm.ptr -> i32
-          %42 = llvm.load %36 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-          %43 = llvm.getelementptr %42[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-          llvm.store %41, %43 : i32, !llvm.ptr
-          %44 = llvm.load %13 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-          %45 = llvm.getelementptr inbounds|nuw %44[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-          %46 = llvm.load %45 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-          %47 = llvm.load %12 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-          %48 = llvm.getelementptr inbounds %47[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-          llvm.store %46, %48 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-          %49 = llvm.getelementptr %12[7] : (!llvm.ptr) -> !llvm.ptr, i32
-          %50 = llvm.load %49 : !llvm.ptr -> i32
-          %51 = llvm.add %50, %2 overflow<nsw> : i32
-          %52 = llvm.getelementptr %12[7] : (!llvm.ptr) -> !llvm.ptr, i32
-          llvm.store %51, %52 : i32, !llvm.ptr
-          %53 = llvm.add %arg5, %8 overflow<nsw> : i64
-          %54 = llvm.add %arg6, %8 overflow<nsw, nuw> : i64
-          %55 = llvm.getelementptr %13[7] : (!llvm.ptr) -> !llvm.ptr, i32
+    %3 = llvm.mlir.undef : i32
+    %4 = llvm.mlir.constant(4294967295 : i64) : i64
+    %5 = llvm.mlir.constant(1 : i64) : i64
+    %6 = llvm.mlir.constant(0 : i64) : i64
+    %7 = llvm.mlir.constant(0 : i32) : i32
+    %8 = llvm.mlir.constant(-2 : i32) : i32
+    %9 = llvm.mlir.constant(0 : i8) : i8
+    %10 = llvm.mlir.addressof @order : !llvm.ptr
+    %11 = llvm.mlir.constant(1 : i32) : i32
+    %12 = llvm.mlir.constant(-1 : i32) : i32
+    %intptr = memref.extract_aligned_pointer_as_index %arg2 : memref<?xi32> -> index
+    %13 = arith.index_cast %intptr : index to i64
+    %14 = llvm.inttoptr %13 : i64 to !llvm.ptr
+    %intptr_0 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xi32> -> index
+    %15 = arith.index_cast %intptr_0 : index to i64
+    %16 = llvm.inttoptr %15 : i64 to !llvm.ptr
+    %17 = llvm.icmp "eq" %arg3, %12 : i32
+    %18 = llvm.select %17, %16, %14 : i1, !llvm.ptr
+    %19 = llvm.select %17, %14, %16 : i1, !llvm.ptr
+    %20 = llvm.getelementptr %18[7] : (!llvm.ptr) -> !llvm.ptr, i32
+    %21 = llvm.load %20 : !llvm.ptr -> i32
+    %22 = llvm.getelementptr %19[24] : (!llvm.ptr) -> !llvm.ptr, i8
+    %23 = llvm.load %22 : !llvm.ptr -> i8
+    %24 = llvm.trunc %23 overflow<nuw> : i8 to i1
+    %25:2 = scf.if %24 -> (i32, i8) {
+      %30 = llvm.getelementptr %19[7] : (!llvm.ptr) -> !llvm.ptr, i32
+      %31 = llvm.load %30 : !llvm.ptr -> i32
+      %32 = llvm.icmp "sgt" %31, %7 : i32
+      scf.if %32 {
+        %41 = llvm.getelementptr inbounds|nuw %19[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %42 = llvm.getelementptr inbounds|nuw %18[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %43 = llvm.sext %21 : i32 to i64
+        %44:2 = scf.while (%arg5 = %43, %arg6 = %6) : (i64, i64) -> (i64, i64) {
+          %45 = llvm.load %41 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+          %46 = llvm.getelementptr %45[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+          %47 = llvm.load %46 : !llvm.ptr -> i32
+          %48 = llvm.load %42 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+          %49 = llvm.getelementptr %48[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+          llvm.store %47, %49 : i32, !llvm.ptr
+          %50 = llvm.load %19 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+          %51 = llvm.getelementptr inbounds|nuw %50[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          %52 = llvm.load %51 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+          %53 = llvm.load %18 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+          %54 = llvm.getelementptr inbounds %53[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          llvm.store %52, %54 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+          %55 = llvm.getelementptr %18[7] : (!llvm.ptr) -> !llvm.ptr, i32
           %56 = llvm.load %55 : !llvm.ptr -> i32
-          %57 = llvm.sext %56 : i32 to i64
-          %58 = llvm.icmp "slt" %54, %57 : i64
-          scf.condition(%58) %53, %54 : i64, i64
+          %57 = llvm.add %56, %11 overflow<nsw> : i32
+          %58 = llvm.getelementptr %18[7] : (!llvm.ptr) -> !llvm.ptr, i32
+          llvm.store %57, %58 : i32, !llvm.ptr
+          %59 = llvm.add %arg5, %5 overflow<nsw> : i64
+          %60 = llvm.add %arg6, %5 overflow<nsw, nuw> : i64
+          %61 = llvm.getelementptr %19[7] : (!llvm.ptr) -> !llvm.ptr, i32
+          %62 = llvm.load %61 : !llvm.ptr -> i32
+          %63 = llvm.sext %62 : i32 to i64
+          %64 = llvm.icmp "slt" %60, %63 : i64
+          scf.condition(%64) %59, %60 : i64, i64
         } do {
         ^bb0(%arg5: i64, %arg6: i64):
           scf.yield %arg5, %arg6 : i64, i64
         }
       }
-      %27 = llvm.load %13 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-      %28 = llvm.load %3 : !llvm.ptr -> i32
-      %29 = llvm.add %28, %1 overflow<nsw> : i32
-      %30 = llvm.sext %29 : i32 to i64
-      %31 = llvm.getelementptr inbounds %27[%30] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-      %32 = llvm.load %31 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-      %33 = llvm.load %12 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-      %34 = llvm.getelementptr inbounds %33[%30] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-      llvm.store %32, %34 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-      scf.yield %10, %4 : i32, i8
+      %33 = llvm.load %19 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+      %34 = llvm.load %10 : !llvm.ptr -> i32
+      %35 = llvm.add %34, %12 overflow<nsw> : i32
+      %36 = llvm.sext %35 : i32 to i64
+      %37 = llvm.getelementptr inbounds %33[%36] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+      %38 = llvm.load %37 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+      %39 = llvm.load %18 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+      %40 = llvm.getelementptr inbounds %39[%36] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+      llvm.store %38, %40 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+      scf.yield %3, %9 : i32, i8
     } else {
-      %24 = llvm.getelementptr inbounds|nuw %12[8] : (!llvm.ptr) -> !llvm.ptr, i8
-      %25 = llvm.load %24 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-      %26 = llvm.sext %15 : i32 to i64
-      %27 = llvm.getelementptr %25[%26] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-      llvm.store %arg4, %27 : i32, !llvm.ptr
-      %28 = llvm.getelementptr %12[7] : (!llvm.ptr) -> !llvm.ptr, i32
-      %29 = llvm.load %28 : !llvm.ptr -> i32
-      %30 = llvm.add %29, %2 overflow<nsw> : i32
-      %31 = llvm.getelementptr %12[7] : (!llvm.ptr) -> !llvm.ptr, i32
-      llvm.store %30, %31 : i32, !llvm.ptr
-      %32 = llvm.getelementptr %13[7] : (!llvm.ptr) -> !llvm.ptr, i32
-      %33 = llvm.load %32 : !llvm.ptr -> i32
-      %34 = llvm.add %33, %30 overflow<nsw> : i32
-      %35 = llvm.load %3 : !llvm.ptr -> i32
-      %36 = llvm.icmp "slt" %34, %35 : i32
-      %37 = arith.xori %36, %true : i1
-      %38 = arith.extui %37 : i1 to i8
-      %39 = scf.if %36 -> (i32) {
-        scf.yield %33 : i32
+      %30 = llvm.getelementptr inbounds|nuw %18[8] : (!llvm.ptr) -> !llvm.ptr, i8
+      %31 = llvm.load %30 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+      %32 = llvm.sext %21 : i32 to i64
+      %33 = llvm.getelementptr %31[%32] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+      llvm.store %arg4, %33 : i32, !llvm.ptr
+      %34 = llvm.getelementptr %18[7] : (!llvm.ptr) -> !llvm.ptr, i32
+      %35 = llvm.load %34 : !llvm.ptr -> i32
+      %36 = llvm.add %35, %11 overflow<nsw> : i32
+      %37 = llvm.getelementptr %18[7] : (!llvm.ptr) -> !llvm.ptr, i32
+      llvm.store %36, %37 : i32, !llvm.ptr
+      %38 = llvm.getelementptr %19[7] : (!llvm.ptr) -> !llvm.ptr, i32
+      %39 = llvm.load %38 : !llvm.ptr -> i32
+      %40 = llvm.add %39, %36 overflow<nsw> : i32
+      %41 = llvm.load %10 : !llvm.ptr -> i32
+      %42 = llvm.icmp "slt" %40, %41 : i32
+      %43 = arith.xori %42, %true : i1
+      %44 = arith.extui %43 : i1 to i8
+      %45 = scf.if %42 -> (i32) {
+        scf.yield %39 : i32
       } else {
-        %55 = func.call @cut(%35) : (i32) -> i32
-        %56 = llvm.add %55, %5 overflow<nsw> : i32
-        scf.yield %56 : i32
+        %61 = func.call @cut(%41) : (i32) -> i32
+        %62 = llvm.add %61, %8 overflow<nsw> : i32
+        scf.yield %62 : i32
       }
-      %40 = llvm.add %15, %2 : i32
-      %41 = llvm.icmp "sgt" %39, %6 : i32
-      %42 = arith.select %41, %39, %6 : i32
-      %43:2 = scf.if %41 -> (i64, i32) {
-        %55 = llvm.getelementptr inbounds|nuw %13[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %56 = llvm.sext %40 : i32 to i64
-        %57 = llvm.zext nneg %39 : i32 to i64
-        %58:2 = scf.while (%arg5 = %7, %arg6 = %56) : (i64, i64) -> (i64, i64) {
-          %61 = llvm.load %55 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-          %62 = llvm.getelementptr %61[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-          %63 = llvm.load %62 : !llvm.ptr -> i32
-          %64 = llvm.load %24 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-          %65 = llvm.getelementptr %64[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-          llvm.store %63, %65 : i32, !llvm.ptr
-          %66 = llvm.load %13 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-          %67 = llvm.getelementptr inbounds|nuw %66[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-          %68 = llvm.load %67 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-          %69 = llvm.load %12 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-          %70 = llvm.getelementptr inbounds %69[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-          llvm.store %68, %70 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-          %71 = llvm.getelementptr %12[7] : (!llvm.ptr) -> !llvm.ptr, i32
-          %72 = llvm.load %71 : !llvm.ptr -> i32
-          %73 = llvm.add %72, %2 overflow<nsw> : i32
-          %74 = llvm.getelementptr %12[7] : (!llvm.ptr) -> !llvm.ptr, i32
-          llvm.store %73, %74 : i32, !llvm.ptr
-          %75 = llvm.getelementptr %13[7] : (!llvm.ptr) -> !llvm.ptr, i32
-          %76 = llvm.load %75 : !llvm.ptr -> i32
-          %77 = llvm.add %76, %1 overflow<nsw> : i32
-          %78 = llvm.getelementptr %13[7] : (!llvm.ptr) -> !llvm.ptr, i32
-          llvm.store %77, %78 : i32, !llvm.ptr
-          %79 = llvm.add %arg5, %8 overflow<nsw, nuw> : i64
-          %80 = llvm.add %arg6, %8 overflow<nsw> : i64
-          %81 = llvm.icmp "eq" %79, %57 : i64
-          %82 = arith.xori %81, %true : i1
-          scf.condition(%82) %79, %80 : i64, i64
+      %46 = llvm.add %21, %11 : i32
+      %47 = llvm.icmp "sgt" %45, %7 : i32
+      %48 = arith.select %47, %45, %7 : i32
+      %49:2 = scf.if %47 -> (i64, i32) {
+        %61 = llvm.getelementptr inbounds|nuw %19[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %62 = llvm.sext %46 : i32 to i64
+        %63 = llvm.zext nneg %45 : i32 to i64
+        %64:2 = scf.while (%arg5 = %6, %arg6 = %62) : (i64, i64) -> (i64, i64) {
+          %67 = llvm.load %61 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+          %68 = llvm.getelementptr %67[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+          %69 = llvm.load %68 : !llvm.ptr -> i32
+          %70 = llvm.load %30 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+          %71 = llvm.getelementptr %70[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+          llvm.store %69, %71 : i32, !llvm.ptr
+          %72 = llvm.load %19 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+          %73 = llvm.getelementptr inbounds|nuw %72[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          %74 = llvm.load %73 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+          %75 = llvm.load %18 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+          %76 = llvm.getelementptr inbounds %75[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          llvm.store %74, %76 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+          %77 = llvm.getelementptr %18[7] : (!llvm.ptr) -> !llvm.ptr, i32
+          %78 = llvm.load %77 : !llvm.ptr -> i32
+          %79 = llvm.add %78, %11 overflow<nsw> : i32
+          %80 = llvm.getelementptr %18[7] : (!llvm.ptr) -> !llvm.ptr, i32
+          llvm.store %79, %80 : i32, !llvm.ptr
+          %81 = llvm.getelementptr %19[7] : (!llvm.ptr) -> !llvm.ptr, i32
+          %82 = llvm.load %81 : !llvm.ptr -> i32
+          %83 = llvm.add %82, %12 overflow<nsw> : i32
+          %84 = llvm.getelementptr %19[7] : (!llvm.ptr) -> !llvm.ptr, i32
+          llvm.store %83, %84 : i32, !llvm.ptr
+          %85 = llvm.add %arg5, %5 overflow<nsw, nuw> : i64
+          %86 = llvm.add %arg6, %5 overflow<nsw> : i64
+          %87 = llvm.icmp "eq" %85, %63 : i64
+          %88 = arith.xori %87, %true : i1
+          scf.condition(%88) %85, %86 : i64, i64
         } do {
         ^bb0(%arg5: i64, %arg6: i64):
           scf.yield %arg5, %arg6 : i64, i64
         }
-        %59 = llvm.trunc %58#1 overflow<nsw> : i64 to i32
-        %60 = llvm.and %58#0, %9 : i64
-        scf.yield %60, %59 : i64, i32
+        %65 = llvm.trunc %64#1 overflow<nsw> : i64 to i32
+        %66 = llvm.and %64#0, %4 : i64
+        scf.yield %66, %65 : i64, i32
       } else {
-        scf.yield %7, %40 : i64, i32
+        scf.yield %6, %46 : i64, i32
       }
-      %44 = llvm.load %13 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-      %45 = llvm.getelementptr inbounds|nuw %44[%43#0] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-      %46 = llvm.load %45 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-      %47 = llvm.load %12 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-      %48 = llvm.sext %43#1 : i32 to i64
-      %49 = llvm.getelementptr inbounds %47[%48] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-      llvm.store %46, %49 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-      %50 = llvm.trunc %38 overflow<nuw> : i8 to i1
-      %51 = scf.if %50 -> (i32) {
-        %55 = llvm.getelementptr inbounds|nuw %13[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %56 = llvm.load %55 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %57 = llvm.zext nneg %42 : i32 to i64
-        %58 = llvm.getelementptr %56[%57] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        %59 = llvm.load %58 : !llvm.ptr -> i32
-        %60 = llvm.add %42, %2 overflow<nsw, nuw> : i32
-        %61 = llvm.getelementptr %13[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %62 = llvm.load %61 : !llvm.ptr -> i32
-        %63 = llvm.icmp "sgt" %62, %6 : i32
-        %64:3 = scf.if %63 -> (i64, i32, i32) {
-          %72 = llvm.add %42, %2 overflow<nuw> : i32
-          %73 = llvm.zext %72 : i32 to i64
-          %74:3 = scf.while (%arg5 = %7, %arg6 = %73) : (i64, i64) -> (i64, i64, i32) {
-            %77 = llvm.load %55 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-            %78 = llvm.getelementptr %77[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-            %79 = llvm.load %78 : !llvm.ptr -> i32
-            %80 = llvm.getelementptr %77[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-            llvm.store %79, %80 : i32, !llvm.ptr
-            %81 = llvm.load %13 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-            %82 = llvm.getelementptr inbounds|nuw %81[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-            %83 = llvm.load %82 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-            %84 = llvm.getelementptr inbounds|nuw %81[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-            llvm.store %83, %84 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-            %85 = llvm.add %arg5, %8 overflow<nsw, nuw> : i64
-            %86 = llvm.add %arg6, %8 overflow<nsw, nuw> : i64
-            %87 = llvm.getelementptr %13[7] : (!llvm.ptr) -> !llvm.ptr, i32
-            %88 = llvm.load %87 : !llvm.ptr -> i32
-            %89 = llvm.sext %88 : i32 to i64
-            %90 = llvm.icmp "slt" %85, %89 : i64
-            scf.condition(%90) %85, %86, %88 : i64, i64, i32
+      %50 = llvm.load %19 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+      %51 = llvm.getelementptr inbounds|nuw %50[%49#0] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+      %52 = llvm.load %51 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+      %53 = llvm.load %18 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+      %54 = llvm.sext %49#1 : i32 to i64
+      %55 = llvm.getelementptr inbounds %53[%54] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+      llvm.store %52, %55 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+      %56 = llvm.trunc %44 overflow<nuw> : i8 to i1
+      %57 = scf.if %56 -> (i32) {
+        %61 = llvm.getelementptr inbounds|nuw %19[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %62 = llvm.load %61 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        %63 = llvm.zext nneg %48 : i32 to i64
+        %64 = llvm.getelementptr %62[%63] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        %65 = llvm.load %64 : !llvm.ptr -> i32
+        %66 = llvm.add %48, %11 overflow<nsw, nuw> : i32
+        %67 = llvm.getelementptr %19[7] : (!llvm.ptr) -> !llvm.ptr, i32
+        %68 = llvm.load %67 : !llvm.ptr -> i32
+        %69 = llvm.icmp "sgt" %68, %7 : i32
+        %70:3 = scf.if %69 -> (i64, i32, i32) {
+          %78 = llvm.add %48, %11 overflow<nuw> : i32
+          %79 = llvm.zext %78 : i32 to i64
+          %80:3 = scf.while (%arg5 = %6, %arg6 = %79) : (i64, i64) -> (i64, i64, i32) {
+            %83 = llvm.load %61 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+            %84 = llvm.getelementptr %83[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+            %85 = llvm.load %84 : !llvm.ptr -> i32
+            %86 = llvm.getelementptr %83[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+            llvm.store %85, %86 : i32, !llvm.ptr
+            %87 = llvm.load %19 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+            %88 = llvm.getelementptr inbounds|nuw %87[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+            %89 = llvm.load %88 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+            %90 = llvm.getelementptr inbounds|nuw %87[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+            llvm.store %89, %90 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+            %91 = llvm.add %arg5, %5 overflow<nsw, nuw> : i64
+            %92 = llvm.add %arg6, %5 overflow<nsw, nuw> : i64
+            %93 = llvm.getelementptr %19[7] : (!llvm.ptr) -> !llvm.ptr, i32
+            %94 = llvm.load %93 : !llvm.ptr -> i32
+            %95 = llvm.sext %94 : i32 to i64
+            %96 = llvm.icmp "slt" %91, %95 : i64
+            scf.condition(%96) %91, %92, %94 : i64, i64, i32
           } do {
           ^bb0(%arg5: i64, %arg6: i64, %arg7: i32):
             scf.yield %arg5, %arg6 : i64, i64
           }
-          %75 = llvm.trunc %74#1 overflow<nuw> : i64 to i32
-          %76 = llvm.and %74#0, %9 : i64
-          scf.yield %76, %75, %74#2 : i64, i32, i32
+          %81 = llvm.trunc %80#1 overflow<nuw> : i64 to i32
+          %82 = llvm.and %80#0, %4 : i64
+          scf.yield %82, %81, %80#2 : i64, i32, i32
         } else {
-          scf.yield %7, %60, %62 : i64, i32, i32
+          scf.yield %6, %66, %68 : i64, i32, i32
         }
-        %65 = llvm.load %13 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %66 = llvm.zext nneg %64#1 : i32 to i64
-        %67 = llvm.getelementptr inbounds|nuw %65[%66] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %68 = llvm.load %67 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %69 = llvm.getelementptr inbounds|nuw %65[%64#0] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        llvm.store %68, %69 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-        %70 = llvm.add %64#2, %1 overflow<nsw> : i32
-        %71 = llvm.getelementptr %13[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        llvm.store %70, %71 : i32, !llvm.ptr
-        scf.yield %59 : i32
+        %71 = llvm.load %19 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %72 = llvm.zext nneg %70#1 : i32 to i64
+        %73 = llvm.getelementptr inbounds|nuw %71[%72] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %74 = llvm.load %73 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %75 = llvm.getelementptr inbounds|nuw %71[%70#0] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        llvm.store %74, %75 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %76 = llvm.add %70#2, %12 overflow<nsw> : i32
+        %77 = llvm.getelementptr %19[7] : (!llvm.ptr) -> !llvm.ptr, i32
+        llvm.store %76, %77 : i32, !llvm.ptr
+        scf.yield %65 : i32
       } else {
-        scf.yield %10 : i32
+        scf.yield %3 : i32
       }
-      %52 = llvm.getelementptr %12[7] : (!llvm.ptr) -> !llvm.ptr, i32
-      %53 = llvm.load %52 : !llvm.ptr -> i32
-      %54 = llvm.icmp "slt" %53, %6 : i32
-      scf.if %54 {
+      %58 = llvm.getelementptr %18[7] : (!llvm.ptr) -> !llvm.ptr, i32
+      %59 = llvm.load %58 : !llvm.ptr -> i32
+      %60 = llvm.icmp "slt" %59, %7 : i32
+      scf.if %60 {
       } else {
-        %55 = llvm.load %12 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %56 = llvm.add %53, %2 overflow<nuw> : i32
-        %57 = llvm.zext %56 : i32 to i64
-        %58 = scf.while (%arg5 = %7) : (i64) -> i64 {
-          %59 = llvm.getelementptr inbounds|nuw %55[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-          %60 = llvm.load %59 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-          %61 = llvm.getelementptr inbounds|nuw %60[16] : (!llvm.ptr) -> !llvm.ptr, i8
-          llvm.store %12, %61 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr, !llvm.ptr
-          %62 = llvm.add %arg5, %8 overflow<nsw, nuw> : i64
-          %63 = llvm.icmp "eq" %62, %57 : i64
-          %64 = arith.xori %63, %true : i1
-          scf.condition(%64) %62 : i64
+        %61 = llvm.load %18 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %62 = llvm.add %59, %11 overflow<nuw> : i32
+        %63 = llvm.zext %62 : i32 to i64
+        %64 = scf.while (%arg5 = %6) : (i64) -> i64 {
+          %65 = llvm.getelementptr inbounds|nuw %61[%arg5] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          %66 = llvm.load %65 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+          %67 = llvm.getelementptr inbounds|nuw %66[16] : (!llvm.ptr) -> !llvm.ptr, i8
+          llvm.store %18, %67 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr, !llvm.ptr
+          %68 = llvm.add %arg5, %5 overflow<nsw, nuw> : i64
+          %69 = llvm.icmp "eq" %68, %63 : i64
+          %70 = arith.xori %69, %true : i1
+          scf.condition(%70) %68 : i64
         } do {
         ^bb0(%arg5: i64):
           scf.yield %arg5 : i64
         }
       }
-      scf.yield %51, %38 : i32, i8
+      scf.yield %57, %44 : i32, i8
     }
-    %20 = llvm.trunc %19#1 overflow<nuw> : i8 to i1
-    %21 = llvm.getelementptr inbounds|nuw %13[16] : (!llvm.ptr) -> !llvm.ptr, i8
-    %22 = llvm.load %21 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
-    %23 = scf.if %20 -> (!llvm.ptr) {
-      %24 = llvm.getelementptr %22[7] : (!llvm.ptr) -> !llvm.ptr, i32
-      %25 = llvm.load %24 : !llvm.ptr -> i32
-      %26 = llvm.intr.smax(%25, %6) : (i32, i32) -> i32
-      %27 = llvm.zext nneg %26 : i32 to i64
-      %28:3 = scf.while (%arg5 = %7) : (i64) -> (i64, i64, i32) {
-        %31 = llvm.icmp "eq" %arg5, %27 : i64
-        %32:3 = scf.if %31 -> (i64, i32, i32) {
-          scf.yield %0, %c2_i32, %c0_i32 : i64, i32, i32
+    %26 = llvm.trunc %25#1 overflow<nuw> : i8 to i1
+    %27 = llvm.getelementptr inbounds|nuw %19[16] : (!llvm.ptr) -> !llvm.ptr, i8
+    %28 = llvm.load %27 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
+    %29 = scf.if %26 -> (!llvm.ptr) {
+      %30 = llvm.getelementptr %28[7] : (!llvm.ptr) -> !llvm.ptr, i32
+      %31 = llvm.load %30 : !llvm.ptr -> i32
+      %32 = llvm.intr.smax(%31, %7) : (i32, i32) -> i32
+      %33 = llvm.zext nneg %32 : i32 to i64
+      %34:3 = scf.while (%arg5 = %6) : (i64) -> (i64, i64, i32) {
+        %37 = llvm.icmp "eq" %arg5, %33 : i64
+        %38:3 = scf.if %37 -> (i64, i32, i32) {
+          scf.yield %2, %c2_i32, %c0_i32 : i64, i32, i32
         } else {
-          %34 = llvm.load %22 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-          %35 = llvm.add %arg5, %8 overflow<nsw, nuw> : i64
-          %36 = llvm.getelementptr inbounds|nuw %34[%35] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-          %37 = llvm.load %36 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-          %38 = llvm.icmp "eq" %37, %13 : !llvm.ptr
-          %39 = arith.extui %38 : i1 to i32
-          %40 = arith.xori %38, %true : i1
-          %41 = arith.extui %40 : i1 to i32
-          scf.yield %35, %39, %41 : i64, i32, i32
+          %40 = llvm.load %28 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+          %41 = llvm.add %arg5, %5 overflow<nsw, nuw> : i64
+          %42 = llvm.getelementptr inbounds|nuw %40[%41] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          %43 = llvm.load %42 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+          %44 = llvm.icmp "eq" %43, %19 : !llvm.ptr
+          %45 = arith.extui %44 : i1 to i32
+          %46 = arith.xori %44, %true : i1
+          %47 = arith.extui %46 : i1 to i32
+          scf.yield %41, %45, %47 : i64, i32, i32
         }
-        %33 = arith.trunci %32#2 : i32 to i1
-        scf.condition(%33) %32#0, %arg5, %32#1 : i64, i64, i32
+        %39 = arith.trunci %38#2 : i32 to i1
+        scf.condition(%39) %38#0, %arg5, %38#1 : i64, i64, i32
       } do {
       ^bb0(%arg5: i64, %arg6: i64, %arg7: i32):
         scf.yield %arg5 : i64
       }
-      %29 = arith.index_castui %28#2 : i32 to index
-      %30 = scf.index_switch %29 -> !llvm.ptr 
+      %35 = arith.index_castui %34#2 : i32 to index
+      %36 = scf.index_switch %35 -> !llvm.ptr 
       case 1 {
-        %31 = llvm.getelementptr inbounds|nuw %22[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %32 = llvm.load %31 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %33 = llvm.and %28#1, %9 : i64
-        %34 = llvm.getelementptr %32[%33] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        llvm.store %19#0, %34 : i32, !llvm.ptr
+        %37 = llvm.getelementptr inbounds|nuw %28[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %38 = llvm.load %37 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        %39 = llvm.and %34#1, %4 : i64
+        %40 = llvm.getelementptr %38[%39] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        llvm.store %25#0, %40 : i32, !llvm.ptr
         scf.yield %arg0 : !llvm.ptr
       }
       default {
         scf.yield %arg0 : !llvm.ptr
       }
-      scf.yield %30 : !llvm.ptr
+      scf.yield %36 : !llvm.ptr
     } else {
-      %24 = func.call @delete_entry(%arg0, %22, %arg4, %13) : (!llvm.ptr, !llvm.ptr, i32, !llvm.ptr) -> !llvm.ptr
-      %25 = llvm.getelementptr inbounds|nuw %13[8] : (!llvm.ptr) -> !llvm.ptr, i8
-      %26 = llvm.load %25 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-      llvm.call tail @free(%26) {memory_effects = #llvm.memory_effects<other = none, argMem = readwrite, inaccessibleMem = readwrite>, no_unwind} : (!llvm.ptr {llvm.noundef}) -> ()
-      %27 = llvm.load %13 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-      llvm.call tail @free(%27) {memory_effects = #llvm.memory_effects<other = none, argMem = readwrite, inaccessibleMem = readwrite>, no_unwind} : (!llvm.ptr {llvm.noundef}) -> ()
-      llvm.call tail @free(%13) {memory_effects = #llvm.memory_effects<other = none, argMem = readwrite, inaccessibleMem = readwrite>, no_unwind} : (!llvm.ptr {llvm.noundef}) -> ()
-      scf.yield %24 : !llvm.ptr
+      %30 = llvm.insertvalue %28, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %31 = llvm.insertvalue %28, %30[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %32 = llvm.insertvalue %6, %31[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %33 = llvm.insertvalue %0, %32[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %34 = llvm.insertvalue %5, %33[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %35 = builtin.unrealized_conversion_cast %34 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+      %36 = func.call @delete_entry.lifted(%arg0, %35, %arg4, %19) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
+      %37 = llvm.getelementptr inbounds|nuw %19[8] : (!llvm.ptr) -> !llvm.ptr, i8
+      %38 = llvm.load %37 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+      llvm.call tail @free(%38) {memory_effects = #llvm.memory_effects<other = none, argMem = readwrite, inaccessibleMem = readwrite>, no_unwind} : (!llvm.ptr {llvm.noundef}) -> ()
+      %39 = llvm.load %19 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+      llvm.call tail @free(%39) {memory_effects = #llvm.memory_effects<other = none, argMem = readwrite, inaccessibleMem = readwrite>, no_unwind} : (!llvm.ptr {llvm.noundef}) -> ()
+      llvm.call tail @free(%19) {memory_effects = #llvm.memory_effects<other = none, argMem = readwrite, inaccessibleMem = readwrite>, no_unwind} : (!llvm.ptr {llvm.noundef}) -> ()
+      scf.yield %36 : !llvm.ptr
     }
-    return %23 : !llvm.ptr
+    return %29 : !llvm.ptr
   }
-  func.func private @delete_entry(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef, llvm.readnone}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
-    %0 = llvm.mlir.addressof @order : !llvm.ptr
-    %1 = llvm.mlir.constant(-1 : i32) : i32
-    %2 = llvm.mlir.constant(0 : i32) : i32
-    %3 = llvm.mlir.constant(1 : i8) : i8
-    %4 = call @remove_entry_from_node(%arg1, %arg2, %arg3) : (!llvm.ptr, i32, !llvm.ptr) -> !llvm.ptr
-    %5 = llvm.icmp "eq" %arg1, %arg0 : !llvm.ptr
-    %6 = scf.if %5 -> (!llvm.ptr) {
-      %7 = func.call @adjust_root(%arg0) : (!llvm.ptr) -> !llvm.ptr
-      scf.yield %7 : !llvm.ptr
+  func.func private @coalesce_nodes(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %10 = llvm.insertvalue %arg2, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %11 = llvm.insertvalue %arg2, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %12 = llvm.insertvalue %2, %11[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %13 = llvm.insertvalue %1, %12[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %14 = llvm.insertvalue %0, %13[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %15 = builtin.unrealized_conversion_cast %14 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %16 = call @coalesce_nodes.lifted(%arg0, %9, %15, %arg3, %arg4) : (!llvm.ptr, memref<?xi32>, memref<?xi32>, i32, i32) -> !llvm.ptr
+    return %16 : !llvm.ptr
+  }
+  func.func private @delete_entry.lifted(%arg0: !llvm.ptr {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef, llvm.readnone}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %c7 = arith.constant 7 : index
+    %c24 = arith.constant 24 : index
+    %4 = llvm.mlir.constant(1 : i8) : i8
+    %5 = llvm.mlir.constant(0 : i32) : i32
+    %6 = llvm.mlir.constant(-1 : i32) : i32
+    %7 = llvm.mlir.addressof @order : !llvm.ptr
+    %8 = lifter.memref2pointer(%arg1) : memref<?xi32> -> !llvm.ptr
+    %9 = call @remove_entry_from_node.lifted(%arg1, %arg2, %arg3) : (memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
+    %10 = llvm.icmp "eq" %8, %arg0 : !llvm.ptr
+    %11 = scf.if %10 -> (!llvm.ptr) {
+      %12 = func.call @adjust_root(%arg0) : (!llvm.ptr) -> !llvm.ptr
+      scf.yield %12 : !llvm.ptr
     } else {
-      %7 = llvm.getelementptr %arg1[24] : (!llvm.ptr) -> !llvm.ptr, i8
-      %8 = llvm.load %7 : !llvm.ptr -> i8
-      %9 = llvm.trunc %8 overflow<nuw> : i8 to i1
-      %10 = llvm.load %0 : !llvm.ptr -> i32
-      %11 = scf.if %9 -> (i32) {
-        %16 = llvm.add %10, %1 overflow<nsw> : i32
-        %17 = func.call @cut(%16) : (i32) -> i32
-        scf.yield %17 : i32
+      %12 = lifter.pointer2memref(%8) : !llvm.ptr -> memref<?xi8>
+      %13 = memref.load %12[%c24] : memref<?xi8>
+      %14 = llvm.trunc %13 overflow<nuw> : i8 to i1
+      %15 = llvm.load %7 : !llvm.ptr -> i32
+      %16 = scf.if %14 -> (i32) {
+        %20 = llvm.add %15, %6 overflow<nsw> : i32
+        %21 = func.call @cut(%20) : (i32) -> i32
+        scf.yield %21 : i32
       } else {
-        %16 = func.call @cut(%10) : (i32) -> i32
-        %17 = llvm.add %16, %1 overflow<nsw> : i32
-        scf.yield %17 : i32
+        %20 = func.call @cut(%15) : (i32) -> i32
+        %21 = llvm.add %20, %6 overflow<nsw> : i32
+        scf.yield %21 : i32
       }
-      %12 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-      %13 = llvm.load %12 : !llvm.ptr -> i32
-      %14 = llvm.icmp "slt" %13, %11 : i32
-      %15 = scf.if %14 -> (!llvm.ptr) {
-        %16 = func.call @get_neighbor_index(%arg1) : (!llvm.ptr) -> i32
-        %17 = llvm.icmp "eq" %16, %1 : i32
-        %18 = llvm.select %17, %2, %16 : i1, i32
-        %19 = llvm.getelementptr inbounds|nuw %arg1[16] : (!llvm.ptr) -> !llvm.ptr, i8
-        %20 = llvm.load %19 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
-        %21 = llvm.getelementptr inbounds|nuw %20[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %22 = llvm.load %21 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %23 = llvm.sext %18 : i32 to i64
-        %24 = llvm.getelementptr %22[%23] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        %25 = llvm.load %24 : !llvm.ptr -> i32
-        %26 = llvm.load %20 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %27 = llvm.getelementptr inbounds|nuw %26[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %28 = llvm.sext %16 : i32 to i64
-        %29 = llvm.getelementptr inbounds %26[%28] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %30 = llvm.select %17, %27, %29 : i1, !llvm.ptr
-        %31 = llvm.load %30 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %32 = llvm.getelementptr %arg1[24] : (!llvm.ptr) -> !llvm.ptr, i8
-        %33 = llvm.load %32 : !llvm.ptr -> i8
-        %34 = llvm.load %0 : !llvm.ptr -> i32
-        %35 = llvm.xor %33, %3 : i8
-        %36 = llvm.zext nneg %35 : i8 to i32
-        %37 = llvm.sub %34, %36 overflow<nsw> : i32
-        %38 = llvm.getelementptr %31[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %39 = llvm.load %38 : !llvm.ptr -> i32
-        %40 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %41 = llvm.load %40 : !llvm.ptr -> i32
-        %42 = llvm.add %41, %39 overflow<nsw> : i32
-        %43 = llvm.icmp "slt" %42, %37 : i32
-        %44 = scf.if %43 -> (!llvm.ptr) {
-          %45 = func.call @coalesce_nodes(%arg0, %arg1, %31, %16, %25) : (!llvm.ptr, !llvm.ptr, !llvm.ptr, i32, i32) -> !llvm.ptr
-          scf.yield %45 : !llvm.ptr
+      %17 = memref.load %arg1[%c7] : memref<?xi32>
+      %18 = llvm.icmp "slt" %17, %16 : i32
+      %19 = scf.if %18 -> (!llvm.ptr) {
+        %20 = func.call @get_neighbor_index.lifted(%arg1) : (memref<?xi32>) -> i32
+        %21 = llvm.icmp "eq" %20, %6 : i32
+        %22 = llvm.select %21, %5, %20 : i1, i32
+        %23 = llvm.getelementptr inbounds|nuw %8[16] : (!llvm.ptr) -> !llvm.ptr, i8
+        %24 = llvm.load %23 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
+        %25 = llvm.getelementptr inbounds|nuw %24[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %26 = llvm.load %25 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        %27 = llvm.sext %22 : i32 to i64
+        %28 = llvm.getelementptr %26[%27] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        %29 = llvm.load %28 : !llvm.ptr -> i32
+        %30 = llvm.load %24 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %31 = llvm.getelementptr inbounds|nuw %30[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %32 = llvm.sext %20 : i32 to i64
+        %33 = llvm.getelementptr inbounds %30[%32] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %34 = llvm.select %21, %31, %33 : i1, !llvm.ptr
+        %35 = llvm.load %34 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %36 = lifter.pointer2memref(%8) : !llvm.ptr -> memref<?xi8>
+        %37 = memref.load %36[%c24] : memref<?xi8>
+        %38 = llvm.load %7 : !llvm.ptr -> i32
+        %39 = llvm.xor %37, %4 : i8
+        %40 = llvm.zext nneg %39 : i8 to i32
+        %41 = llvm.sub %38, %40 overflow<nsw> : i32
+        %42 = llvm.getelementptr %35[7] : (!llvm.ptr) -> !llvm.ptr, i32
+        %43 = llvm.load %42 : !llvm.ptr -> i32
+        %44 = memref.load %arg1[%c7] : memref<?xi32>
+        %45 = llvm.add %44, %43 overflow<nsw> : i32
+        %46 = llvm.icmp "slt" %45, %41 : i32
+        %47 = scf.if %46 -> (!llvm.ptr) {
+          %48 = llvm.insertvalue %35, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %49 = llvm.insertvalue %35, %48[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %50 = llvm.insertvalue %2, %49[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %51 = llvm.insertvalue %1, %50[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %52 = llvm.insertvalue %0, %51[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %53 = builtin.unrealized_conversion_cast %52 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+          %54 = func.call @coalesce_nodes.lifted(%arg0, %arg1, %53, %20, %29) : (!llvm.ptr, memref<?xi32>, memref<?xi32>, i32, i32) -> !llvm.ptr
+          scf.yield %54 : !llvm.ptr
         } else {
-          %45 = func.call @redistribute_nodes(%arg0, %arg1, %31, %16, %18, %25) : (!llvm.ptr, !llvm.ptr, !llvm.ptr, i32, i32, i32) -> !llvm.ptr
+          %48 = llvm.insertvalue %35, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %49 = llvm.insertvalue %35, %48[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %50 = llvm.insertvalue %2, %49[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %51 = llvm.insertvalue %1, %50[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %52 = llvm.insertvalue %0, %51[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %53 = builtin.unrealized_conversion_cast %52 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+          %54 = func.call @redistribute_nodes.lifted(%arg0, %arg1, %53, %20, %22, %29) : (!llvm.ptr, memref<?xi32>, memref<?xi32>, i32, i32, i32) -> !llvm.ptr
           scf.yield %arg0 : !llvm.ptr
         }
-        scf.yield %44 : !llvm.ptr
+        scf.yield %47 : !llvm.ptr
       } else {
         scf.yield %arg0 : !llvm.ptr
       }
-      scf.yield %15 : !llvm.ptr
+      scf.yield %19 : !llvm.ptr
     }
-    return %6 : !llvm.ptr
+    return %11 : !llvm.ptr
   }
-  func.func private @redistribute_nodes(%arg0: !llvm.ptr {llvm.noundef, llvm.readnone, llvm.returned}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: !llvm.ptr {llvm.nocapture, llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: i32 {llvm.noundef}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
-    %0 = llvm.mlir.constant(-1 : i32) : i32
-    %1 = llvm.mlir.constant(0 : i32) : i32
-    %2 = llvm.mlir.constant(-1 : i64) : i64
-    %3 = llvm.mlir.constant(1 : i64) : i64
-    %4 = llvm.mlir.zero : !llvm.ptr
-    %5 = llvm.mlir.constant(0 : i64) : i64
-    %6 = llvm.mlir.constant(4294967295 : i64) : i64
-    %7 = llvm.mlir.constant(1 : i32) : i32
-    %8 = llvm.icmp "eq" %arg3, %0 : i32
-    %9 = llvm.getelementptr %arg1[24] : (!llvm.ptr) -> !llvm.ptr, i8
-    %10 = llvm.load %9 : !llvm.ptr -> i8
-    %11 = llvm.trunc %10 overflow<nuw> : i8 to i1
-    scf.if %8 {
-      %20 = scf.if %11 -> (!llvm.ptr) {
-        %32 = llvm.getelementptr inbounds|nuw %arg2[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %33 = llvm.load %32 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %34 = llvm.load %33 : !llvm.ptr -> i32
-        %35 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %36 = llvm.load %35 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %37 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %38 = llvm.load %37 : !llvm.ptr -> i32
-        %39 = llvm.sext %38 : i32 to i64
-        %40 = llvm.getelementptr %36[%39] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        llvm.store %34, %40 : i32, !llvm.ptr
-        %41 = llvm.load %arg2 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %42 = llvm.load %41 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %43 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %44 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %45 = llvm.load %44 : !llvm.ptr -> i32
-        %46 = llvm.sext %45 : i32 to i64
-        %47 = llvm.getelementptr inbounds %43[%46] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        llvm.store %42, %47 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-        %48 = llvm.load %32 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %49 = llvm.getelementptr inbounds|nuw %48[4] : (!llvm.ptr) -> !llvm.ptr, i8
-        scf.yield %49 : !llvm.ptr
-      } else {
-        %32 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %33 = llvm.load %32 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %34 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %35 = llvm.load %34 : !llvm.ptr -> i32
+  func.func private @delete_entry(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef, llvm.readnone}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %10 = call @delete_entry.lifted(%arg0, %9, %arg2, %arg3) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
+    return %10 : !llvm.ptr
+  }
+  func.func private @redistribute_nodes.lifted(%arg0: !llvm.ptr {llvm.noundef, llvm.readnone, llvm.returned}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: memref<?xi32> {llvm.nocapture, llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: i32 {llvm.noundef}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+    %c7 = arith.constant 7 : index
+    %c24 = arith.constant 24 : index
+    %0 = llvm.mlir.constant(1 : i32) : i32
+    %1 = llvm.mlir.constant(4294967295 : i64) : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.zero : !llvm.ptr
+    %4 = llvm.mlir.constant(1 : i64) : i64
+    %5 = llvm.mlir.constant(-1 : i64) : i64
+    %6 = llvm.mlir.constant(0 : i32) : i32
+    %7 = llvm.mlir.constant(-1 : i32) : i32
+    %intptr = memref.extract_aligned_pointer_as_index %arg2 : memref<?xi32> -> index
+    %8 = arith.index_cast %intptr : index to i64
+    %9 = llvm.inttoptr %8 : i64 to !llvm.ptr
+    %10 = lifter.memref2pointer(%arg1) : memref<?xi32> -> !llvm.ptr
+    %11 = llvm.icmp "eq" %arg3, %7 : i32
+    %12 = lifter.pointer2memref(%10) : !llvm.ptr -> memref<?xi8>
+    %13 = memref.load %12[%c24] : memref<?xi8>
+    %14 = llvm.trunc %13 overflow<nuw> : i8 to i1
+    scf.if %11 {
+      %19 = scf.if %14 -> (!llvm.ptr) {
+        %30 = llvm.getelementptr inbounds|nuw %9[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %31 = llvm.load %30 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        %32 = llvm.load %31 : !llvm.ptr -> i32
+        %33 = llvm.getelementptr inbounds|nuw %10[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %34 = llvm.load %33 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        %35 = memref.load %arg1[%c7] : memref<?xi32>
         %36 = llvm.sext %35 : i32 to i64
-        %37 = llvm.getelementptr %33[%36] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        llvm.store %arg5, %37 : i32, !llvm.ptr
-        %38 = llvm.load %arg2 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %37 = llvm.getelementptr %34[%36] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        llvm.store %32, %37 : i32, !llvm.ptr
+        %38 = llvm.load %9 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
         %39 = llvm.load %38 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %40 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %41 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %42 = llvm.load %41 : !llvm.ptr -> i32
-        %43 = llvm.sext %42 : i32 to i64
-        %44 = llvm.getelementptr %40[%43] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %45 = llvm.getelementptr %44[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        llvm.store %39, %45 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-        %46 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %47 = llvm.getelementptr %46[%43] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %48 = llvm.getelementptr %47[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %49 = llvm.load %48 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %50 = llvm.getelementptr inbounds|nuw %49[16] : (!llvm.ptr) -> !llvm.ptr, i8
-        llvm.store %arg1, %50 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr, !llvm.ptr
-        %51 = llvm.getelementptr inbounds|nuw %arg2[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %52 = llvm.load %51 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        scf.yield %52 : !llvm.ptr
+        %40 = llvm.load %10 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %41 = memref.load %arg1[%c7] : memref<?xi32>
+        %42 = llvm.sext %41 : i32 to i64
+        %43 = llvm.getelementptr inbounds %40[%42] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        llvm.store %39, %43 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %44 = llvm.load %30 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        %45 = llvm.getelementptr inbounds|nuw %44[4] : (!llvm.ptr) -> !llvm.ptr, i8
+        scf.yield %45 : !llvm.ptr
+      } else {
+        %30 = llvm.getelementptr inbounds|nuw %10[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %31 = llvm.load %30 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        %32 = memref.load %arg1[%c7] : memref<?xi32>
+        %33 = llvm.sext %32 : i32 to i64
+        %34 = llvm.getelementptr %31[%33] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        llvm.store %arg5, %34 : i32, !llvm.ptr
+        %35 = llvm.load %9 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %36 = llvm.load %35 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %37 = llvm.load %10 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %38 = memref.load %arg1[%c7] : memref<?xi32>
+        %39 = llvm.sext %38 : i32 to i64
+        %40 = llvm.getelementptr %37[%39] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %41 = llvm.getelementptr %40[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        llvm.store %36, %41 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %42 = llvm.load %10 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %43 = llvm.getelementptr %42[%39] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %44 = llvm.getelementptr %43[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %45 = llvm.load %44 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %46 = llvm.getelementptr inbounds|nuw %45[16] : (!llvm.ptr) -> !llvm.ptr, i8
+        llvm.store %10, %46 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr, !llvm.ptr
+        %47 = llvm.getelementptr inbounds|nuw %9[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %48 = llvm.load %47 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        scf.yield %48 : !llvm.ptr
       }
-      %21 = llvm.load %20 : !llvm.ptr -> i32
-      %22 = llvm.getelementptr inbounds|nuw %arg1[16] : (!llvm.ptr) -> !llvm.ptr, i8
-      %23 = llvm.load %22 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
-      %24 = llvm.getelementptr inbounds|nuw %23[8] : (!llvm.ptr) -> !llvm.ptr, i8
-      %25 = llvm.load %24 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-      %26 = llvm.sext %arg4 : i32 to i64
-      %27 = llvm.getelementptr %25[%26] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-      llvm.store %21, %27 : i32, !llvm.ptr
-      %28 = llvm.getelementptr %arg2[7] : (!llvm.ptr) -> !llvm.ptr, i32
-      %29 = llvm.load %28 : !llvm.ptr -> i32
-      %30 = llvm.icmp "sgt" %29, %1 : i32
-      %31 = scf.if %30 -> (i64) {
-        %32 = llvm.getelementptr inbounds|nuw %arg2[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %33 = scf.while (%arg6 = %5) : (i64) -> i64 {
-          %35 = llvm.load %32 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-          %36 = llvm.add %arg6, %3 overflow<nsw, nuw> : i64
-          %37 = llvm.getelementptr %35[%36] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-          %38 = llvm.load %37 : !llvm.ptr -> i32
-          %39 = llvm.getelementptr %35[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-          llvm.store %38, %39 : i32, !llvm.ptr
-          %40 = llvm.load %arg2 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-          %41 = llvm.getelementptr inbounds|nuw %40[%36] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-          %42 = llvm.load %41 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-          %43 = llvm.getelementptr inbounds|nuw %40[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-          llvm.store %42, %43 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-          %44 = llvm.getelementptr %arg2[7] : (!llvm.ptr) -> !llvm.ptr, i32
-          %45 = llvm.load %44 : !llvm.ptr -> i32
-          %46 = llvm.sext %45 : i32 to i64
-          %47 = llvm.icmp "slt" %36, %46 : i64
-          scf.condition(%47) %36 : i64
+      %20 = llvm.load %19 : !llvm.ptr -> i32
+      %21 = llvm.getelementptr inbounds|nuw %10[16] : (!llvm.ptr) -> !llvm.ptr, i8
+      %22 = llvm.load %21 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
+      %23 = llvm.getelementptr inbounds|nuw %22[8] : (!llvm.ptr) -> !llvm.ptr, i8
+      %24 = llvm.load %23 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+      %25 = llvm.sext %arg4 : i32 to i64
+      %26 = llvm.getelementptr %24[%25] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+      llvm.store %20, %26 : i32, !llvm.ptr
+      %27 = memref.load %arg2[%c7] : memref<?xi32>
+      %28 = llvm.icmp "sgt" %27, %6 : i32
+      %29 = scf.if %28 -> (i64) {
+        %30 = llvm.getelementptr inbounds|nuw %9[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %31 = scf.while (%arg6 = %2) : (i64) -> i64 {
+          %33 = llvm.load %30 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+          %34 = llvm.add %arg6, %4 overflow<nsw, nuw> : i64
+          %35 = llvm.getelementptr %33[%34] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+          %36 = llvm.load %35 : !llvm.ptr -> i32
+          %37 = llvm.getelementptr %33[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+          llvm.store %36, %37 : i32, !llvm.ptr
+          %38 = llvm.load %9 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+          %39 = llvm.getelementptr inbounds|nuw %38[%34] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          %40 = llvm.load %39 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+          %41 = llvm.getelementptr inbounds|nuw %38[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          llvm.store %40, %41 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+          %42 = memref.load %arg2[%c7] : memref<?xi32>
+          %43 = llvm.sext %42 : i32 to i64
+          %44 = llvm.icmp "slt" %34, %43 : i64
+          scf.condition(%44) %34 : i64
         } do {
         ^bb0(%arg6: i64):
           scf.yield %arg6 : i64
         }
-        %34 = llvm.and %33, %6 : i64
-        scf.yield %34 : i64
+        %32 = llvm.and %31, %1 : i64
+        scf.yield %32 : i64
       } else {
-        scf.yield %5 : i64
+        scf.yield %2 : i64
       }
-      scf.if %11 {
+      scf.if %14 {
       } else {
-        %32 = llvm.load %arg2 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %33 = llvm.getelementptr inbounds|nuw %32[%31] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %34 = llvm.getelementptr inbounds|nuw %33[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %35 = llvm.load %34 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        llvm.store %35, %33 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %30 = llvm.load %9 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %31 = llvm.getelementptr inbounds|nuw %30[%29] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %32 = llvm.getelementptr inbounds|nuw %31[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %33 = llvm.load %32 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        llvm.store %33, %31 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
       }
     } else {
-      scf.if %11 {
+      scf.if %14 {
       } else {
-        %28 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %29 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %30 = llvm.load %29 : !llvm.ptr -> i32
-        %31 = llvm.sext %30 : i32 to i64
-        %32 = llvm.getelementptr inbounds %28[%31] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %33 = llvm.load %32 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %34 = llvm.getelementptr %32[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        llvm.store %33, %34 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %25 = llvm.load %10 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %26 = memref.load %arg1[%c7] : memref<?xi32>
+        %27 = llvm.sext %26 : i32 to i64
+        %28 = llvm.getelementptr inbounds %25[%27] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %29 = llvm.load %28 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %30 = llvm.getelementptr %28[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        llvm.store %29, %30 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
       }
-      %20 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-      %21 = llvm.load %20 : !llvm.ptr -> i32
-      %22 = llvm.icmp "sgt" %21, %1 : i32
-      scf.if %22 {
-        %28 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %29 = llvm.zext nneg %21 : i32 to i64
-        %30 = scf.while (%arg6 = %29) : (i64) -> i64 {
-          %31 = llvm.load %28 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-          %32 = llvm.add %arg6, %2 overflow<nsw> : i64
-          %33 = llvm.getelementptr %31[%32] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-          %34 = llvm.load %33 : !llvm.ptr -> i32
-          %35 = llvm.getelementptr %31[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-          llvm.store %34, %35 : i32, !llvm.ptr
-          %36 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-          %37 = llvm.getelementptr inbounds|nuw %36[%32] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-          %38 = llvm.load %37 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-          %39 = llvm.getelementptr inbounds|nuw %36[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-          llvm.store %38, %39 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-          %40 = llvm.icmp "sgt" %arg6, %3 : i64
-          scf.condition(%40) %32 : i64
+      %19 = memref.load %arg1[%c7] : memref<?xi32>
+      %20 = llvm.icmp "sgt" %19, %6 : i32
+      scf.if %20 {
+        %25 = llvm.getelementptr inbounds|nuw %10[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %26 = llvm.zext nneg %19 : i32 to i64
+        %27 = scf.while (%arg6 = %26) : (i64) -> i64 {
+          %28 = llvm.load %25 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+          %29 = llvm.add %arg6, %5 overflow<nsw> : i64
+          %30 = llvm.getelementptr %28[%29] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+          %31 = llvm.load %30 : !llvm.ptr -> i32
+          %32 = llvm.getelementptr %28[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+          llvm.store %31, %32 : i32, !llvm.ptr
+          %33 = llvm.load %10 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+          %34 = llvm.getelementptr inbounds|nuw %33[%29] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          %35 = llvm.load %34 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+          %36 = llvm.getelementptr inbounds|nuw %33[%arg6] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+          llvm.store %35, %36 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+          %37 = llvm.icmp "sgt" %arg6, %4 : i64
+          scf.condition(%37) %29 : i64
         } do {
         ^bb0(%arg6: i64):
           scf.yield %arg6 : i64
         }
       }
-      %23 = llvm.load %arg2 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-      %24 = llvm.getelementptr %arg2[7] : (!llvm.ptr) -> !llvm.ptr, i32
-      %25 = llvm.load %24 : !llvm.ptr -> i32
-      %26 = llvm.sext %25 : i32 to i64
-      %27 = llvm.getelementptr %23[%26] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-      scf.if %11 {
-        %28 = llvm.getelementptr %27[-8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %29 = llvm.load %28 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %30 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        llvm.store %29, %30 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-        %31 = llvm.load %arg2 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %32 = llvm.getelementptr %31[%26] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        %33 = llvm.getelementptr %32[-8] : (!llvm.ptr) -> !llvm.ptr, i8
-        llvm.store %4, %33 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-        %34 = llvm.getelementptr inbounds|nuw %arg2[8] : (!llvm.ptr) -> !llvm.ptr, i8
+      %21 = llvm.load %9 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+      %22 = memref.load %arg2[%c7] : memref<?xi32>
+      %23 = llvm.sext %22 : i32 to i64
+      %24 = llvm.getelementptr %21[%23] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+      scf.if %14 {
+        %25 = llvm.getelementptr %24[-8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %26 = llvm.load %25 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %27 = llvm.load %10 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        llvm.store %26, %27 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %28 = llvm.load %9 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %29 = llvm.getelementptr %28[%23] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        %30 = llvm.getelementptr %29[-8] : (!llvm.ptr) -> !llvm.ptr, i8
+        llvm.store %3, %30 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %31 = llvm.getelementptr inbounds|nuw %9[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %32 = llvm.load %31 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        %33 = llvm.getelementptr %32[%23] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        %34 = llvm.getelementptr %33[-4] : (!llvm.ptr) -> !llvm.ptr, i8
+        %35 = llvm.load %34 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> i32
+        %36 = llvm.getelementptr inbounds|nuw %10[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %37 = llvm.load %36 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        llvm.store %35, %37 : i32, !llvm.ptr
+        %38 = llvm.getelementptr inbounds|nuw %10[16] : (!llvm.ptr) -> !llvm.ptr, i8
+        %39 = llvm.load %38 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
+        %40 = llvm.getelementptr inbounds|nuw %39[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %41 = llvm.load %40 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        %42 = llvm.sext %arg4 : i32 to i64
+        %43 = llvm.getelementptr %41[%42] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        llvm.store %35, %43 : i32, !llvm.ptr
+      } else {
+        %25 = llvm.load %24 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %26 = llvm.load %10 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        llvm.store %25, %26 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %27 = llvm.load %10 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %28 = llvm.load %27 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
+        %29 = llvm.getelementptr inbounds|nuw %28[16] : (!llvm.ptr) -> !llvm.ptr, i8
+        llvm.store %10, %29 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr, !llvm.ptr
+        %30 = llvm.load %9 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
+        %31 = llvm.getelementptr inbounds %30[%23] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
+        llvm.store %3, %31 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
+        %32 = llvm.getelementptr inbounds|nuw %10[8] : (!llvm.ptr) -> !llvm.ptr, i8
+        %33 = llvm.load %32 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
+        llvm.store %arg5, %33 : i32, !llvm.ptr
+        %34 = llvm.getelementptr inbounds|nuw %9[8] : (!llvm.ptr) -> !llvm.ptr, i8
         %35 = llvm.load %34 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %36 = llvm.getelementptr %35[%26] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        %37 = llvm.getelementptr %36[-4] : (!llvm.ptr) -> !llvm.ptr, i8
-        %38 = llvm.load %37 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> i32
-        %39 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %40 = llvm.load %39 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        llvm.store %38, %40 : i32, !llvm.ptr
-        %41 = llvm.getelementptr inbounds|nuw %arg1[16] : (!llvm.ptr) -> !llvm.ptr, i8
+        %36 = memref.load %arg2[%c7] : memref<?xi32>
+        %37 = llvm.sext %36 : i32 to i64
+        %38 = llvm.getelementptr %35[%37] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        %39 = llvm.getelementptr %38[-4] : (!llvm.ptr) -> !llvm.ptr, i8
+        %40 = llvm.load %39 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> i32
+        %41 = llvm.getelementptr inbounds|nuw %10[16] : (!llvm.ptr) -> !llvm.ptr, i8
         %42 = llvm.load %41 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
         %43 = llvm.getelementptr inbounds|nuw %42[8] : (!llvm.ptr) -> !llvm.ptr, i8
         %44 = llvm.load %43 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
         %45 = llvm.sext %arg4 : i32 to i64
         %46 = llvm.getelementptr %44[%45] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        llvm.store %38, %46 : i32, !llvm.ptr
-      } else {
-        %28 = llvm.load %27 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %29 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        llvm.store %28, %29 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-        %30 = llvm.load %arg1 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %31 = llvm.load %30 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-        %32 = llvm.getelementptr inbounds|nuw %31[16] : (!llvm.ptr) -> !llvm.ptr, i8
-        llvm.store %arg1, %32 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr, !llvm.ptr
-        %33 = llvm.load %arg2 {alignment = 8 : i64, tbaa = [#tbaa_tag17]} : !llvm.ptr -> !llvm.ptr
-        %34 = llvm.getelementptr inbounds %33[%26] : (!llvm.ptr, i64) -> !llvm.ptr, !llvm.ptr
-        llvm.store %4, %34 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr, !llvm.ptr
-        %35 = llvm.getelementptr inbounds|nuw %arg1[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %36 = llvm.load %35 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        llvm.store %arg5, %36 : i32, !llvm.ptr
-        %37 = llvm.getelementptr inbounds|nuw %arg2[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %38 = llvm.load %37 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %39 = llvm.getelementptr %arg2[7] : (!llvm.ptr) -> !llvm.ptr, i32
-        %40 = llvm.load %39 : !llvm.ptr -> i32
-        %41 = llvm.sext %40 : i32 to i64
-        %42 = llvm.getelementptr %38[%41] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        %43 = llvm.getelementptr %42[-4] : (!llvm.ptr) -> !llvm.ptr, i8
-        %44 = llvm.load %43 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> i32
-        %45 = llvm.getelementptr inbounds|nuw %arg1[16] : (!llvm.ptr) -> !llvm.ptr, i8
-        %46 = llvm.load %45 {alignment = 8 : i64, tbaa = [#tbaa_tag19]} : !llvm.ptr -> !llvm.ptr
-        %47 = llvm.getelementptr inbounds|nuw %46[8] : (!llvm.ptr) -> !llvm.ptr, i8
-        %48 = llvm.load %47 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
-        %49 = llvm.sext %arg4 : i32 to i64
-        %50 = llvm.getelementptr %48[%49] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        llvm.store %44, %50 : i32, !llvm.ptr
+        llvm.store %40, %46 : i32, !llvm.ptr
       }
     }
-    %12 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-    %13 = llvm.load %12 : !llvm.ptr -> i32
-    %14 = llvm.add %13, %7 overflow<nsw> : i32
-    %15 = llvm.getelementptr %arg1[7] : (!llvm.ptr) -> !llvm.ptr, i32
-    llvm.store %14, %15 : i32, !llvm.ptr
-    %16 = llvm.getelementptr %arg2[7] : (!llvm.ptr) -> !llvm.ptr, i32
-    %17 = llvm.load %16 : !llvm.ptr -> i32
-    %18 = llvm.add %17, %0 overflow<nsw> : i32
-    %19 = llvm.getelementptr %arg2[7] : (!llvm.ptr) -> !llvm.ptr, i32
-    llvm.store %18, %19 : i32, !llvm.ptr
+    %15 = memref.load %arg1[%c7] : memref<?xi32>
+    %16 = llvm.add %15, %0 overflow<nsw> : i32
+    memref.store %16, %arg1[%c7] : memref<?xi32>
+    %17 = memref.load %arg2[%c7] : memref<?xi32>
+    %18 = llvm.add %17, %7 overflow<nsw> : i32
+    memref.store %18, %arg2[%c7] : memref<?xi32>
     return %arg0 : !llvm.ptr
   }
+  func.func private @redistribute_nodes(%arg0: !llvm.ptr {llvm.noundef, llvm.readnone, llvm.returned}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: !llvm.ptr {llvm.nocapture, llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: i32 {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %10 = llvm.insertvalue %arg2, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %11 = llvm.insertvalue %arg2, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %12 = llvm.insertvalue %2, %11[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %13 = llvm.insertvalue %1, %12[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %14 = llvm.insertvalue %0, %13[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %15 = builtin.unrealized_conversion_cast %14 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %16 = call @redistribute_nodes.lifted(%arg0, %9, %15, %arg3, %arg4, %arg5) : (!llvm.ptr, memref<?xi32>, memref<?xi32>, i32, i32, i32) -> !llvm.ptr
+    return %16 : !llvm.ptr
+  }
   func.func private @deleteVal(%arg0: !llvm.ptr {llvm.noundef}, %arg1: i32 {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
-    %0 = llvm.mlir.constant(false) : i1
-    %1 = llvm.mlir.zero : !llvm.ptr
-    %2 = call @find(%arg0, %arg1, %0) : (!llvm.ptr, i32, i1) -> !llvm.ptr
-    %3 = call @find_leaf(%arg0, %arg1, %0) : (!llvm.ptr, i32, i1) -> !llvm.ptr
-    %4 = llvm.icmp "ne" %2, %1 : !llvm.ptr
-    %5 = llvm.icmp "ne" %3, %1 : !llvm.ptr
-    %6 = llvm.select %4, %5, %0 : i1, i1
-    %7 = scf.if %6 -> (!llvm.ptr) {
-      llvm.call tail @free(%2) {memory_effects = #llvm.memory_effects<other = none, argMem = readwrite, inaccessibleMem = readwrite>, no_unwind} : (!llvm.ptr {llvm.noundef}) -> ()
-      %8 = func.call @delete_entry(%arg0, %3, %arg1, %2) : (!llvm.ptr, !llvm.ptr, i32, !llvm.ptr) -> !llvm.ptr
-      scf.yield %8 : !llvm.ptr
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.mlir.constant(false) : i1
+    %5 = llvm.mlir.zero : !llvm.ptr
+    %6 = call @find(%arg0, %arg1, %4) : (!llvm.ptr, i32, i1) -> !llvm.ptr
+    %7 = call @find_leaf(%arg0, %arg1, %4) : (!llvm.ptr, i32, i1) -> !llvm.ptr
+    %8 = llvm.icmp "ne" %6, %5 : !llvm.ptr
+    %9 = llvm.icmp "ne" %7, %5 : !llvm.ptr
+    %10 = llvm.select %8, %9, %4 : i1, i1
+    %11 = scf.if %10 -> (!llvm.ptr) {
+      llvm.call tail @free(%6) {memory_effects = #llvm.memory_effects<other = none, argMem = readwrite, inaccessibleMem = readwrite>, no_unwind} : (!llvm.ptr {llvm.noundef}) -> ()
+      %12 = llvm.insertvalue %7, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %13 = llvm.insertvalue %7, %12[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %14 = llvm.insertvalue %2, %13[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %15 = llvm.insertvalue %1, %14[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %16 = llvm.insertvalue %0, %15[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %17 = builtin.unrealized_conversion_cast %16 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+      %18 = func.call @delete_entry.lifted(%arg0, %17, %arg1, %6) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
+      scf.yield %18 : !llvm.ptr
     } else {
       scf.yield %arg0 : !llvm.ptr
     }
-    return %7 : !llvm.ptr
+    return %11 : !llvm.ptr
   }
   func.func private @destroy_tree_nodes(%arg0: !llvm.ptr {llvm.nocapture, llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %0 = llvm.mlir.constant(0 : i32) : i32

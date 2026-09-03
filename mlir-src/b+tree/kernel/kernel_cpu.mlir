@@ -35,7 +35,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
   llvm.mlir.global private unnamed_addr constant @str("Time spent in different stages of CPU/MCPU KERNEL:\00") {addr_space = 0 : i32, alignment = 1 : i64, dso_local}
   llvm.mlir.global private unnamed_addr constant @str.5("Total time:\00") {addr_space = 0 : i32, alignment = 1 : i64, dso_local}
   llvm.module_flags [#llvm.mlir.module_flag<error, "wchar_size", 4 : i32>, #llvm.mlir.module_flag<max, "openmp", 51 : i32>, #llvm.mlir.module_flag<min, "PIC Level", 2 : i32>, #llvm.mlir.module_flag<max, "PIE Level", 2 : i32>, #llvm.mlir.module_flag<max, "uwtable", 2 : i32>]
-  func.func private @kernel_cpu.lifted(%arg0: i32 {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}, %arg3: i64 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: i64 {llvm.noundef}, %arg6: i32 {llvm.noundef}, %arg7: memref<?xi64> {llvm.noundef}, %arg8: memref<?xi64> {llvm.noundef}, %arg9: memref<?xi32> {llvm.noundef}, %arg10: !llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @kernel_cpu.lifted(%arg0: i32 {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}, %arg3: i64 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: i64 {llvm.noundef}, %arg6: i32 {llvm.noundef}, %arg7: memref<?xi64> {llvm.noundef}, %arg8: memref<?xi64> {llvm.noundef}, %arg9: memref<?xi32> {llvm.noundef}, %arg10: memref<?xi32> {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %true = arith.constant true
     %0 = llvm.mlir.constant(1 : index) : i32
     %c1021 = arith.constant 1021 : index
@@ -189,10 +189,10 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
                   %80 = llvm.getelementptr %arg2[%79] : (!llvm.ptr, i64) -> !llvm.ptr, i32
                   %81 = llvm.load %80 : !llvm.ptr -> i32
                   %82 = llvm.sext %81 : i32 to i64
-                  %83 = llvm.getelementptr %arg1[%82] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-                  %84 = llvm.load %83 : !llvm.ptr -> i32
-                  %85 = llvm.getelementptr %arg10[%51] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-                  llvm.store %84, %85 : i32, !llvm.ptr
+                  %83 = arith.index_cast %82 : i64 to index
+                  %84 = memref.load %arg1[%83] : memref<?xi32>
+                  %85 = arith.index_cast %51 : i64 to index
+                  memref.store %84, %arg10[%85] : memref<?xi32>
                 }
                 %70 = llvm.add %arg12, %14 overflow<nsw, nuw> : i64
                 %71 = memref.load %alloca_2[%c0] : memref<1xi32>
@@ -241,25 +241,37 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %1 = llvm.mlir.poison : i64
     %2 = llvm.mlir.constant(0 : i64) : i64
     %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg7, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg7, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi64>
-    %10 = llvm.insertvalue %arg8, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %11 = llvm.insertvalue %arg8, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %10 = llvm.insertvalue %arg7, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %11 = llvm.insertvalue %arg7, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %12 = llvm.insertvalue %2, %11[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %13 = llvm.insertvalue %1, %12[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %14 = llvm.insertvalue %0, %13[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %15 = builtin.unrealized_conversion_cast %14 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi64>
-    %16 = llvm.insertvalue %arg9, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %17 = llvm.insertvalue %arg9, %16[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %16 = llvm.insertvalue %arg8, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %17 = llvm.insertvalue %arg8, %16[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %18 = llvm.insertvalue %2, %17[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %19 = llvm.insertvalue %1, %18[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %20 = llvm.insertvalue %0, %19[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %21 = builtin.unrealized_conversion_cast %20 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-    call @kernel_cpu.lifted(%arg0, %arg1, %arg2, %arg3, %arg4, %arg5, %arg6, %9, %15, %21, %arg10) : (i32, !llvm.ptr, !llvm.ptr, i64, i32, i64, i32, memref<?xi64>, memref<?xi64>, memref<?xi32>, !llvm.ptr) -> ()
+    %21 = builtin.unrealized_conversion_cast %20 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi64>
+    %22 = llvm.insertvalue %arg9, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %23 = llvm.insertvalue %arg9, %22[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %24 = llvm.insertvalue %2, %23[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %25 = llvm.insertvalue %1, %24[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %26 = llvm.insertvalue %0, %25[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %27 = builtin.unrealized_conversion_cast %26 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    %28 = llvm.insertvalue %arg10, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %29 = llvm.insertvalue %arg10, %28[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %30 = llvm.insertvalue %2, %29[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %31 = llvm.insertvalue %1, %30[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %32 = llvm.insertvalue %0, %31[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %33 = builtin.unrealized_conversion_cast %32 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    call @kernel_cpu.lifted(%arg0, %9, %arg2, %arg3, %arg4, %arg5, %arg6, %15, %21, %27, %33) : (i32, memref<?xi32>, !llvm.ptr, i64, i32, i64, i32, memref<?xi64>, memref<?xi64>, memref<?xi32>, memref<?xi32>) -> ()
     return
   }
   llvm.func local_unnamed_addr @get_time(...) -> i64 attributes {passthrough = [["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}

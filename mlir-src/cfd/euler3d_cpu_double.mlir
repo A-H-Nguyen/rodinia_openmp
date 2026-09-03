@@ -292,82 +292,104 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
   llvm.func local_unnamed_addr @__kmpc_for_static_fini(!llvm.ptr, i32) attributes {no_unwind}
   llvm.func local_unnamed_addr @__kmpc_fork_call(!llvm.ptr, i32, !llvm.ptr, ...) attributes {no_unwind}
   func.func private @_Z19compute_step_factoriPdS_S_.lifted(%arg0: i32 {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: memref<?xf64> {llvm.noundef}, %arg3: memref<?xf64> {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
-    %0 = llvm.mlir.constant(1 : index) : i32
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.mlir.constant(1 : index) : i32
     %c0 = arith.constant 0 : index
-    %1 = llvm.mlir.addressof @mlir.llvm.nameless_global_2 : !llvm.ptr
-    %2 = llvm.mlir.constant(1 : i32) : i32
-    %3 = llvm.mlir.constant(0 : i32) : i32
-    %4 = llvm.mlir.constant(-1 : i32) : i32
-    %5 = llvm.mlir.constant(40 : i64) : i64
-    %6 = llvm.mlir.constant(5.000000e-01 : f64) : f64
+    %5 = llvm.mlir.addressof @mlir.llvm.nameless_global_2 : !llvm.ptr
+    %6 = llvm.mlir.constant(1 : i32) : i32
+    %7 = llvm.mlir.constant(0 : i32) : i32
+    %8 = llvm.mlir.constant(-1 : i32) : i32
+    %9 = llvm.mlir.constant(40 : i64) : i64
+    %10 = llvm.mlir.constant(5.000000e-01 : f64) : f64
     %alloca = memref.alloca() {alignment = 4 : i64} : memref<1xi32>
     memref.store %arg0, %alloca[%c0] : memref<1xi32>
     omp.parallel {
       %alloca_0 = memref.alloca() {alignment = 4 : i64} : memref<1xi32>
       %alloca_1 = memref.alloca() {alignment = 8 : i64} : memref<1xf64>
       %cast = memref.cast %alloca_1 : memref<1xf64> to memref<?xf64>
-      %7 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %11 = llvm.alloca %6 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
       %alloca_2 = memref.alloca() {alignment = 8 : i64} : memref<1xf64>
       %cast_3 = memref.cast %alloca_2 : memref<1xf64> to memref<?xf64>
-      %8 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %12 = llvm.alloca %6 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
       %alloca_4 = memref.alloca() {alignment = 8 : i64} : memref<1xf64>
       %cast_5 = memref.cast %alloca_4 : memref<1xf64> to memref<?xf64>
       %alloca_6 = memref.alloca() {alignment = 8 : i64} : memref<1xf64>
       %cast_7 = memref.cast %alloca_6 : memref<1xf64> to memref<?xf64>
-      %9 = llvm.call @__kmpc_global_thread_num(%1) : (!llvm.ptr) -> i32
-      %10 = llvm.call @__kmpc_bound_thread_num(%1) : (!llvm.ptr) -> i32
+      %13 = llvm.call @__kmpc_global_thread_num(%5) : (!llvm.ptr) -> i32
+      %14 = llvm.call @__kmpc_bound_thread_num(%5) : (!llvm.ptr) -> i32
       llvm.intr.experimental.noalias.scope.decl #alias_scope2
       llvm.intr.experimental.noalias.scope.decl #alias_scope3
-      %11 = memref.load %alloca[%c0] : memref<1xi32>
-      %12 = llvm.icmp "sgt" %11, %3 : i32
-      scf.if %12 {
-        %13 = llvm.add %11, %4 overflow<nsw> : i32
-        %14 = llvm.add %13, %0 : i32
-        memref.store %13, %alloca_0[%c0] : memref<1xi32>
-        %15 = memref.load %alloca_0[%c0] : memref<1xi32>
-        %16 = llvm.intr.smin(%15, %13) : (i32, i32) -> i32
-        memref.store %16, %alloca_0[%c0] : memref<1xi32>
+      %15 = memref.load %alloca[%c0] : memref<1xi32>
+      %16 = llvm.icmp "sgt" %15, %7 : i32
+      scf.if %16 {
+        %17 = llvm.add %15, %8 overflow<nsw> : i32
+        %18 = llvm.add %17, %4 : i32
+        memref.store %17, %alloca_0[%c0] : memref<1xi32>
+        %19 = memref.load %alloca_0[%c0] : memref<1xi32>
+        %20 = llvm.intr.smin(%19, %17) : (i32, i32) -> i32
+        memref.store %20, %alloca_0[%c0] : memref<1xi32>
         omp.wsloop {
-          omp.loop_nest (%arg4) : i32 = (%3) to (%14) step (%2) {
-            %17 = llvm.sext %arg4 : i32 to i64
-            %18 = llvm.mul %17, %5 overflow<nsw> : i64
-            %19 = llvm.getelementptr inbounds %arg1[%18] : (!llvm.ptr, i64) -> !llvm.ptr, i8
-            %20 = llvm.load %19 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
-            memref.store %20, %alloca_1[%c0] : memref<1xf64>
-            llvm.intr.lifetime.start 24, %7 : !llvm.ptr
-            %21 = llvm.getelementptr %19[8] : (!llvm.ptr) -> !llvm.ptr, i8
-            %22 = llvm.load %21 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
-            llvm.store %22, %7 : f64, !llvm.ptr
-            %23 = llvm.getelementptr %19[16] : (!llvm.ptr) -> !llvm.ptr, i8
+          omp.loop_nest (%arg4) : i32 = (%7) to (%18) step (%6) {
+            %21 = llvm.sext %arg4 : i32 to i64
+            %22 = llvm.mul %21, %9 overflow<nsw> : i64
+            %23 = llvm.getelementptr inbounds %arg1[%22] : (!llvm.ptr, i64) -> !llvm.ptr, i8
             %24 = llvm.load %23 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
-            %25 = llvm.getelementptr %7[1] : (!llvm.ptr) -> !llvm.ptr, f64
-            llvm.store %24, %25 : f64, !llvm.ptr
-            %26 = llvm.getelementptr %19[24] : (!llvm.ptr) -> !llvm.ptr, i8
-            %27 = llvm.load %26 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
-            %28 = llvm.getelementptr %7[2] : (!llvm.ptr) -> !llvm.ptr, f64
-            llvm.store %27, %28 : f64, !llvm.ptr
-            %29 = llvm.getelementptr %19[32] : (!llvm.ptr) -> !llvm.ptr, i8
-            %30 = llvm.load %29 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
-            memref.store %30, %alloca_2[%c0] : memref<1xf64>
-            llvm.intr.lifetime.start 24, %8 : !llvm.ptr
-            func.call @_Z16compute_velocityRdR7double3S1_.lifted(%cast, %7, %8) : (memref<?xf64>, !llvm.ptr, !llvm.ptr) -> ()
-            %31 = func.call @_Z17compute_speed_sqdR7double3(%8) : (!llvm.ptr) -> f64
-            memref.store %31, %alloca_4[%c0] : memref<1xf64>
-            %32 = func.call @_Z16compute_pressureRdS_S_.lifted(%cast, %cast_3, %cast_5) : (memref<?xf64>, memref<?xf64>, memref<?xf64>) -> f64
-            memref.store %32, %alloca_6[%c0] : memref<1xf64>
-            %33 = func.call @_Z22compute_speed_of_soundRdS_.lifted(%cast, %cast_7) : (memref<?xf64>, memref<?xf64>) -> f64
-            %34 = arith.index_cast %17 : i64 to index
-            %35 = memref.load %arg2[%34] : memref<?xf64>
-            %36 = llvm.call @sqrt(%35) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, noalias_scopes = [#alias_scope2, #alias_scope3], tbaa = [#tbaa_tag1]} : (f64 {llvm.noundef}) -> f64
-            %37 = memref.load %alloca_4[%c0] : memref<1xf64>
-            %38 = llvm.call @sqrt(%37) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, noalias_scopes = [#alias_scope2, #alias_scope3], tbaa = [#tbaa_tag1]} : (f64 {llvm.noundef}) -> f64
-            %39 = llvm.fadd %33, %38 : f64
-            %40 = llvm.fmul %36, %39 : f64
-            %41 = llvm.fdiv %6, %40 : f64
-            %42 = arith.index_cast %17 : i64 to index
-            memref.store %41, %arg3[%42] : memref<?xf64>
-            llvm.intr.lifetime.end 24, %8 : !llvm.ptr
-            llvm.intr.lifetime.end 24, %7 : !llvm.ptr
+            memref.store %24, %alloca_1[%c0] : memref<1xf64>
+            llvm.intr.lifetime.start 24, %11 : !llvm.ptr
+            %25 = llvm.getelementptr %23[8] : (!llvm.ptr) -> !llvm.ptr, i8
+            %26 = llvm.load %25 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
+            llvm.store %26, %11 : f64, !llvm.ptr
+            %27 = llvm.getelementptr %23[16] : (!llvm.ptr) -> !llvm.ptr, i8
+            %28 = llvm.load %27 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
+            %29 = llvm.getelementptr %11[1] : (!llvm.ptr) -> !llvm.ptr, f64
+            llvm.store %28, %29 : f64, !llvm.ptr
+            %30 = llvm.getelementptr %23[24] : (!llvm.ptr) -> !llvm.ptr, i8
+            %31 = llvm.load %30 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
+            %32 = llvm.getelementptr %11[2] : (!llvm.ptr) -> !llvm.ptr, f64
+            llvm.store %31, %32 : f64, !llvm.ptr
+            %33 = llvm.getelementptr %23[32] : (!llvm.ptr) -> !llvm.ptr, i8
+            %34 = llvm.load %33 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
+            memref.store %34, %alloca_2[%c0] : memref<1xf64>
+            llvm.intr.lifetime.start 24, %12 : !llvm.ptr
+            %35 = llvm.insertvalue %11, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %36 = llvm.insertvalue %11, %35[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %37 = llvm.insertvalue %2, %36[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %38 = llvm.insertvalue %1, %37[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %39 = llvm.insertvalue %0, %38[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %40 = builtin.unrealized_conversion_cast %39 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+            %41 = llvm.insertvalue %12, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %42 = llvm.insertvalue %12, %41[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %43 = llvm.insertvalue %2, %42[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %44 = llvm.insertvalue %1, %43[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %45 = llvm.insertvalue %0, %44[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %46 = builtin.unrealized_conversion_cast %45 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+            func.call @_Z16compute_velocityRdR7double3S1_.lifted(%cast, %40, %46) : (memref<?xf64>, memref<?xf64>, memref<?xf64>) -> ()
+            %47 = llvm.insertvalue %12, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %48 = llvm.insertvalue %12, %47[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %49 = llvm.insertvalue %2, %48[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %50 = llvm.insertvalue %1, %49[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %51 = llvm.insertvalue %0, %50[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %52 = builtin.unrealized_conversion_cast %51 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+            %53 = func.call @_Z17compute_speed_sqdR7double3.lifted(%52) : (memref<?xf64>) -> f64
+            memref.store %53, %alloca_4[%c0] : memref<1xf64>
+            %54 = func.call @_Z16compute_pressureRdS_S_.lifted(%cast, %cast_3, %cast_5) : (memref<?xf64>, memref<?xf64>, memref<?xf64>) -> f64
+            memref.store %54, %alloca_6[%c0] : memref<1xf64>
+            %55 = func.call @_Z22compute_speed_of_soundRdS_.lifted(%cast, %cast_7) : (memref<?xf64>, memref<?xf64>) -> f64
+            %56 = arith.index_cast %21 : i64 to index
+            %57 = memref.load %arg2[%56] : memref<?xf64>
+            %58 = llvm.call @sqrt(%57) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, noalias_scopes = [#alias_scope2, #alias_scope3], tbaa = [#tbaa_tag1]} : (f64 {llvm.noundef}) -> f64
+            %59 = memref.load %alloca_4[%c0] : memref<1xf64>
+            %60 = llvm.call @sqrt(%59) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, noalias_scopes = [#alias_scope2, #alias_scope3], tbaa = [#tbaa_tag1]} : (f64 {llvm.noundef}) -> f64
+            %61 = llvm.fadd %55, %60 : f64
+            %62 = llvm.fmul %58, %61 : f64
+            %63 = llvm.fdiv %10, %62 : f64
+            %64 = arith.index_cast %21 : i64 to index
+            memref.store %63, %arg3[%64] : memref<?xf64>
+            llvm.intr.lifetime.end 24, %12 : !llvm.ptr
+            llvm.intr.lifetime.end 24, %11 : !llvm.ptr
             omp.yield
           }
         }
@@ -396,24 +418,22 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     call @_Z19compute_step_factoriPdS_S_.lifted(%arg0, %arg1, %9, %15) : (i32, !llvm.ptr, memref<?xf64>, memref<?xf64>) -> ()
     return
   }
-  func.func private @_Z16compute_velocityRdR7double3S1_.lifted(%arg0: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg1: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg2: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @_Z16compute_velocityRdR7double3S1_.lifted(%arg0: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg1: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg2: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+    %c2 = arith.constant 2 : index
+    %c1 = arith.constant 1 : index
     %c0 = arith.constant 0 : index
-    %0 = llvm.load %arg1 : !llvm.ptr -> f64
+    %0 = memref.load %arg1[%c0] : memref<?xf64>
     %1 = memref.load %arg0[%c0] : memref<?xf64>
     %2 = llvm.fdiv %0, %1 : f64
-    llvm.store %2, %arg2 : f64, !llvm.ptr
-    %3 = llvm.getelementptr %arg1[1] : (!llvm.ptr) -> !llvm.ptr, f64
-    %4 = llvm.load %3 : !llvm.ptr -> f64
-    %5 = memref.load %arg0[%c0] : memref<?xf64>
-    %6 = llvm.fdiv %4, %5 : f64
-    %7 = llvm.getelementptr %arg2[1] : (!llvm.ptr) -> !llvm.ptr, f64
-    llvm.store %6, %7 : f64, !llvm.ptr
-    %8 = llvm.getelementptr %arg1[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    %9 = llvm.load %8 : !llvm.ptr -> f64
-    %10 = memref.load %arg0[%c0] : memref<?xf64>
-    %11 = llvm.fdiv %9, %10 : f64
-    %12 = llvm.getelementptr %arg2[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    llvm.store %11, %12 : f64, !llvm.ptr
+    memref.store %2, %arg2[%c0] : memref<?xf64>
+    %3 = memref.load %arg1[%c1] : memref<?xf64>
+    %4 = memref.load %arg0[%c0] : memref<?xf64>
+    %5 = llvm.fdiv %3, %4 : f64
+    memref.store %5, %arg2[%c1] : memref<?xf64>
+    %6 = memref.load %arg1[%c2] : memref<?xf64>
+    %7 = memref.load %arg0[%c0] : memref<?xf64>
+    %8 = llvm.fdiv %6, %7 : f64
+    memref.store %8, %arg2[%c2] : memref<?xf64>
     return
   }
   func.func private @_Z16compute_velocityRdR7double3S1_(%arg0: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg1: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg2: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<linkonce_odr>} {
@@ -427,19 +447,46 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-    call @_Z16compute_velocityRdR7double3S1_.lifted(%9, %arg1, %arg2) : (memref<?xf64>, !llvm.ptr, !llvm.ptr) -> ()
+    %10 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %11 = llvm.insertvalue %arg1, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %12 = llvm.insertvalue %2, %11[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %13 = llvm.insertvalue %1, %12[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %14 = llvm.insertvalue %0, %13[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %15 = builtin.unrealized_conversion_cast %14 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+    %16 = llvm.insertvalue %arg2, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %17 = llvm.insertvalue %arg2, %16[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %18 = llvm.insertvalue %2, %17[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %19 = llvm.insertvalue %1, %18[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %20 = llvm.insertvalue %0, %19[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %21 = builtin.unrealized_conversion_cast %20 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+    call @_Z16compute_velocityRdR7double3S1_.lifted(%9, %15, %21) : (memref<?xf64>, memref<?xf64>, memref<?xf64>) -> ()
     return
   }
-  func.func private @_Z17compute_speed_sqdR7double3(%arg0: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}) -> (f64 {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<linkonce_odr>, no_inline} {
-    %0 = llvm.load %arg0 : !llvm.ptr -> f64
-    %1 = llvm.getelementptr %arg0[1] : (!llvm.ptr) -> !llvm.ptr, f64
-    %2 = llvm.load %1 : !llvm.ptr -> f64
-    %3 = llvm.fmul %2, %2 : f64
-    %4 = llvm.intr.fmuladd(%0, %0, %3) : (f64, f64, f64) -> f64
-    %5 = llvm.getelementptr %arg0[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    %6 = llvm.load %5 : !llvm.ptr -> f64
-    %7 = llvm.intr.fmuladd(%6, %6, %4) : (f64, f64, f64) -> f64
-    return %7 : f64
+  func.func private @_Z17compute_speed_sqdR7double3.lifted(%arg0: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}) -> (f64 {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+    %c2 = arith.constant 2 : index
+    %c1 = arith.constant 1 : index
+    %c0 = arith.constant 0 : index
+    %0 = memref.load %arg0[%c0] : memref<?xf64>
+    %1 = memref.load %arg0[%c1] : memref<?xf64>
+    %2 = llvm.fmul %1, %1 : f64
+    %3 = llvm.intr.fmuladd(%0, %0, %2) : (f64, f64, f64) -> f64
+    %4 = memref.load %arg0[%c2] : memref<?xf64>
+    %5 = llvm.intr.fmuladd(%4, %4, %3) : (f64, f64, f64) -> f64
+    return %5 : f64
+  }
+  func.func private @_Z17compute_speed_sqdR7double3(%arg0: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}) -> f64 attributes {llvm.linkage = #llvm.linkage<linkonce_odr>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+    %10 = call @_Z17compute_speed_sqdR7double3.lifted(%9) : (memref<?xf64>) -> f64
+    return %10 : f64
   }
   func.func private @_Z16compute_pressureRdS_S_.lifted(%arg0: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg1: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg2: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}) -> (f64 {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %c0 = arith.constant 0 : index
@@ -512,410 +559,520 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
   llvm.func local_unnamed_addr @sqrt(f64 {llvm.noundef}) -> f64 attributes {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, passthrough = ["mustprogress", "nocallback", "nofree", ["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic", will_return}
   func.func private @_Z12compute_fluxiPiPdS0_S0_.lifted(%arg0: i32 {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}, %arg3: memref<?xf64> {llvm.noundef}, %arg4: memref<?xf64> {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %true = arith.constant true
-    %0 = llvm.mlir.constant(1 : index) : i32
+    %0 = llvm.mlir.poison : i64
+    %1 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %2 = llvm.mlir.constant(1 : index) : i32
     %c0 = arith.constant 0 : index
-    %1 = llvm.mlir.addressof @mlir.llvm.nameless_global_2 : !llvm.ptr
-    %2 = llvm.mlir.constant(1 : i32) : i32
-    %3 = llvm.mlir.constant(0 : i32) : i32
-    %4 = llvm.mlir.constant(-1 : i32) : i32
-    %5 = llvm.mlir.constant(5 : i64) : i64
-    %6 = llvm.mlir.constant(1 : i64) : i64
-    %7 = llvm.mlir.constant(2 : i64) : i64
-    %8 = llvm.mlir.constant(3 : i64) : i64
-    %9 = llvm.mlir.constant(4 : i64) : i64
-    %10 = llvm.mlir.constant(0 : i64) : i64
-    %11 = llvm.mlir.constant(0.000000e+00 : f64) : f64
-    %12 = llvm.mlir.constant(24 : i64) : i64
-    %13 = llvm.mlir.constant(5.000000e-01 : f64) : f64
-    %14 = llvm.mlir.addressof @ff_variable : !llvm.ptr
-    %15 = llvm.mlir.addressof @ff_flux_contribution_density_energy : !llvm.ptr
-    %16 = llvm.mlir.addressof @ff_flux_contribution_momentum_x : !llvm.ptr
-    %17 = llvm.mlir.addressof @ff_flux_contribution_momentum_y : !llvm.ptr
-    %18 = llvm.mlir.addressof @ff_flux_contribution_momentum_z : !llvm.ptr
-    %19 = llvm.mlir.constant(5 : i32) : i32
-    %20 = llvm.mlir.constant(-0.20000000298023224 : f64) : f64
+    %3 = llvm.mlir.addressof @mlir.llvm.nameless_global_2 : !llvm.ptr
+    %4 = llvm.mlir.constant(1 : i32) : i32
+    %5 = llvm.mlir.constant(0 : i32) : i32
+    %6 = llvm.mlir.constant(-1 : i32) : i32
+    %7 = llvm.mlir.constant(5 : i64) : i64
+    %8 = llvm.mlir.constant(1 : i64) : i64
+    %9 = llvm.mlir.constant(2 : i64) : i64
+    %10 = llvm.mlir.constant(3 : i64) : i64
+    %11 = llvm.mlir.constant(4 : i64) : i64
+    %12 = llvm.mlir.constant(0 : i64) : i64
+    %13 = llvm.mlir.constant(0.000000e+00 : f64) : f64
+    %14 = llvm.mlir.constant(24 : i64) : i64
+    %15 = llvm.mlir.constant(5.000000e-01 : f64) : f64
+    %16 = llvm.mlir.addressof @ff_variable : !llvm.ptr
+    %17 = llvm.mlir.addressof @ff_flux_contribution_density_energy : !llvm.ptr
+    %18 = llvm.mlir.addressof @ff_flux_contribution_momentum_x : !llvm.ptr
+    %19 = llvm.mlir.addressof @ff_flux_contribution_momentum_y : !llvm.ptr
+    %20 = llvm.mlir.addressof @ff_flux_contribution_momentum_z : !llvm.ptr
+    %21 = llvm.mlir.constant(5 : i32) : i32
+    %22 = llvm.mlir.constant(-0.20000000298023224 : f64) : f64
     %alloca = memref.alloca() {alignment = 4 : i64} : memref<1xi32>
     memref.store %arg0, %alloca[%c0] : memref<1xi32>
     omp.parallel {
       %alloca_0 = memref.alloca() {alignment = 4 : i64} : memref<1xi32>
       %alloca_1 = memref.alloca() {alignment = 8 : i64} : memref<1xf64>
       %cast = memref.cast %alloca_1 : memref<1xf64> to memref<?xf64>
-      %21 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %23 = llvm.alloca %4 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
       %alloca_2 = memref.alloca() {alignment = 8 : i64} : memref<1xf64>
       %cast_3 = memref.cast %alloca_2 : memref<1xf64> to memref<?xf64>
       %intptr = memref.extract_aligned_pointer_as_index %cast_3 : memref<?xf64> -> index
-      %22 = arith.index_cast %intptr : index to i64
-      %23 = llvm.inttoptr %22 : i64 to !llvm.ptr
-      %24 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %24 = arith.index_cast %intptr : index to i64
+      %25 = llvm.inttoptr %24 : i64 to !llvm.ptr
+      %26 = llvm.alloca %4 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
       %alloca_4 = memref.alloca() {alignment = 8 : i64} : memref<1xf64>
       %cast_5 = memref.cast %alloca_4 : memref<1xf64> to memref<?xf64>
       %alloca_6 = memref.alloca() {alignment = 8 : i64} : memref<1xf64>
       %cast_7 = memref.cast %alloca_6 : memref<1xf64> to memref<?xf64>
-      %25 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
-      %26 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
-      %27 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
-      %28 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
-      %29 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %27 = llvm.alloca %4 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %28 = llvm.alloca %4 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %29 = llvm.alloca %4 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %30 = llvm.alloca %4 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %31 = llvm.alloca %4 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
       %alloca_8 = memref.alloca() {alignment = 8 : i64} : memref<1xf64>
       %cast_9 = memref.cast %alloca_8 : memref<1xf64> to memref<?xf64>
       %alloca_10 = memref.alloca() {alignment = 8 : i64} : memref<1xf64>
       %cast_11 = memref.cast %alloca_10 : memref<1xf64> to memref<?xf64>
       %intptr_12 = memref.extract_aligned_pointer_as_index %cast_11 : memref<?xf64> -> index
-      %30 = arith.index_cast %intptr_12 : index to i64
-      %31 = llvm.inttoptr %30 : i64 to !llvm.ptr
-      %32 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
-      %33 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
-      %34 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
-      %35 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
-      %36 = llvm.alloca %2 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %32 = arith.index_cast %intptr_12 : index to i64
+      %33 = llvm.inttoptr %32 : i64 to !llvm.ptr
+      %34 = llvm.alloca %4 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %35 = llvm.alloca %4 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %36 = llvm.alloca %4 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %37 = llvm.alloca %4 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
+      %38 = llvm.alloca %4 x !llvm.struct<"struct.double3", (f64, f64, f64)> {alignment = 8 : i64} : (i32) -> !llvm.ptr
       %alloca_13 = memref.alloca() {alignment = 8 : i64} : memref<1xf64>
       %cast_14 = memref.cast %alloca_13 : memref<1xf64> to memref<?xf64>
       %alloca_15 = memref.alloca() {alignment = 8 : i64} : memref<1xf64>
       %cast_16 = memref.cast %alloca_15 : memref<1xf64> to memref<?xf64>
-      %37 = llvm.call @__kmpc_global_thread_num(%1) : (!llvm.ptr) -> i32
-      %38 = llvm.call @__kmpc_bound_thread_num(%1) : (!llvm.ptr) -> i32
+      %39 = llvm.call @__kmpc_global_thread_num(%3) : (!llvm.ptr) -> i32
+      %40 = llvm.call @__kmpc_bound_thread_num(%3) : (!llvm.ptr) -> i32
       llvm.intr.experimental.noalias.scope.decl #alias_scope4
       llvm.intr.experimental.noalias.scope.decl #alias_scope5
-      %39 = memref.load %alloca[%c0] : memref<1xi32>
-      %40 = llvm.icmp "sgt" %39, %3 : i32
-      scf.if %40 {
-        %41 = llvm.add %39, %4 overflow<nsw> : i32
-        %42 = llvm.add %41, %0 : i32
-        memref.store %41, %alloca_0[%c0] : memref<1xi32>
-        %43 = memref.load %alloca_0[%c0] : memref<1xi32>
-        %44 = llvm.intr.smin(%43, %41) : (i32, i32) -> i32
-        memref.store %44, %alloca_0[%c0] : memref<1xi32>
+      %41 = memref.load %alloca[%c0] : memref<1xi32>
+      %42 = llvm.icmp "sgt" %41, %5 : i32
+      scf.if %42 {
+        %43 = llvm.add %41, %6 overflow<nsw> : i32
+        %44 = llvm.add %43, %2 : i32
+        memref.store %43, %alloca_0[%c0] : memref<1xi32>
+        %45 = memref.load %alloca_0[%c0] : memref<1xi32>
+        %46 = llvm.intr.smin(%45, %43) : (i32, i32) -> i32
+        memref.store %46, %alloca_0[%c0] : memref<1xi32>
         omp.wsloop {
-          omp.loop_nest (%arg5) : i32 = (%3) to (%42) step (%2) {
-            %45 = llvm.sext %arg5 : i32 to i64
-            %46 = llvm.mul %45, %5 overflow<nsw> : i64
-            %47 = arith.index_cast %46 : i64 to index
-            %48 = memref.load %arg3[%47] : memref<?xf64>
-            memref.store %48, %alloca_1[%c0] : memref<1xf64>
-            llvm.intr.lifetime.start 24, %21 : !llvm.ptr
-            %49 = llvm.add %46, %6 overflow<nsw> : i64
-            %50 = arith.index_cast %49 : i64 to index
-            %51 = memref.load %arg3[%50] : memref<?xf64>
-            llvm.store %51, %21 : f64, !llvm.ptr
-            %52 = llvm.add %46, %7 overflow<nsw> : i64
-            %53 = arith.index_cast %52 : i64 to index
-            %54 = memref.load %arg3[%53] : memref<?xf64>
-            %55 = llvm.getelementptr %21[1] : (!llvm.ptr) -> !llvm.ptr, f64
-            llvm.store %54, %55 : f64, !llvm.ptr
-            %56 = llvm.add %46, %8 overflow<nsw> : i64
-            %57 = arith.index_cast %56 : i64 to index
-            %58 = memref.load %arg3[%57] : memref<?xf64>
-            %59 = llvm.getelementptr %21[2] : (!llvm.ptr) -> !llvm.ptr, f64
-            llvm.store %58, %59 : f64, !llvm.ptr
-            %60 = llvm.add %46, %9 overflow<nsw> : i64
-            %61 = arith.index_cast %60 : i64 to index
-            %62 = memref.load %arg3[%61] : memref<?xf64>
-            memref.store %62, %alloca_2[%c0] : memref<1xf64>
-            llvm.intr.lifetime.start 24, %24 : !llvm.ptr
-            func.call @_Z16compute_velocityRdR7double3S1_.lifted(%cast, %21, %24) : (memref<?xf64>, !llvm.ptr, !llvm.ptr) -> ()
-            %63 = func.call @_Z17compute_speed_sqdR7double3(%24) : (!llvm.ptr) -> f64
-            memref.store %63, %alloca_4[%c0] : memref<1xf64>
-            %64 = llvm.call @sqrt(%63) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, noalias_scopes = [#alias_scope4, #alias_scope5], tbaa = [#tbaa_tag1]} : (f64 {llvm.noundef}) -> f64
-            %65 = func.call @_Z16compute_pressureRdS_S_.lifted(%cast, %cast_3, %cast_5) : (memref<?xf64>, memref<?xf64>, memref<?xf64>) -> f64
-            memref.store %65, %alloca_6[%c0] : memref<1xf64>
-            %66 = func.call @_Z22compute_speed_of_soundRdS_.lifted(%cast, %cast_7) : (memref<?xf64>, memref<?xf64>) -> f64
-            llvm.intr.lifetime.start 24, %25 : !llvm.ptr
+          omp.loop_nest (%arg5) : i32 = (%5) to (%44) step (%4) {
+            %47 = llvm.sext %arg5 : i32 to i64
+            %48 = llvm.mul %47, %7 overflow<nsw> : i64
+            %49 = arith.index_cast %48 : i64 to index
+            %50 = memref.load %arg3[%49] : memref<?xf64>
+            memref.store %50, %alloca_1[%c0] : memref<1xf64>
+            llvm.intr.lifetime.start 24, %23 : !llvm.ptr
+            %51 = llvm.add %48, %8 overflow<nsw> : i64
+            %52 = arith.index_cast %51 : i64 to index
+            %53 = memref.load %arg3[%52] : memref<?xf64>
+            llvm.store %53, %23 : f64, !llvm.ptr
+            %54 = llvm.add %48, %9 overflow<nsw> : i64
+            %55 = arith.index_cast %54 : i64 to index
+            %56 = memref.load %arg3[%55] : memref<?xf64>
+            %57 = llvm.getelementptr %23[1] : (!llvm.ptr) -> !llvm.ptr, f64
+            llvm.store %56, %57 : f64, !llvm.ptr
+            %58 = llvm.add %48, %10 overflow<nsw> : i64
+            %59 = arith.index_cast %58 : i64 to index
+            %60 = memref.load %arg3[%59] : memref<?xf64>
+            %61 = llvm.getelementptr %23[2] : (!llvm.ptr) -> !llvm.ptr, f64
+            llvm.store %60, %61 : f64, !llvm.ptr
+            %62 = llvm.add %48, %11 overflow<nsw> : i64
+            %63 = arith.index_cast %62 : i64 to index
+            %64 = memref.load %arg3[%63] : memref<?xf64>
+            memref.store %64, %alloca_2[%c0] : memref<1xf64>
             llvm.intr.lifetime.start 24, %26 : !llvm.ptr
+            %65 = llvm.insertvalue %23, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %66 = llvm.insertvalue %23, %65[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %67 = llvm.insertvalue %12, %66[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %68 = llvm.insertvalue %0, %67[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %69 = llvm.insertvalue %8, %68[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %70 = builtin.unrealized_conversion_cast %69 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+            %71 = llvm.insertvalue %26, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %72 = llvm.insertvalue %26, %71[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %73 = llvm.insertvalue %12, %72[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %74 = llvm.insertvalue %0, %73[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %75 = llvm.insertvalue %8, %74[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %76 = builtin.unrealized_conversion_cast %75 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+            func.call @_Z16compute_velocityRdR7double3S1_.lifted(%cast, %70, %76) : (memref<?xf64>, memref<?xf64>, memref<?xf64>) -> ()
+            %77 = llvm.insertvalue %26, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %78 = llvm.insertvalue %26, %77[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %79 = llvm.insertvalue %12, %78[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %80 = llvm.insertvalue %0, %79[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %81 = llvm.insertvalue %8, %80[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %82 = builtin.unrealized_conversion_cast %81 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+            %83 = func.call @_Z17compute_speed_sqdR7double3.lifted(%82) : (memref<?xf64>) -> f64
+            memref.store %83, %alloca_4[%c0] : memref<1xf64>
+            %84 = llvm.call @sqrt(%83) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, noalias_scopes = [#alias_scope4, #alias_scope5], tbaa = [#tbaa_tag1]} : (f64 {llvm.noundef}) -> f64
+            %85 = func.call @_Z16compute_pressureRdS_S_.lifted(%cast, %cast_3, %cast_5) : (memref<?xf64>, memref<?xf64>, memref<?xf64>) -> f64
+            memref.store %85, %alloca_6[%c0] : memref<1xf64>
+            %86 = func.call @_Z22compute_speed_of_soundRdS_.lifted(%cast, %cast_7) : (memref<?xf64>, memref<?xf64>) -> f64
             llvm.intr.lifetime.start 24, %27 : !llvm.ptr
             llvm.intr.lifetime.start 24, %28 : !llvm.ptr
-            func.call @_Z25compute_flux_contributionRdR7double3S_S_S1_S1_S1_S1_S1_.lifted(%cast, %21, %23, %cast_7, %24, %25, %26, %27, %28) : (memref<?xf64>, !llvm.ptr, !llvm.ptr, memref<?xf64>, !llvm.ptr, !llvm.ptr, !llvm.ptr, !llvm.ptr, !llvm.ptr) -> ()
             llvm.intr.lifetime.start 24, %29 : !llvm.ptr
-            llvm.intr.lifetime.start 24, %32 : !llvm.ptr
-            llvm.intr.lifetime.start 24, %33 : !llvm.ptr
+            llvm.intr.lifetime.start 24, %30 : !llvm.ptr
+            %87 = llvm.insertvalue %23, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %88 = llvm.insertvalue %23, %87[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %89 = llvm.insertvalue %12, %88[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %90 = llvm.insertvalue %0, %89[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %91 = llvm.insertvalue %8, %90[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %92 = builtin.unrealized_conversion_cast %91 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+            %93 = llvm.insertvalue %26, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %94 = llvm.insertvalue %26, %93[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %95 = llvm.insertvalue %12, %94[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %96 = llvm.insertvalue %0, %95[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %97 = llvm.insertvalue %8, %96[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %98 = builtin.unrealized_conversion_cast %97 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+            %99 = llvm.insertvalue %27, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %100 = llvm.insertvalue %27, %99[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %101 = llvm.insertvalue %12, %100[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %102 = llvm.insertvalue %0, %101[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %103 = llvm.insertvalue %8, %102[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %104 = builtin.unrealized_conversion_cast %103 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+            %105 = llvm.insertvalue %28, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %106 = llvm.insertvalue %28, %105[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %107 = llvm.insertvalue %12, %106[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %108 = llvm.insertvalue %0, %107[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %109 = llvm.insertvalue %8, %108[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %110 = builtin.unrealized_conversion_cast %109 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+            %111 = llvm.insertvalue %29, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %112 = llvm.insertvalue %29, %111[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %113 = llvm.insertvalue %12, %112[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %114 = llvm.insertvalue %0, %113[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %115 = llvm.insertvalue %8, %114[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %116 = builtin.unrealized_conversion_cast %115 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+            %117 = llvm.insertvalue %30, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %118 = llvm.insertvalue %30, %117[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %119 = llvm.insertvalue %12, %118[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %120 = llvm.insertvalue %0, %119[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %121 = llvm.insertvalue %8, %120[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %122 = builtin.unrealized_conversion_cast %121 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+            func.call @_Z25compute_flux_contributionRdR7double3S_S_S1_S1_S1_S1_S1_.lifted(%cast, %92, %25, %cast_7, %98, %104, %110, %116, %122) : (memref<?xf64>, memref<?xf64>, !llvm.ptr, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>) -> ()
+            llvm.intr.lifetime.start 24, %31 : !llvm.ptr
             llvm.intr.lifetime.start 24, %34 : !llvm.ptr
             llvm.intr.lifetime.start 24, %35 : !llvm.ptr
             llvm.intr.lifetime.start 24, %36 : !llvm.ptr
-            %67 = llvm.shl %45, %7 overflow<nsw> : i64
-            %68:6 = scf.while (%arg6 = %10, %arg7 = %11, %arg8 = %11, %arg9 = %11, %arg10 = %11, %arg11 = %11) : (i64, f64, f64, f64, f64, f64) -> (i64, f64, f64, f64, f64, f64) {
-              %74 = llvm.add %arg6, %67 overflow<nsw, nuw> : i64
-              %75 = arith.index_cast %74 : i64 to index
-              %76 = memref.load %arg1[%75] : memref<?xi32>
-              %77 = llvm.mul %74, %12 overflow<nsw> : i64
-              %78 = llvm.getelementptr inbounds %arg2[%77] : (!llvm.ptr, i64) -> !llvm.ptr, i8
-              %79 = llvm.load %78 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
-              %80 = llvm.getelementptr %78[8] : (!llvm.ptr) -> !llvm.ptr, i8
-              %81 = llvm.load %80 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
-              %82 = llvm.getelementptr %78[16] : (!llvm.ptr) -> !llvm.ptr, i8
-              %83 = llvm.load %82 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
-              %84 = llvm.fmul %81, %81 : f64
-              %85 = llvm.intr.fmuladd(%79, %79, %84) : (f64, f64, f64) -> f64
-              %86 = llvm.intr.fmuladd(%83, %83, %85) : (f64, f64, f64) -> f64
-              %87 = llvm.call @sqrt(%86) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, noalias_scopes = [#alias_scope4, #alias_scope5], tbaa = [#tbaa_tag1]} : (f64 {llvm.noundef}) -> f64
-              %88 = llvm.icmp "sgt" %76, %4 : i32
-              %89:5 = scf.if %88 -> (f64, f64, f64, f64, f64) {
-                %93 = llvm.mul %76, %19 overflow<nsw, nuw> : i32
-                %94 = llvm.zext nneg %93 : i32 to i64
-                %95 = arith.index_cast %94 : i64 to index
+            llvm.intr.lifetime.start 24, %37 : !llvm.ptr
+            llvm.intr.lifetime.start 24, %38 : !llvm.ptr
+            %123 = llvm.shl %47, %9 overflow<nsw> : i64
+            %124:6 = scf.while (%arg6 = %12, %arg7 = %13, %arg8 = %13, %arg9 = %13, %arg10 = %13, %arg11 = %13) : (i64, f64, f64, f64, f64, f64) -> (i64, f64, f64, f64, f64, f64) {
+              %130 = llvm.add %arg6, %123 overflow<nsw, nuw> : i64
+              %131 = arith.index_cast %130 : i64 to index
+              %132 = memref.load %arg1[%131] : memref<?xi32>
+              %133 = llvm.mul %130, %14 overflow<nsw> : i64
+              %134 = llvm.getelementptr inbounds %arg2[%133] : (!llvm.ptr, i64) -> !llvm.ptr, i8
+              %135 = llvm.load %134 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
+              %136 = llvm.getelementptr %134[8] : (!llvm.ptr) -> !llvm.ptr, i8
+              %137 = llvm.load %136 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
+              %138 = llvm.getelementptr %134[16] : (!llvm.ptr) -> !llvm.ptr, i8
+              %139 = llvm.load %138 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f64
+              %140 = llvm.fmul %137, %137 : f64
+              %141 = llvm.intr.fmuladd(%135, %135, %140) : (f64, f64, f64) -> f64
+              %142 = llvm.intr.fmuladd(%139, %139, %141) : (f64, f64, f64) -> f64
+              %143 = llvm.call @sqrt(%142) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, noalias_scopes = [#alias_scope4, #alias_scope5], tbaa = [#tbaa_tag1]} : (f64 {llvm.noundef}) -> f64
+              %144 = llvm.icmp "sgt" %132, %6 : i32
+              %145:5 = scf.if %144 -> (f64, f64, f64, f64, f64) {
+                %149 = llvm.mul %132, %21 overflow<nsw, nuw> : i32
+                %150 = llvm.zext nneg %149 : i32 to i64
+                %151 = arith.index_cast %150 : i64 to index
                 %intptr_17 = memref.extract_aligned_pointer_as_index %arg3 : memref<?xf64> -> index
-                %96 = arith.index_cast %intptr_17 : index to i64
-                %97 = llvm.inttoptr %96 : i64 to !llvm.ptr
-                %98 = llvm.getelementptr %97[%94] : (!llvm.ptr, i64) -> !llvm.ptr, f64
-                %99 = memref.load %arg3[%95] : memref<?xf64>
-                memref.store %99, %alloca_8[%c0] : memref<1xf64>
-                %100 = llvm.getelementptr %98[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                %101 = llvm.load %100 : !llvm.ptr -> f64
-                llvm.store %101, %32 : f64, !llvm.ptr
-                %102 = llvm.getelementptr %98[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                %103 = llvm.load %102 : !llvm.ptr -> f64
-                %104 = llvm.getelementptr %32[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                llvm.store %103, %104 : f64, !llvm.ptr
-                %105 = llvm.getelementptr %98[3] : (!llvm.ptr) -> !llvm.ptr, f64
-                %106 = llvm.load %105 : !llvm.ptr -> f64
-                %107 = llvm.getelementptr %32[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                llvm.store %106, %107 : f64, !llvm.ptr
-                %108 = llvm.getelementptr %98[4] : (!llvm.ptr) -> !llvm.ptr, f64
-                %109 = llvm.load %108 : !llvm.ptr -> f64
-                memref.store %109, %alloca_10[%c0] : memref<1xf64>
-                func.call @_Z16compute_velocityRdR7double3S1_.lifted(%cast_9, %32, %29) : (memref<?xf64>, !llvm.ptr, !llvm.ptr) -> ()
-                %110 = func.call @_Z17compute_speed_sqdR7double3(%29) : (!llvm.ptr) -> f64
-                memref.store %110, %alloca_13[%c0] : memref<1xf64>
-                %111 = func.call @_Z16compute_pressureRdS_S_.lifted(%cast_9, %cast_11, %cast_14) : (memref<?xf64>, memref<?xf64>, memref<?xf64>) -> f64
-                memref.store %111, %alloca_15[%c0] : memref<1xf64>
-                %112 = func.call @_Z22compute_speed_of_soundRdS_.lifted(%cast_9, %cast_16) : (memref<?xf64>, memref<?xf64>) -> f64
-                func.call @_Z25compute_flux_contributionRdR7double3S_S_S1_S1_S1_S1_S1_.lifted(%cast_9, %32, %31, %cast_16, %29, %33, %34, %35, %36) : (memref<?xf64>, !llvm.ptr, !llvm.ptr, memref<?xf64>, !llvm.ptr, !llvm.ptr, !llvm.ptr, !llvm.ptr, !llvm.ptr) -> ()
-                %113 = llvm.fmul %87, %20 : f64
-                %114 = llvm.fmul %113, %13 : f64
-                %115 = memref.load %alloca_13[%c0] : memref<1xf64>
-                %116 = llvm.call @sqrt(%115) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, noalias_scopes = [#alias_scope4, #alias_scope5], tbaa = [#tbaa_tag1]} : (f64 {llvm.noundef}) -> f64
-                %117 = llvm.fadd %64, %116 : f64
-                %118 = llvm.fadd %66, %117 : f64
-                %119 = llvm.fadd %112, %118 : f64
-                %120 = llvm.fmul %114, %119 : f64
-                %121 = memref.load %alloca_1[%c0] : memref<1xf64>
-                %122 = memref.load %alloca_8[%c0] : memref<1xf64>
-                %123 = llvm.fsub %121, %122 : f64
-                %124 = llvm.intr.fmuladd(%120, %123, %arg11) : (f64, f64, f64) -> f64
-                %125 = memref.load %alloca_2[%c0] : memref<1xf64>
-                %126 = memref.load %alloca_10[%c0] : memref<1xf64>
-                %127 = llvm.fsub %125, %126 : f64
-                %128 = llvm.intr.fmuladd(%120, %127, %arg7) : (f64, f64, f64) -> f64
-                %129 = llvm.load %21 : !llvm.ptr -> f64
-                %130 = llvm.load %32 : !llvm.ptr -> f64
-                %131 = llvm.fsub %129, %130 : f64
-                %132 = llvm.intr.fmuladd(%120, %131, %arg8) : (f64, f64, f64) -> f64
-                %133 = llvm.getelementptr %21[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                %134 = llvm.load %133 : !llvm.ptr -> f64
-                %135 = llvm.getelementptr %32[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                %136 = llvm.load %135 : !llvm.ptr -> f64
-                %137 = llvm.fsub %134, %136 : f64
-                %138 = llvm.intr.fmuladd(%120, %137, %arg9) : (f64, f64, f64) -> f64
-                %139 = llvm.getelementptr %21[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                %140 = llvm.load %139 : !llvm.ptr -> f64
-                %141 = llvm.getelementptr %32[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                %142 = llvm.load %141 : !llvm.ptr -> f64
-                %143 = llvm.fsub %140, %142 : f64
-                %144 = llvm.intr.fmuladd(%120, %143, %arg10) : (f64, f64, f64) -> f64
-                %145 = llvm.fmul %79, %13 : f64
-                %146 = llvm.fadd %129, %130 : f64
-                %147 = llvm.intr.fmuladd(%145, %146, %124) : (f64, f64, f64) -> f64
-                %148 = llvm.load %36 : !llvm.ptr -> f64
-                %149 = llvm.load %28 : !llvm.ptr -> f64
-                %150 = llvm.fadd %148, %149 : f64
-                %151 = llvm.intr.fmuladd(%145, %150, %128) : (f64, f64, f64) -> f64
-                %152 = llvm.load %33 : !llvm.ptr -> f64
-                %153 = llvm.load %25 : !llvm.ptr -> f64
-                %154 = llvm.fadd %152, %153 : f64
-                %155 = llvm.intr.fmuladd(%145, %154, %132) : (f64, f64, f64) -> f64
-                %156 = llvm.load %34 : !llvm.ptr -> f64
-                %157 = llvm.load %26 : !llvm.ptr -> f64
-                %158 = llvm.fadd %156, %157 : f64
-                %159 = llvm.intr.fmuladd(%145, %158, %138) : (f64, f64, f64) -> f64
-                %160 = llvm.load %35 : !llvm.ptr -> f64
-                %161 = llvm.load %27 : !llvm.ptr -> f64
-                %162 = llvm.fadd %160, %161 : f64
-                %163 = llvm.intr.fmuladd(%145, %162, %144) : (f64, f64, f64) -> f64
-                %164 = llvm.fmul %81, %13 : f64
-                %165 = llvm.fadd %134, %136 : f64
-                %166 = llvm.intr.fmuladd(%164, %165, %147) : (f64, f64, f64) -> f64
-                %167 = llvm.getelementptr %36[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                %168 = llvm.load %167 : !llvm.ptr -> f64
-                %169 = llvm.getelementptr %28[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                %170 = llvm.load %169 : !llvm.ptr -> f64
-                %171 = llvm.fadd %168, %170 : f64
-                %172 = llvm.intr.fmuladd(%164, %171, %151) : (f64, f64, f64) -> f64
-                %173 = llvm.getelementptr %33[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                %174 = llvm.load %173 : !llvm.ptr -> f64
-                %175 = llvm.getelementptr %25[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                %176 = llvm.load %175 : !llvm.ptr -> f64
-                %177 = llvm.fadd %174, %176 : f64
-                %178 = llvm.intr.fmuladd(%164, %177, %155) : (f64, f64, f64) -> f64
-                %179 = llvm.getelementptr %34[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                %180 = llvm.load %179 : !llvm.ptr -> f64
-                %181 = llvm.getelementptr %26[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                %182 = llvm.load %181 : !llvm.ptr -> f64
-                %183 = llvm.fadd %180, %182 : f64
-                %184 = llvm.intr.fmuladd(%164, %183, %159) : (f64, f64, f64) -> f64
-                %185 = llvm.getelementptr %35[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                %186 = llvm.load %185 : !llvm.ptr -> f64
-                %187 = llvm.getelementptr %27[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                %188 = llvm.load %187 : !llvm.ptr -> f64
-                %189 = llvm.fadd %186, %188 : f64
-                %190 = llvm.intr.fmuladd(%164, %189, %163) : (f64, f64, f64) -> f64
-                %191 = llvm.fmul %83, %13 : f64
-                %192 = llvm.fadd %140, %142 : f64
-                %193 = llvm.intr.fmuladd(%191, %192, %166) : (f64, f64, f64) -> f64
-                %194 = llvm.getelementptr %36[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                %195 = llvm.load %194 : !llvm.ptr -> f64
-                %196 = llvm.getelementptr %28[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                %197 = llvm.load %196 : !llvm.ptr -> f64
-                %198 = llvm.fadd %195, %197 : f64
-                %199 = llvm.intr.fmuladd(%191, %198, %172) : (f64, f64, f64) -> f64
-                %200 = llvm.getelementptr %33[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                %201 = llvm.load %200 : !llvm.ptr -> f64
-                %202 = llvm.getelementptr %25[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                %203 = llvm.load %202 : !llvm.ptr -> f64
-                %204 = llvm.fadd %201, %203 : f64
-                %205 = llvm.intr.fmuladd(%191, %204, %178) : (f64, f64, f64) -> f64
-                %206 = llvm.getelementptr %34[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                %207 = llvm.load %206 : !llvm.ptr -> f64
-                %208 = llvm.getelementptr %26[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                %209 = llvm.load %208 : !llvm.ptr -> f64
-                %210 = llvm.fadd %207, %209 : f64
-                %211 = llvm.intr.fmuladd(%191, %210, %184) : (f64, f64, f64) -> f64
-                %212 = llvm.getelementptr %35[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                %213 = llvm.load %212 : !llvm.ptr -> f64
-                %214 = llvm.getelementptr %27[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                %215 = llvm.load %214 : !llvm.ptr -> f64
-                %216 = llvm.fadd %213, %215 : f64
-                %217 = llvm.intr.fmuladd(%191, %216, %190) : (f64, f64, f64) -> f64
-                scf.yield %193, %217, %211, %205, %199 : f64, f64, f64, f64, f64
+                %152 = arith.index_cast %intptr_17 : index to i64
+                %153 = llvm.inttoptr %152 : i64 to !llvm.ptr
+                %154 = llvm.getelementptr %153[%150] : (!llvm.ptr, i64) -> !llvm.ptr, f64
+                %155 = memref.load %arg3[%151] : memref<?xf64>
+                memref.store %155, %alloca_8[%c0] : memref<1xf64>
+                %156 = llvm.getelementptr %154[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                %157 = llvm.load %156 : !llvm.ptr -> f64
+                llvm.store %157, %34 : f64, !llvm.ptr
+                %158 = llvm.getelementptr %154[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                %159 = llvm.load %158 : !llvm.ptr -> f64
+                %160 = llvm.getelementptr %34[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                llvm.store %159, %160 : f64, !llvm.ptr
+                %161 = llvm.getelementptr %154[3] : (!llvm.ptr) -> !llvm.ptr, f64
+                %162 = llvm.load %161 : !llvm.ptr -> f64
+                %163 = llvm.getelementptr %34[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                llvm.store %162, %163 : f64, !llvm.ptr
+                %164 = llvm.getelementptr %154[4] : (!llvm.ptr) -> !llvm.ptr, f64
+                %165 = llvm.load %164 : !llvm.ptr -> f64
+                memref.store %165, %alloca_10[%c0] : memref<1xf64>
+                %166 = llvm.insertvalue %34, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %167 = llvm.insertvalue %34, %166[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %168 = llvm.insertvalue %12, %167[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %169 = llvm.insertvalue %0, %168[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %170 = llvm.insertvalue %8, %169[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %171 = builtin.unrealized_conversion_cast %170 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+                %172 = llvm.insertvalue %31, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %173 = llvm.insertvalue %31, %172[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %174 = llvm.insertvalue %12, %173[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %175 = llvm.insertvalue %0, %174[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %176 = llvm.insertvalue %8, %175[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %177 = builtin.unrealized_conversion_cast %176 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+                func.call @_Z16compute_velocityRdR7double3S1_.lifted(%cast_9, %171, %177) : (memref<?xf64>, memref<?xf64>, memref<?xf64>) -> ()
+                %178 = llvm.insertvalue %31, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %179 = llvm.insertvalue %31, %178[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %180 = llvm.insertvalue %12, %179[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %181 = llvm.insertvalue %0, %180[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %182 = llvm.insertvalue %8, %181[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %183 = builtin.unrealized_conversion_cast %182 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+                %184 = func.call @_Z17compute_speed_sqdR7double3.lifted(%183) : (memref<?xf64>) -> f64
+                memref.store %184, %alloca_13[%c0] : memref<1xf64>
+                %185 = func.call @_Z16compute_pressureRdS_S_.lifted(%cast_9, %cast_11, %cast_14) : (memref<?xf64>, memref<?xf64>, memref<?xf64>) -> f64
+                memref.store %185, %alloca_15[%c0] : memref<1xf64>
+                %186 = func.call @_Z22compute_speed_of_soundRdS_.lifted(%cast_9, %cast_16) : (memref<?xf64>, memref<?xf64>) -> f64
+                %187 = llvm.insertvalue %34, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %188 = llvm.insertvalue %34, %187[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %189 = llvm.insertvalue %12, %188[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %190 = llvm.insertvalue %0, %189[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %191 = llvm.insertvalue %8, %190[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %192 = builtin.unrealized_conversion_cast %191 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+                %193 = llvm.insertvalue %31, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %194 = llvm.insertvalue %31, %193[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %195 = llvm.insertvalue %12, %194[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %196 = llvm.insertvalue %0, %195[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %197 = llvm.insertvalue %8, %196[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %198 = builtin.unrealized_conversion_cast %197 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+                %199 = llvm.insertvalue %35, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %200 = llvm.insertvalue %35, %199[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %201 = llvm.insertvalue %12, %200[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %202 = llvm.insertvalue %0, %201[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %203 = llvm.insertvalue %8, %202[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %204 = builtin.unrealized_conversion_cast %203 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+                %205 = llvm.insertvalue %36, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %206 = llvm.insertvalue %36, %205[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %207 = llvm.insertvalue %12, %206[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %208 = llvm.insertvalue %0, %207[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %209 = llvm.insertvalue %8, %208[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %210 = builtin.unrealized_conversion_cast %209 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+                %211 = llvm.insertvalue %37, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %212 = llvm.insertvalue %37, %211[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %213 = llvm.insertvalue %12, %212[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %214 = llvm.insertvalue %0, %213[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %215 = llvm.insertvalue %8, %214[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %216 = builtin.unrealized_conversion_cast %215 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+                %217 = llvm.insertvalue %38, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %218 = llvm.insertvalue %38, %217[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %219 = llvm.insertvalue %12, %218[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %220 = llvm.insertvalue %0, %219[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %221 = llvm.insertvalue %8, %220[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+                %222 = builtin.unrealized_conversion_cast %221 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+                func.call @_Z25compute_flux_contributionRdR7double3S_S_S1_S1_S1_S1_S1_.lifted(%cast_9, %192, %33, %cast_16, %198, %204, %210, %216, %222) : (memref<?xf64>, memref<?xf64>, !llvm.ptr, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>) -> ()
+                %223 = llvm.fmul %143, %22 : f64
+                %224 = llvm.fmul %223, %15 : f64
+                %225 = memref.load %alloca_13[%c0] : memref<1xf64>
+                %226 = llvm.call @sqrt(%225) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, noalias_scopes = [#alias_scope4, #alias_scope5], tbaa = [#tbaa_tag1]} : (f64 {llvm.noundef}) -> f64
+                %227 = llvm.fadd %84, %226 : f64
+                %228 = llvm.fadd %86, %227 : f64
+                %229 = llvm.fadd %186, %228 : f64
+                %230 = llvm.fmul %224, %229 : f64
+                %231 = memref.load %alloca_1[%c0] : memref<1xf64>
+                %232 = memref.load %alloca_8[%c0] : memref<1xf64>
+                %233 = llvm.fsub %231, %232 : f64
+                %234 = llvm.intr.fmuladd(%230, %233, %arg11) : (f64, f64, f64) -> f64
+                %235 = memref.load %alloca_2[%c0] : memref<1xf64>
+                %236 = memref.load %alloca_10[%c0] : memref<1xf64>
+                %237 = llvm.fsub %235, %236 : f64
+                %238 = llvm.intr.fmuladd(%230, %237, %arg7) : (f64, f64, f64) -> f64
+                %239 = llvm.load %23 : !llvm.ptr -> f64
+                %240 = llvm.load %34 : !llvm.ptr -> f64
+                %241 = llvm.fsub %239, %240 : f64
+                %242 = llvm.intr.fmuladd(%230, %241, %arg8) : (f64, f64, f64) -> f64
+                %243 = llvm.getelementptr %23[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                %244 = llvm.load %243 : !llvm.ptr -> f64
+                %245 = llvm.getelementptr %34[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                %246 = llvm.load %245 : !llvm.ptr -> f64
+                %247 = llvm.fsub %244, %246 : f64
+                %248 = llvm.intr.fmuladd(%230, %247, %arg9) : (f64, f64, f64) -> f64
+                %249 = llvm.getelementptr %23[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                %250 = llvm.load %249 : !llvm.ptr -> f64
+                %251 = llvm.getelementptr %34[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                %252 = llvm.load %251 : !llvm.ptr -> f64
+                %253 = llvm.fsub %250, %252 : f64
+                %254 = llvm.intr.fmuladd(%230, %253, %arg10) : (f64, f64, f64) -> f64
+                %255 = llvm.fmul %135, %15 : f64
+                %256 = llvm.fadd %239, %240 : f64
+                %257 = llvm.intr.fmuladd(%255, %256, %234) : (f64, f64, f64) -> f64
+                %258 = llvm.load %38 : !llvm.ptr -> f64
+                %259 = llvm.load %30 : !llvm.ptr -> f64
+                %260 = llvm.fadd %258, %259 : f64
+                %261 = llvm.intr.fmuladd(%255, %260, %238) : (f64, f64, f64) -> f64
+                %262 = llvm.load %35 : !llvm.ptr -> f64
+                %263 = llvm.load %27 : !llvm.ptr -> f64
+                %264 = llvm.fadd %262, %263 : f64
+                %265 = llvm.intr.fmuladd(%255, %264, %242) : (f64, f64, f64) -> f64
+                %266 = llvm.load %36 : !llvm.ptr -> f64
+                %267 = llvm.load %28 : !llvm.ptr -> f64
+                %268 = llvm.fadd %266, %267 : f64
+                %269 = llvm.intr.fmuladd(%255, %268, %248) : (f64, f64, f64) -> f64
+                %270 = llvm.load %37 : !llvm.ptr -> f64
+                %271 = llvm.load %29 : !llvm.ptr -> f64
+                %272 = llvm.fadd %270, %271 : f64
+                %273 = llvm.intr.fmuladd(%255, %272, %254) : (f64, f64, f64) -> f64
+                %274 = llvm.fmul %137, %15 : f64
+                %275 = llvm.fadd %244, %246 : f64
+                %276 = llvm.intr.fmuladd(%274, %275, %257) : (f64, f64, f64) -> f64
+                %277 = llvm.getelementptr %38[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                %278 = llvm.load %277 : !llvm.ptr -> f64
+                %279 = llvm.getelementptr %30[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                %280 = llvm.load %279 : !llvm.ptr -> f64
+                %281 = llvm.fadd %278, %280 : f64
+                %282 = llvm.intr.fmuladd(%274, %281, %261) : (f64, f64, f64) -> f64
+                %283 = llvm.getelementptr %35[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                %284 = llvm.load %283 : !llvm.ptr -> f64
+                %285 = llvm.getelementptr %27[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                %286 = llvm.load %285 : !llvm.ptr -> f64
+                %287 = llvm.fadd %284, %286 : f64
+                %288 = llvm.intr.fmuladd(%274, %287, %265) : (f64, f64, f64) -> f64
+                %289 = llvm.getelementptr %36[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                %290 = llvm.load %289 : !llvm.ptr -> f64
+                %291 = llvm.getelementptr %28[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                %292 = llvm.load %291 : !llvm.ptr -> f64
+                %293 = llvm.fadd %290, %292 : f64
+                %294 = llvm.intr.fmuladd(%274, %293, %269) : (f64, f64, f64) -> f64
+                %295 = llvm.getelementptr %37[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                %296 = llvm.load %295 : !llvm.ptr -> f64
+                %297 = llvm.getelementptr %29[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                %298 = llvm.load %297 : !llvm.ptr -> f64
+                %299 = llvm.fadd %296, %298 : f64
+                %300 = llvm.intr.fmuladd(%274, %299, %273) : (f64, f64, f64) -> f64
+                %301 = llvm.fmul %139, %15 : f64
+                %302 = llvm.fadd %250, %252 : f64
+                %303 = llvm.intr.fmuladd(%301, %302, %276) : (f64, f64, f64) -> f64
+                %304 = llvm.getelementptr %38[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                %305 = llvm.load %304 : !llvm.ptr -> f64
+                %306 = llvm.getelementptr %30[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                %307 = llvm.load %306 : !llvm.ptr -> f64
+                %308 = llvm.fadd %305, %307 : f64
+                %309 = llvm.intr.fmuladd(%301, %308, %282) : (f64, f64, f64) -> f64
+                %310 = llvm.getelementptr %35[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                %311 = llvm.load %310 : !llvm.ptr -> f64
+                %312 = llvm.getelementptr %27[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                %313 = llvm.load %312 : !llvm.ptr -> f64
+                %314 = llvm.fadd %311, %313 : f64
+                %315 = llvm.intr.fmuladd(%301, %314, %288) : (f64, f64, f64) -> f64
+                %316 = llvm.getelementptr %36[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                %317 = llvm.load %316 : !llvm.ptr -> f64
+                %318 = llvm.getelementptr %28[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                %319 = llvm.load %318 : !llvm.ptr -> f64
+                %320 = llvm.fadd %317, %319 : f64
+                %321 = llvm.intr.fmuladd(%301, %320, %294) : (f64, f64, f64) -> f64
+                %322 = llvm.getelementptr %37[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                %323 = llvm.load %322 : !llvm.ptr -> f64
+                %324 = llvm.getelementptr %29[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                %325 = llvm.load %324 : !llvm.ptr -> f64
+                %326 = llvm.fadd %323, %325 : f64
+                %327 = llvm.intr.fmuladd(%301, %326, %300) : (f64, f64, f64) -> f64
+                scf.yield %303, %327, %321, %315, %309 : f64, f64, f64, f64, f64
               } else {
-                %93 = arith.index_castui %76 : i32 to index
-                %94:5 = scf.index_switch %93 -> f64, f64, f64, f64, f64 
+                %149 = arith.index_castui %132 : i32 to index
+                %150:5 = scf.index_switch %149 -> f64, f64, f64, f64, f64 
                 case 4294967295 {
-                  %95 = memref.load %alloca_6[%c0] : memref<1xf64>
-                  %96 = llvm.intr.fmuladd(%79, %95, %arg8) : (f64, f64, f64) -> f64
-                  %97 = llvm.intr.fmuladd(%81, %95, %arg9) : (f64, f64, f64) -> f64
-                  %98 = llvm.intr.fmuladd(%83, %95, %arg10) : (f64, f64, f64) -> f64
-                  scf.yield %arg11, %98, %97, %96, %arg7 : f64, f64, f64, f64, f64
+                  %151 = memref.load %alloca_6[%c0] : memref<1xf64>
+                  %152 = llvm.intr.fmuladd(%135, %151, %arg8) : (f64, f64, f64) -> f64
+                  %153 = llvm.intr.fmuladd(%137, %151, %arg9) : (f64, f64, f64) -> f64
+                  %154 = llvm.intr.fmuladd(%139, %151, %arg10) : (f64, f64, f64) -> f64
+                  scf.yield %arg11, %154, %153, %152, %arg7 : f64, f64, f64, f64, f64
                 }
                 case 4294967294 {
-                  %95 = llvm.fmul %79, %13 : f64
-                  %96 = llvm.getelementptr %14[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %97 = llvm.load %96 : !llvm.ptr -> f64
-                  %98 = llvm.load %21 : !llvm.ptr -> f64
-                  %99 = llvm.fadd %97, %98 : f64
-                  %100 = llvm.intr.fmuladd(%95, %99, %arg11) : (f64, f64, f64) -> f64
-                  %101 = llvm.load %15 : !llvm.ptr -> f64
-                  %102 = llvm.load %28 : !llvm.ptr -> f64
-                  %103 = llvm.fadd %101, %102 : f64
-                  %104 = llvm.intr.fmuladd(%95, %103, %arg7) : (f64, f64, f64) -> f64
-                  %105 = llvm.load %16 : !llvm.ptr -> f64
-                  %106 = llvm.load %25 : !llvm.ptr -> f64
-                  %107 = llvm.fadd %105, %106 : f64
-                  %108 = llvm.intr.fmuladd(%95, %107, %arg8) : (f64, f64, f64) -> f64
-                  %109 = llvm.load %17 : !llvm.ptr -> f64
-                  %110 = llvm.load %26 : !llvm.ptr -> f64
-                  %111 = llvm.fadd %109, %110 : f64
-                  %112 = llvm.intr.fmuladd(%95, %111, %arg9) : (f64, f64, f64) -> f64
-                  %113 = llvm.load %18 : !llvm.ptr -> f64
-                  %114 = llvm.load %27 : !llvm.ptr -> f64
-                  %115 = llvm.fadd %113, %114 : f64
-                  %116 = llvm.intr.fmuladd(%95, %115, %arg10) : (f64, f64, f64) -> f64
-                  %117 = llvm.fmul %81, %13 : f64
-                  %118 = llvm.getelementptr %14[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %119 = llvm.load %118 : !llvm.ptr -> f64
-                  %120 = llvm.getelementptr %21[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %121 = llvm.load %120 : !llvm.ptr -> f64
-                  %122 = llvm.fadd %119, %121 : f64
-                  %123 = llvm.intr.fmuladd(%117, %122, %100) : (f64, f64, f64) -> f64
-                  %124 = llvm.getelementptr %15[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %125 = llvm.load %124 : !llvm.ptr -> f64
-                  %126 = llvm.getelementptr %28[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %127 = llvm.load %126 : !llvm.ptr -> f64
-                  %128 = llvm.fadd %125, %127 : f64
-                  %129 = llvm.intr.fmuladd(%117, %128, %104) : (f64, f64, f64) -> f64
-                  %130 = llvm.getelementptr %16[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %131 = llvm.load %130 : !llvm.ptr -> f64
-                  %132 = llvm.getelementptr %25[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %133 = llvm.load %132 : !llvm.ptr -> f64
-                  %134 = llvm.fadd %131, %133 : f64
-                  %135 = llvm.intr.fmuladd(%117, %134, %108) : (f64, f64, f64) -> f64
-                  %136 = llvm.getelementptr %17[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %137 = llvm.load %136 : !llvm.ptr -> f64
-                  %138 = llvm.getelementptr %26[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %139 = llvm.load %138 : !llvm.ptr -> f64
-                  %140 = llvm.fadd %137, %139 : f64
-                  %141 = llvm.intr.fmuladd(%117, %140, %112) : (f64, f64, f64) -> f64
-                  %142 = llvm.getelementptr %18[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %143 = llvm.load %142 : !llvm.ptr -> f64
-                  %144 = llvm.getelementptr %27[1] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %145 = llvm.load %144 : !llvm.ptr -> f64
-                  %146 = llvm.fadd %143, %145 : f64
-                  %147 = llvm.intr.fmuladd(%117, %146, %116) : (f64, f64, f64) -> f64
-                  %148 = llvm.fmul %83, %13 : f64
-                  %149 = llvm.getelementptr %14[3] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %150 = llvm.load %149 : !llvm.ptr -> f64
-                  %151 = llvm.getelementptr %21[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %152 = llvm.load %151 : !llvm.ptr -> f64
-                  %153 = llvm.fadd %150, %152 : f64
-                  %154 = llvm.intr.fmuladd(%148, %153, %123) : (f64, f64, f64) -> f64
-                  %155 = llvm.getelementptr %15[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %156 = llvm.load %155 : !llvm.ptr -> f64
-                  %157 = llvm.getelementptr %28[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %158 = llvm.load %157 : !llvm.ptr -> f64
-                  %159 = llvm.fadd %156, %158 : f64
-                  %160 = llvm.intr.fmuladd(%148, %159, %129) : (f64, f64, f64) -> f64
-                  %161 = llvm.getelementptr %16[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %162 = llvm.load %161 : !llvm.ptr -> f64
-                  %163 = llvm.getelementptr %25[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %164 = llvm.load %163 : !llvm.ptr -> f64
-                  %165 = llvm.fadd %162, %164 : f64
-                  %166 = llvm.intr.fmuladd(%148, %165, %135) : (f64, f64, f64) -> f64
-                  %167 = llvm.getelementptr %17[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %168 = llvm.load %167 : !llvm.ptr -> f64
-                  %169 = llvm.getelementptr %26[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %170 = llvm.load %169 : !llvm.ptr -> f64
-                  %171 = llvm.fadd %168, %170 : f64
-                  %172 = llvm.intr.fmuladd(%148, %171, %141) : (f64, f64, f64) -> f64
-                  %173 = llvm.getelementptr %18[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %174 = llvm.load %173 : !llvm.ptr -> f64
-                  %175 = llvm.getelementptr %27[2] : (!llvm.ptr) -> !llvm.ptr, f64
-                  %176 = llvm.load %175 : !llvm.ptr -> f64
-                  %177 = llvm.fadd %174, %176 : f64
-                  %178 = llvm.intr.fmuladd(%148, %177, %147) : (f64, f64, f64) -> f64
-                  scf.yield %154, %178, %172, %166, %160 : f64, f64, f64, f64, f64
+                  %151 = llvm.fmul %135, %15 : f64
+                  %152 = llvm.getelementptr %16[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %153 = llvm.load %152 : !llvm.ptr -> f64
+                  %154 = llvm.load %23 : !llvm.ptr -> f64
+                  %155 = llvm.fadd %153, %154 : f64
+                  %156 = llvm.intr.fmuladd(%151, %155, %arg11) : (f64, f64, f64) -> f64
+                  %157 = llvm.load %17 : !llvm.ptr -> f64
+                  %158 = llvm.load %30 : !llvm.ptr -> f64
+                  %159 = llvm.fadd %157, %158 : f64
+                  %160 = llvm.intr.fmuladd(%151, %159, %arg7) : (f64, f64, f64) -> f64
+                  %161 = llvm.load %18 : !llvm.ptr -> f64
+                  %162 = llvm.load %27 : !llvm.ptr -> f64
+                  %163 = llvm.fadd %161, %162 : f64
+                  %164 = llvm.intr.fmuladd(%151, %163, %arg8) : (f64, f64, f64) -> f64
+                  %165 = llvm.load %19 : !llvm.ptr -> f64
+                  %166 = llvm.load %28 : !llvm.ptr -> f64
+                  %167 = llvm.fadd %165, %166 : f64
+                  %168 = llvm.intr.fmuladd(%151, %167, %arg9) : (f64, f64, f64) -> f64
+                  %169 = llvm.load %20 : !llvm.ptr -> f64
+                  %170 = llvm.load %29 : !llvm.ptr -> f64
+                  %171 = llvm.fadd %169, %170 : f64
+                  %172 = llvm.intr.fmuladd(%151, %171, %arg10) : (f64, f64, f64) -> f64
+                  %173 = llvm.fmul %137, %15 : f64
+                  %174 = llvm.getelementptr %16[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %175 = llvm.load %174 : !llvm.ptr -> f64
+                  %176 = llvm.getelementptr %23[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %177 = llvm.load %176 : !llvm.ptr -> f64
+                  %178 = llvm.fadd %175, %177 : f64
+                  %179 = llvm.intr.fmuladd(%173, %178, %156) : (f64, f64, f64) -> f64
+                  %180 = llvm.getelementptr %17[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %181 = llvm.load %180 : !llvm.ptr -> f64
+                  %182 = llvm.getelementptr %30[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %183 = llvm.load %182 : !llvm.ptr -> f64
+                  %184 = llvm.fadd %181, %183 : f64
+                  %185 = llvm.intr.fmuladd(%173, %184, %160) : (f64, f64, f64) -> f64
+                  %186 = llvm.getelementptr %18[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %187 = llvm.load %186 : !llvm.ptr -> f64
+                  %188 = llvm.getelementptr %27[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %189 = llvm.load %188 : !llvm.ptr -> f64
+                  %190 = llvm.fadd %187, %189 : f64
+                  %191 = llvm.intr.fmuladd(%173, %190, %164) : (f64, f64, f64) -> f64
+                  %192 = llvm.getelementptr %19[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %193 = llvm.load %192 : !llvm.ptr -> f64
+                  %194 = llvm.getelementptr %28[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %195 = llvm.load %194 : !llvm.ptr -> f64
+                  %196 = llvm.fadd %193, %195 : f64
+                  %197 = llvm.intr.fmuladd(%173, %196, %168) : (f64, f64, f64) -> f64
+                  %198 = llvm.getelementptr %20[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %199 = llvm.load %198 : !llvm.ptr -> f64
+                  %200 = llvm.getelementptr %29[1] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %201 = llvm.load %200 : !llvm.ptr -> f64
+                  %202 = llvm.fadd %199, %201 : f64
+                  %203 = llvm.intr.fmuladd(%173, %202, %172) : (f64, f64, f64) -> f64
+                  %204 = llvm.fmul %139, %15 : f64
+                  %205 = llvm.getelementptr %16[3] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %206 = llvm.load %205 : !llvm.ptr -> f64
+                  %207 = llvm.getelementptr %23[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %208 = llvm.load %207 : !llvm.ptr -> f64
+                  %209 = llvm.fadd %206, %208 : f64
+                  %210 = llvm.intr.fmuladd(%204, %209, %179) : (f64, f64, f64) -> f64
+                  %211 = llvm.getelementptr %17[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %212 = llvm.load %211 : !llvm.ptr -> f64
+                  %213 = llvm.getelementptr %30[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %214 = llvm.load %213 : !llvm.ptr -> f64
+                  %215 = llvm.fadd %212, %214 : f64
+                  %216 = llvm.intr.fmuladd(%204, %215, %185) : (f64, f64, f64) -> f64
+                  %217 = llvm.getelementptr %18[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %218 = llvm.load %217 : !llvm.ptr -> f64
+                  %219 = llvm.getelementptr %27[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %220 = llvm.load %219 : !llvm.ptr -> f64
+                  %221 = llvm.fadd %218, %220 : f64
+                  %222 = llvm.intr.fmuladd(%204, %221, %191) : (f64, f64, f64) -> f64
+                  %223 = llvm.getelementptr %19[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %224 = llvm.load %223 : !llvm.ptr -> f64
+                  %225 = llvm.getelementptr %28[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %226 = llvm.load %225 : !llvm.ptr -> f64
+                  %227 = llvm.fadd %224, %226 : f64
+                  %228 = llvm.intr.fmuladd(%204, %227, %197) : (f64, f64, f64) -> f64
+                  %229 = llvm.getelementptr %20[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %230 = llvm.load %229 : !llvm.ptr -> f64
+                  %231 = llvm.getelementptr %29[2] : (!llvm.ptr) -> !llvm.ptr, f64
+                  %232 = llvm.load %231 : !llvm.ptr -> f64
+                  %233 = llvm.fadd %230, %232 : f64
+                  %234 = llvm.intr.fmuladd(%204, %233, %203) : (f64, f64, f64) -> f64
+                  scf.yield %210, %234, %228, %222, %216 : f64, f64, f64, f64, f64
                 }
                 default {
                   scf.yield %arg11, %arg10, %arg9, %arg8, %arg7 : f64, f64, f64, f64, f64
                 }
-                scf.yield %94#0, %94#1, %94#2, %94#3, %94#4 : f64, f64, f64, f64, f64
+                scf.yield %150#0, %150#1, %150#2, %150#3, %150#4 : f64, f64, f64, f64, f64
               }
-              %90 = llvm.add %arg6, %6 overflow<nsw, nuw> : i64
-              %91 = llvm.icmp "eq" %90, %9 : i64
-              %92 = arith.xori %91, %true : i1
-              scf.condition(%92) %90, %89#4, %89#3, %89#2, %89#1, %89#0 : i64, f64, f64, f64, f64, f64
+              %146 = llvm.add %arg6, %8 overflow<nsw, nuw> : i64
+              %147 = llvm.icmp "eq" %146, %11 : i64
+              %148 = arith.xori %147, %true : i1
+              scf.condition(%148) %146, %145#4, %145#3, %145#2, %145#1, %145#0 : i64, f64, f64, f64, f64, f64
             } do {
             ^bb0(%arg6: i64, %arg7: f64, %arg8: f64, %arg9: f64, %arg10: f64, %arg11: f64):
               scf.yield %arg6, %arg7, %arg8, %arg9, %arg10, %arg11 : i64, f64, f64, f64, f64, f64
             }
-            %69 = arith.index_cast %46 : i64 to index
-            memref.store %68#5, %arg4[%69] : memref<?xf64>
-            %70 = arith.index_cast %49 : i64 to index
-            memref.store %68#2, %arg4[%70] : memref<?xf64>
-            %71 = arith.index_cast %52 : i64 to index
-            memref.store %68#3, %arg4[%71] : memref<?xf64>
-            %72 = arith.index_cast %56 : i64 to index
-            memref.store %68#4, %arg4[%72] : memref<?xf64>
-            %73 = arith.index_cast %60 : i64 to index
-            memref.store %68#1, %arg4[%73] : memref<?xf64>
+            %125 = arith.index_cast %48 : i64 to index
+            memref.store %124#5, %arg4[%125] : memref<?xf64>
+            %126 = arith.index_cast %51 : i64 to index
+            memref.store %124#2, %arg4[%126] : memref<?xf64>
+            %127 = arith.index_cast %54 : i64 to index
+            memref.store %124#3, %arg4[%127] : memref<?xf64>
+            %128 = arith.index_cast %58 : i64 to index
+            memref.store %124#4, %arg4[%128] : memref<?xf64>
+            %129 = arith.index_cast %62 : i64 to index
+            memref.store %124#1, %arg4[%129] : memref<?xf64>
+            llvm.intr.lifetime.end 24, %38 : !llvm.ptr
+            llvm.intr.lifetime.end 24, %37 : !llvm.ptr
             llvm.intr.lifetime.end 24, %36 : !llvm.ptr
             llvm.intr.lifetime.end 24, %35 : !llvm.ptr
             llvm.intr.lifetime.end 24, %34 : !llvm.ptr
-            llvm.intr.lifetime.end 24, %33 : !llvm.ptr
-            llvm.intr.lifetime.end 24, %32 : !llvm.ptr
+            llvm.intr.lifetime.end 24, %31 : !llvm.ptr
+            llvm.intr.lifetime.end 24, %30 : !llvm.ptr
             llvm.intr.lifetime.end 24, %29 : !llvm.ptr
             llvm.intr.lifetime.end 24, %28 : !llvm.ptr
             llvm.intr.lifetime.end 24, %27 : !llvm.ptr
             llvm.intr.lifetime.end 24, %26 : !llvm.ptr
-            llvm.intr.lifetime.end 24, %25 : !llvm.ptr
-            llvm.intr.lifetime.end 24, %24 : !llvm.ptr
-            llvm.intr.lifetime.end 24, %21 : !llvm.ptr
+            llvm.intr.lifetime.end 24, %23 : !llvm.ptr
             omp.yield
           }
         }
@@ -950,69 +1107,52 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     call @_Z12compute_fluxiPiPdS0_S0_.lifted(%arg0, %9, %arg2, %15, %21) : (i32, memref<?xi32>, !llvm.ptr, memref<?xf64>, memref<?xf64>) -> ()
     return
   }
-  func.func private @_Z25compute_flux_contributionRdR7double3S_S_S1_S1_S1_S1_S1_.lifted(%arg0: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg1: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg2: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg3: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg4: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg5: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg6: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg7: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg8: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @_Z25compute_flux_contributionRdR7double3S_S_S1_S1_S1_S1_S1_.lifted(%arg0: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg1: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg2: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg3: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg4: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg5: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg6: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg7: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg8: memref<?xf64> {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+    %c2 = arith.constant 2 : index
+    %c1 = arith.constant 1 : index
     %c0 = arith.constant 0 : index
-    %0 = llvm.load %arg4 : !llvm.ptr -> f64
-    %1 = llvm.load %arg1 : !llvm.ptr -> f64
+    %0 = memref.load %arg4[%c0] : memref<?xf64>
+    %1 = memref.load %arg1[%c0] : memref<?xf64>
     %2 = memref.load %arg3[%c0] : memref<?xf64>
     %3 = llvm.intr.fmuladd(%0, %1, %2) : (f64, f64, f64) -> f64
-    llvm.store %3, %arg5 : f64, !llvm.ptr
-    %4 = llvm.load %arg4 : !llvm.ptr -> f64
-    %5 = llvm.getelementptr %arg1[1] : (!llvm.ptr) -> !llvm.ptr, f64
-    %6 = llvm.load %5 : !llvm.ptr -> f64
-    %7 = llvm.fmul %4, %6 : f64
-    %8 = llvm.getelementptr %arg5[1] : (!llvm.ptr) -> !llvm.ptr, f64
-    llvm.store %7, %8 : f64, !llvm.ptr
-    %9 = llvm.getelementptr %arg1[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    %10 = llvm.load %9 : !llvm.ptr -> f64
-    %11 = llvm.fmul %4, %10 : f64
-    %12 = llvm.getelementptr %arg5[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    llvm.store %11, %12 : f64, !llvm.ptr
-    llvm.store %7, %arg6 : f64, !llvm.ptr
-    %13 = llvm.getelementptr %arg4[1] : (!llvm.ptr) -> !llvm.ptr, f64
-    %14 = llvm.load %13 : !llvm.ptr -> f64
-    %15 = llvm.getelementptr %arg1[1] : (!llvm.ptr) -> !llvm.ptr, f64
-    %16 = llvm.load %15 : !llvm.ptr -> f64
-    %17 = memref.load %arg3[%c0] : memref<?xf64>
-    %18 = llvm.intr.fmuladd(%14, %16, %17) : (f64, f64, f64) -> f64
-    %19 = llvm.getelementptr %arg6[1] : (!llvm.ptr) -> !llvm.ptr, f64
-    llvm.store %18, %19 : f64, !llvm.ptr
-    %20 = llvm.getelementptr %arg4[1] : (!llvm.ptr) -> !llvm.ptr, f64
-    %21 = llvm.load %20 : !llvm.ptr -> f64
-    %22 = llvm.getelementptr %arg1[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    %23 = llvm.load %22 : !llvm.ptr -> f64
-    %24 = llvm.fmul %21, %23 : f64
-    %25 = llvm.getelementptr %arg6[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    llvm.store %24, %25 : f64, !llvm.ptr
-    %26 = llvm.getelementptr %arg5[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    %27 = llvm.load %26 : !llvm.ptr -> f64
-    llvm.store %27, %arg7 : f64, !llvm.ptr
-    %28 = llvm.getelementptr %arg7[1] : (!llvm.ptr) -> !llvm.ptr, f64
-    llvm.store %24, %28 : f64, !llvm.ptr
-    %29 = llvm.getelementptr %arg4[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    %30 = llvm.load %29 : !llvm.ptr -> f64
-    %31 = llvm.getelementptr %arg1[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    %32 = llvm.load %31 : !llvm.ptr -> f64
-    %33 = memref.load %arg3[%c0] : memref<?xf64>
-    %34 = llvm.intr.fmuladd(%30, %32, %33) : (f64, f64, f64) -> f64
-    %35 = llvm.getelementptr %arg7[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    llvm.store %34, %35 : f64, !llvm.ptr
-    %36 = llvm.load %arg2 : !llvm.ptr -> f64
-    %37 = memref.load %arg3[%c0] : memref<?xf64>
-    %38 = llvm.fadd %36, %37 : f64
-    %39 = llvm.load %arg4 : !llvm.ptr -> f64
-    %40 = llvm.fmul %39, %38 : f64
-    llvm.store %40, %arg8 : f64, !llvm.ptr
-    %41 = llvm.getelementptr %arg4[1] : (!llvm.ptr) -> !llvm.ptr, f64
-    %42 = llvm.load %41 : !llvm.ptr -> f64
-    %43 = llvm.fmul %38, %42 : f64
-    %44 = llvm.getelementptr %arg8[1] : (!llvm.ptr) -> !llvm.ptr, f64
-    llvm.store %43, %44 : f64, !llvm.ptr
-    %45 = llvm.getelementptr %arg4[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    %46 = llvm.load %45 : !llvm.ptr -> f64
-    %47 = llvm.fmul %38, %46 : f64
-    %48 = llvm.getelementptr %arg8[2] : (!llvm.ptr) -> !llvm.ptr, f64
-    llvm.store %47, %48 : f64, !llvm.ptr
+    memref.store %3, %arg5[%c0] : memref<?xf64>
+    %4 = memref.load %arg4[%c0] : memref<?xf64>
+    %5 = memref.load %arg1[%c1] : memref<?xf64>
+    %6 = llvm.fmul %4, %5 : f64
+    memref.store %6, %arg5[%c1] : memref<?xf64>
+    %7 = memref.load %arg1[%c2] : memref<?xf64>
+    %8 = llvm.fmul %4, %7 : f64
+    memref.store %8, %arg5[%c2] : memref<?xf64>
+    memref.store %6, %arg6[%c0] : memref<?xf64>
+    %9 = memref.load %arg4[%c1] : memref<?xf64>
+    %10 = memref.load %arg1[%c1] : memref<?xf64>
+    %11 = memref.load %arg3[%c0] : memref<?xf64>
+    %12 = llvm.intr.fmuladd(%9, %10, %11) : (f64, f64, f64) -> f64
+    memref.store %12, %arg6[%c1] : memref<?xf64>
+    %13 = memref.load %arg4[%c1] : memref<?xf64>
+    %14 = memref.load %arg1[%c2] : memref<?xf64>
+    %15 = llvm.fmul %13, %14 : f64
+    memref.store %15, %arg6[%c2] : memref<?xf64>
+    %16 = memref.load %arg5[%c2] : memref<?xf64>
+    memref.store %16, %arg7[%c0] : memref<?xf64>
+    memref.store %15, %arg7[%c1] : memref<?xf64>
+    %17 = memref.load %arg4[%c2] : memref<?xf64>
+    %18 = memref.load %arg1[%c2] : memref<?xf64>
+    %19 = memref.load %arg3[%c0] : memref<?xf64>
+    %20 = llvm.intr.fmuladd(%17, %18, %19) : (f64, f64, f64) -> f64
+    memref.store %20, %arg7[%c2] : memref<?xf64>
+    %21 = llvm.load %arg2 : !llvm.ptr -> f64
+    %22 = memref.load %arg3[%c0] : memref<?xf64>
+    %23 = llvm.fadd %21, %22 : f64
+    %24 = memref.load %arg4[%c0] : memref<?xf64>
+    %25 = llvm.fmul %24, %23 : f64
+    memref.store %25, %arg8[%c0] : memref<?xf64>
+    %26 = memref.load %arg4[%c1] : memref<?xf64>
+    %27 = llvm.fmul %23, %26 : f64
+    memref.store %27, %arg8[%c1] : memref<?xf64>
+    %28 = memref.load %arg4[%c2] : memref<?xf64>
+    %29 = llvm.fmul %23, %28 : f64
+    memref.store %29, %arg8[%c2] : memref<?xf64>
     return
   }
   func.func private @_Z25compute_flux_contributionRdR7double3S_S_S1_S1_S1_S1_S1_(%arg0: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg1: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg2: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg3: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, %arg4: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg5: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg6: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg7: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}, %arg8: !llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 24 : i64, llvm.nonnull, llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<linkonce_odr>} {
@@ -1026,13 +1166,49 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-    %10 = llvm.insertvalue %arg3, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %11 = llvm.insertvalue %arg3, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %10 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %11 = llvm.insertvalue %arg1, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %12 = llvm.insertvalue %2, %11[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %13 = llvm.insertvalue %1, %12[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %14 = llvm.insertvalue %0, %13[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %15 = builtin.unrealized_conversion_cast %14 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-    call @_Z25compute_flux_contributionRdR7double3S_S_S1_S1_S1_S1_S1_.lifted(%9, %arg1, %arg2, %15, %arg4, %arg5, %arg6, %arg7, %arg8) : (memref<?xf64>, !llvm.ptr, !llvm.ptr, memref<?xf64>, !llvm.ptr, !llvm.ptr, !llvm.ptr, !llvm.ptr, !llvm.ptr) -> ()
+    %16 = llvm.insertvalue %arg3, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %17 = llvm.insertvalue %arg3, %16[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %18 = llvm.insertvalue %2, %17[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %19 = llvm.insertvalue %1, %18[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %20 = llvm.insertvalue %0, %19[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %21 = builtin.unrealized_conversion_cast %20 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+    %22 = llvm.insertvalue %arg4, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %23 = llvm.insertvalue %arg4, %22[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %24 = llvm.insertvalue %2, %23[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %25 = llvm.insertvalue %1, %24[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %26 = llvm.insertvalue %0, %25[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %27 = builtin.unrealized_conversion_cast %26 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+    %28 = llvm.insertvalue %arg5, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %29 = llvm.insertvalue %arg5, %28[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %30 = llvm.insertvalue %2, %29[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %31 = llvm.insertvalue %1, %30[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %32 = llvm.insertvalue %0, %31[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %33 = builtin.unrealized_conversion_cast %32 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+    %34 = llvm.insertvalue %arg6, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %35 = llvm.insertvalue %arg6, %34[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %36 = llvm.insertvalue %2, %35[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %37 = llvm.insertvalue %1, %36[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %38 = llvm.insertvalue %0, %37[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %39 = builtin.unrealized_conversion_cast %38 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+    %40 = llvm.insertvalue %arg7, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %41 = llvm.insertvalue %arg7, %40[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %42 = llvm.insertvalue %2, %41[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %43 = llvm.insertvalue %1, %42[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %44 = llvm.insertvalue %0, %43[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %45 = builtin.unrealized_conversion_cast %44 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+    %46 = llvm.insertvalue %arg8, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %47 = llvm.insertvalue %arg8, %46[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %48 = llvm.insertvalue %2, %47[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %49 = llvm.insertvalue %1, %48[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %50 = llvm.insertvalue %0, %49[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %51 = builtin.unrealized_conversion_cast %50 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+    call @_Z25compute_flux_contributionRdR7double3S_S_S1_S1_S1_S1_S1_.lifted(%9, %15, %arg2, %21, %27, %33, %39, %45, %51) : (memref<?xf64>, memref<?xf64>, !llvm.ptr, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>) -> ()
     return
   }
   func.func private @_Z9time_stepiiPdS_S_S_.lifted(%arg0: i32 {llvm.noundef}, %arg1: i32 {llvm.noundef}, %arg2: memref<?xf64> {llvm.noundef}, %arg3: memref<?xf64> {llvm.noundef}, %arg4: memref<?xf64> {llvm.noundef}, %arg5: memref<?xf64> {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
@@ -1245,164 +1421,200 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
       %59 = llvm.insertvalue %0, %58[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
       %60 = llvm.insertvalue %15, %59[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
       %61 = builtin.unrealized_conversion_cast %60 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-      func.call @_Z25compute_flux_contributionRdR7double3S_S_S1_S1_S1_S1_S1_.lifted(%61, %45, %43, %cast, %44, %31, %30, %29, %28) : (memref<?xf64>, !llvm.ptr, !llvm.ptr, memref<?xf64>, !llvm.ptr, !llvm.ptr, !llvm.ptr, !llvm.ptr, !llvm.ptr) -> ()
+      %62 = llvm.insertvalue %45, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %63 = llvm.insertvalue %45, %62[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %64 = llvm.insertvalue %19, %63[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %65 = llvm.insertvalue %0, %64[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %66 = llvm.insertvalue %15, %65[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %67 = builtin.unrealized_conversion_cast %66 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+      %68 = llvm.insertvalue %44, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %69 = llvm.insertvalue %44, %68[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %70 = llvm.insertvalue %19, %69[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %71 = llvm.insertvalue %0, %70[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %72 = llvm.insertvalue %15, %71[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %73 = builtin.unrealized_conversion_cast %72 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+      %74 = llvm.insertvalue %31, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %75 = llvm.insertvalue %31, %74[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %76 = llvm.insertvalue %19, %75[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %77 = llvm.insertvalue %0, %76[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %78 = llvm.insertvalue %15, %77[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %79 = builtin.unrealized_conversion_cast %78 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+      %80 = llvm.insertvalue %30, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %81 = llvm.insertvalue %30, %80[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %82 = llvm.insertvalue %19, %81[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %83 = llvm.insertvalue %0, %82[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %84 = llvm.insertvalue %15, %83[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %85 = builtin.unrealized_conversion_cast %84 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+      %86 = llvm.insertvalue %29, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %87 = llvm.insertvalue %29, %86[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %88 = llvm.insertvalue %19, %87[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %89 = llvm.insertvalue %0, %88[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %90 = llvm.insertvalue %15, %89[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %91 = builtin.unrealized_conversion_cast %90 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+      %92 = llvm.insertvalue %28, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %93 = llvm.insertvalue %28, %92[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %94 = llvm.insertvalue %19, %93[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %95 = llvm.insertvalue %0, %94[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %96 = llvm.insertvalue %15, %95[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+      %97 = builtin.unrealized_conversion_cast %96 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+      func.call @_Z25compute_flux_contributionRdR7double3S_S_S1_S1_S1_S1_S1_.lifted(%61, %67, %43, %cast, %73, %79, %85, %91, %97) : (memref<?xf64>, memref<?xf64>, !llvm.ptr, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>) -> ()
       llvm.intr.lifetime.end 24, %45 : !llvm.ptr
       llvm.intr.lifetime.end 24, %44 : !llvm.ptr
       llvm.intr.lifetime.start 520, %48 : !llvm.ptr
       llvm.call @_ZNSt14basic_ifstreamIcSt11char_traitsIcEEC1EPKcSt13_Ios_Openmode(%48, %51, %27) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 256 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}) -> ()
-      %62 = llvm.call @_ZNSirsERi(%48, %47) : (!llvm.ptr, !llvm.ptr) -> !llvm.ptr
-      %63 = memref.load %alloca_0[%c0] : memref<1xi32>
-      %64 = llvm.sdiv %63, %27 : i32
+      %98 = llvm.call @_ZNSirsERi(%48, %47) : (!llvm.ptr, !llvm.ptr) -> !llvm.ptr
+      %99 = memref.load %alloca_0[%c0] : memref<1xi32>
+      %100 = llvm.sdiv %99, %27 : i32
       memref.store %33, %alloca_2[%c0] : memref<1xi32>
-      %65 = llvm.srem %63, %27 : i32
-      memref.store %65, %alloca_4[%c0] : memref<1xi32>
-      %66 = func.call @_ZSt3minIiERKT_S2_S2_.lifted(%cast_3, %cast_5) : (memref<?xi32>, memref<?xi32>) -> !llvm.ptr
-      %67 = llvm.load %66 : !llvm.ptr -> i32
-      %68 = llvm.add %67, %64 overflow<nsw> : i32
-      %69 = llvm.shl %68, %26 : i32
-      %70 = llvm.sext %69 : i32 to i64
-      %71 = llvm.icmp "slt" %68, %25 : i32
-      %72 = llvm.shl %70, %24 overflow<nsw> : i64
-      %73 = llvm.select %71, %23, %72 : i1, i64
-      %74 = arith.index_cast %73 : i64 to index
-      %alloc = memref.alloc(%74) : memref<?xf64>
+      %101 = llvm.srem %99, %27 : i32
+      memref.store %101, %alloca_4[%c0] : memref<1xi32>
+      %102 = func.call @_ZSt3minIiERKT_S2_S2_.lifted(%cast_3, %cast_5) : (memref<?xi32>, memref<?xi32>) -> !llvm.ptr
+      %103 = llvm.load %102 : !llvm.ptr -> i32
+      %104 = llvm.add %103, %100 overflow<nsw> : i32
+      %105 = llvm.shl %104, %26 : i32
+      %106 = llvm.sext %105 : i32 to i64
+      %107 = llvm.icmp "slt" %104, %25 : i32
+      %108 = llvm.shl %106, %24 overflow<nsw> : i64
+      %109 = llvm.select %107, %23, %108 : i1, i64
+      %110 = arith.index_cast %109 : i64 to index
+      %alloc = memref.alloc(%110) : memref<?xf64>
       %intptr_6 = memref.extract_aligned_pointer_as_index %alloc : memref<?xf64> -> index
-      %75 = arith.index_cast %intptr_6 : index to i64
-      %76 = llvm.inttoptr %75 : i64 to !llvm.ptr
-      %77 = llvm.shl %68, %22 overflow<nsw> : i32
-      %78 = llvm.sext %77 : i32 to i64
-      %79 = llvm.shl %78, %21 overflow<nsw> : i64
-      %80 = llvm.select %71, %23, %79 : i1, i64
-      %81 = arith.index_cast %80 : i64 to index
-      %alloc_7 = memref.alloc(%81) : memref<?xi32>
+      %111 = arith.index_cast %intptr_6 : index to i64
+      %112 = llvm.inttoptr %111 : i64 to !llvm.ptr
+      %113 = llvm.shl %104, %22 overflow<nsw> : i32
+      %114 = llvm.sext %113 : i32 to i64
+      %115 = llvm.shl %114, %21 overflow<nsw> : i64
+      %116 = llvm.select %107, %23, %115 : i1, i64
+      %117 = arith.index_cast %116 : i64 to index
+      %alloc_7 = memref.alloc(%117) : memref<?xi32>
       %intptr_8 = memref.extract_aligned_pointer_as_index %alloc_7 : memref<?xi32> -> index
-      %82 = arith.index_cast %intptr_8 : index to i64
-      %83 = llvm.inttoptr %82 : i64 to !llvm.ptr
-      %84 = llvm.mul %68, %20 overflow<nsw> : i32
-      %85 = llvm.sext %84 : i32 to i64
-      %86 = llvm.shl %85, %24 overflow<nsw> : i64
-      %87 = llvm.select %71, %23, %86 : i1, i64
-      %88 = arith.index_cast %87 : i64 to index
-      %alloc_9 = memref.alloc(%88) : memref<?xi8>
-      %intptr_10 = memref.extract_aligned_pointer_as_index %alloc_9 : memref<?xi8> -> index
-      %89 = arith.index_cast %intptr_10 : index to i64
-      %90 = llvm.inttoptr %89 : i64 to !llvm.ptr
-      %91 = memref.load %alloca_0[%c0] : memref<1xi32>
-      %92 = llvm.icmp "sgt" %91, %25 : i32
-      %93 = scf.if %92 -> (i32) {
-        %119:2 = scf.while (%arg2 = %19) : (i64) -> (i64, i32) {
+      %118 = arith.index_cast %intptr_8 : index to i64
+      %119 = llvm.inttoptr %118 : i64 to !llvm.ptr
+      %120 = llvm.mul %104, %20 overflow<nsw> : i32
+      %121 = llvm.sext %120 : i32 to i64
+      %122 = llvm.shl %121, %24 overflow<nsw> : i64
+      %123 = llvm.select %107, %23, %122 : i1, i64
+      %124 = arith.index_cast %123 : i64 to index
+      %alloc_9 = memref.alloc(%124) : memref<?xf64>
+      %intptr_10 = memref.extract_aligned_pointer_as_index %alloc_9 : memref<?xf64> -> index
+      %125 = arith.index_cast %intptr_10 : index to i64
+      %126 = llvm.inttoptr %125 : i64 to !llvm.ptr
+      %127 = memref.load %alloca_0[%c0] : memref<1xi32>
+      %128 = llvm.icmp "sgt" %127, %25 : i32
+      %129 = scf.if %128 -> (i32) {
+        %155:2 = scf.while (%arg2 = %19) : (i64) -> (i64, i32) {
           %intptr_11 = memref.extract_aligned_pointer_as_index %alloc : memref<?xf64> -> index
-          %120 = arith.index_cast %intptr_11 : index to i64
-          %121 = llvm.inttoptr %120 : i64 to !llvm.ptr
-          %122 = llvm.getelementptr %121[%arg2] : (!llvm.ptr, i64) -> !llvm.ptr, f64
-          %123 = llvm.call @_ZNSirsERd(%48, %122) : (!llvm.ptr, !llvm.ptr) -> !llvm.ptr
-          %124 = llvm.shl %arg2, %21 : i64
-          %125 = llvm.and %124, %18 : i64
-          %126 = scf.while (%arg3 = %19) : (i64) -> i64 {
-            %131 = llvm.add %arg3, %125 overflow<nsw, nuw> : i64
-            %132 = arith.index_cast %131 : i64 to index
+          %156 = arith.index_cast %intptr_11 : index to i64
+          %157 = llvm.inttoptr %156 : i64 to !llvm.ptr
+          %158 = llvm.getelementptr %157[%arg2] : (!llvm.ptr, i64) -> !llvm.ptr, f64
+          %159 = llvm.call @_ZNSirsERd(%48, %158) : (!llvm.ptr, !llvm.ptr) -> !llvm.ptr
+          %160 = llvm.shl %arg2, %21 : i64
+          %161 = llvm.and %160, %18 : i64
+          %162 = scf.while (%arg3 = %19) : (i64) -> i64 {
+            %167 = llvm.add %arg3, %161 overflow<nsw, nuw> : i64
+            %168 = arith.index_cast %167 : i64 to index
             %intptr_12 = memref.extract_aligned_pointer_as_index %alloc_7 : memref<?xi32> -> index
-            %133 = arith.index_cast %intptr_12 : index to i64
-            %134 = llvm.inttoptr %133 : i64 to !llvm.ptr
-            %135 = llvm.getelementptr %134[%131] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-            %136 = llvm.call @_ZNSirsERi(%48, %135) : (!llvm.ptr, !llvm.ptr) -> !llvm.ptr
-            %137 = memref.load %alloc_7[%132] : memref<?xi32>
-            %138 = llvm.icmp "slt" %137, %25 : i32
-            scf.if %138 {
-              memref.store %17, %alloc_7[%132] : memref<?xi32>
+            %169 = arith.index_cast %intptr_12 : index to i64
+            %170 = llvm.inttoptr %169 : i64 to !llvm.ptr
+            %171 = llvm.getelementptr %170[%167] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+            %172 = llvm.call @_ZNSirsERi(%48, %171) : (!llvm.ptr, !llvm.ptr) -> !llvm.ptr
+            %173 = memref.load %alloc_7[%168] : memref<?xi32>
+            %174 = llvm.icmp "slt" %173, %25 : i32
+            scf.if %174 {
+              memref.store %17, %alloc_7[%168] : memref<?xi32>
             }
-            %139 = memref.load %alloc_7[%132] : memref<?xi32>
-            %140 = llvm.add %139, %17 overflow<nsw> : i32
-            memref.store %140, %alloc_7[%132] : memref<?xi32>
-            %141 = llvm.mul %131, %16 overflow<nsw, nuw> : i64
-            %142 = llvm.getelementptr inbounds %90[%141] : (!llvm.ptr, i64) -> !llvm.ptr, i8
-            %143 = scf.while (%arg4 = %19) : (i64) -> i64 {
-              %147 = llvm.getelementptr %142[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, f64
-              %148 = llvm.call @_ZNSirsERd(%48, %147) : (!llvm.ptr, !llvm.ptr) -> !llvm.ptr
-              %149 = llvm.getelementptr %142[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, f64
-              %150 = llvm.load %149 : !llvm.ptr -> f64
-              %151 = llvm.fneg %150 : f64
-              %152 = llvm.getelementptr %142[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, f64
-              llvm.store %151, %152 : f64, !llvm.ptr
-              %153 = llvm.add %arg4, %15 overflow<nsw, nuw> : i64
-              %154 = llvm.icmp "eq" %153, %24 : i64
-              %155 = arith.xori %154, %true : i1
-              scf.condition(%155) %153 : i64
+            %175 = memref.load %alloc_7[%168] : memref<?xi32>
+            %176 = llvm.add %175, %17 overflow<nsw> : i32
+            memref.store %176, %alloc_7[%168] : memref<?xi32>
+            %177 = llvm.mul %167, %16 overflow<nsw, nuw> : i64
+            %178 = llvm.getelementptr inbounds %126[%177] : (!llvm.ptr, i64) -> !llvm.ptr, i8
+            %179 = scf.while (%arg4 = %19) : (i64) -> i64 {
+              %183 = llvm.getelementptr %178[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, f64
+              %184 = llvm.call @_ZNSirsERd(%48, %183) : (!llvm.ptr, !llvm.ptr) -> !llvm.ptr
+              %185 = llvm.getelementptr %178[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, f64
+              %186 = llvm.load %185 : !llvm.ptr -> f64
+              %187 = llvm.fneg %186 : f64
+              %188 = llvm.getelementptr %178[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, f64
+              llvm.store %187, %188 : f64, !llvm.ptr
+              %189 = llvm.add %arg4, %15 overflow<nsw, nuw> : i64
+              %190 = llvm.icmp "eq" %189, %24 : i64
+              %191 = arith.xori %190, %true : i1
+              scf.condition(%191) %189 : i64
             } do {
             ^bb0(%arg4: i64):
               scf.yield %arg4 : i64
             }
-            %144 = llvm.add %arg3, %15 overflow<nsw, nuw> : i64
-            %145 = llvm.icmp "eq" %144, %14 : i64
-            %146 = arith.xori %145, %true : i1
-            scf.condition(%146) %144 : i64
+            %180 = llvm.add %arg3, %15 overflow<nsw, nuw> : i64
+            %181 = llvm.icmp "eq" %180, %14 : i64
+            %182 = arith.xori %181, %true : i1
+            scf.condition(%182) %180 : i64
           } do {
           ^bb0(%arg3: i64):
             scf.yield %arg3 : i64
           }
-          %127 = llvm.add %arg2, %15 overflow<nsw, nuw> : i64
-          %128 = memref.load %alloca_0[%c0] : memref<1xi32>
-          %129 = llvm.sext %128 : i32 to i64
-          %130 = llvm.icmp "slt" %127, %129 : i64
-          scf.condition(%130) %127, %128 : i64, i32
+          %163 = llvm.add %arg2, %15 overflow<nsw, nuw> : i64
+          %164 = memref.load %alloca_0[%c0] : memref<1xi32>
+          %165 = llvm.sext %164 : i32 to i64
+          %166 = llvm.icmp "slt" %163, %165 : i64
+          scf.condition(%166) %163, %164 : i64, i32
         } do {
         ^bb0(%arg2: i64, %arg3: i32):
           scf.yield %arg2 : i64
         }
-        scf.yield %119#1 : i32
+        scf.yield %155#1 : i32
       } else {
-        scf.yield %91 : i32
+        scf.yield %127 : i32
       }
-      %94 = llvm.icmp "slt" %93, %69 : i32
-      scf.if %94 {
-        %119 = llvm.add %93, %17 overflow<nsw> : i32
-        %120 = llvm.sext %119 : i32 to i64
-        %121 = arith.index_cast %120 : i64 to index
-        %122 = llvm.shl %119, %34 overflow<nsw> : i32
-        %123 = llvm.sext %122 : i32 to i64
-        %124 = llvm.sext %93 : i32 to i64
-        %125 = llvm.sext %69 : i32 to i64
-        %126 = scf.while (%arg2 = %124) : (i64) -> i64 {
-          %127 = memref.load %alloc[%121] : memref<?xf64>
-          %128 = arith.index_cast %arg2 : i64 to index
-          memref.store %127, %alloc[%128] : memref<?xf64>
-          %129 = llvm.shl %arg2, %21 overflow<nsw> : i64
-          %130 = scf.while (%arg3 = %19) : (i64) -> i64 {
-            %134 = llvm.add %arg3, %123 overflow<nsw, nuw> : i64
-            %135 = arith.index_cast %134 : i64 to index
-            %136 = memref.load %alloc_7[%135] : memref<?xi32>
-            %137 = llvm.add %arg3, %129 overflow<nsw, nuw> : i64
-            %138 = arith.index_cast %137 : i64 to index
-            memref.store %136, %alloc_7[%138] : memref<?xi32>
-            %139 = llvm.mul %134, %16 : i64
-            %140 = llvm.getelementptr %90[%139] : (!llvm.ptr, i64) -> !llvm.ptr, i8
-            %141 = llvm.mul %137, %16 : i64
-            %142 = llvm.getelementptr %90[%141] : (!llvm.ptr, i64) -> !llvm.ptr, i8
-            %143 = scf.while (%arg4 = %19) : (i64) -> i64 {
-              %147 = llvm.getelementptr %140[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, f64
-              %148 = llvm.load %147 : !llvm.ptr -> f64
-              %149 = llvm.getelementptr %142[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, f64
-              llvm.store %148, %149 : f64, !llvm.ptr
-              %150 = llvm.add %arg4, %15 overflow<nsw, nuw> : i64
-              %151 = llvm.icmp "eq" %150, %24 : i64
-              %152 = arith.xori %151, %true : i1
-              scf.condition(%152) %150 : i64
+      %130 = llvm.icmp "slt" %129, %105 : i32
+      scf.if %130 {
+        %155 = llvm.add %129, %17 overflow<nsw> : i32
+        %156 = llvm.sext %155 : i32 to i64
+        %157 = arith.index_cast %156 : i64 to index
+        %158 = llvm.shl %155, %34 overflow<nsw> : i32
+        %159 = llvm.sext %158 : i32 to i64
+        %160 = llvm.sext %129 : i32 to i64
+        %161 = llvm.sext %105 : i32 to i64
+        %162 = scf.while (%arg2 = %160) : (i64) -> i64 {
+          %163 = memref.load %alloc[%157] : memref<?xf64>
+          %164 = arith.index_cast %arg2 : i64 to index
+          memref.store %163, %alloc[%164] : memref<?xf64>
+          %165 = llvm.shl %arg2, %21 overflow<nsw> : i64
+          %166 = scf.while (%arg3 = %19) : (i64) -> i64 {
+            %170 = llvm.add %arg3, %159 overflow<nsw, nuw> : i64
+            %171 = arith.index_cast %170 : i64 to index
+            %172 = memref.load %alloc_7[%171] : memref<?xi32>
+            %173 = llvm.add %arg3, %165 overflow<nsw, nuw> : i64
+            %174 = arith.index_cast %173 : i64 to index
+            memref.store %172, %alloc_7[%174] : memref<?xi32>
+            %175 = llvm.mul %170, %16 : i64
+            %176 = llvm.getelementptr %126[%175] : (!llvm.ptr, i64) -> !llvm.ptr, i8
+            %177 = llvm.mul %173, %16 : i64
+            %178 = llvm.getelementptr %126[%177] : (!llvm.ptr, i64) -> !llvm.ptr, i8
+            %179 = scf.while (%arg4 = %19) : (i64) -> i64 {
+              %183 = llvm.getelementptr %176[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, f64
+              %184 = llvm.load %183 : !llvm.ptr -> f64
+              %185 = llvm.getelementptr %178[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, f64
+              llvm.store %184, %185 : f64, !llvm.ptr
+              %186 = llvm.add %arg4, %15 overflow<nsw, nuw> : i64
+              %187 = llvm.icmp "eq" %186, %24 : i64
+              %188 = arith.xori %187, %true : i1
+              scf.condition(%188) %186 : i64
             } do {
             ^bb0(%arg4: i64):
               scf.yield %arg4 : i64
             }
-            %144 = llvm.add %arg3, %15 overflow<nsw, nuw> : i64
-            %145 = llvm.icmp "eq" %144, %14 : i64
-            %146 = arith.xori %145, %true : i1
-            scf.condition(%146) %144 : i64
+            %180 = llvm.add %arg3, %15 overflow<nsw, nuw> : i64
+            %181 = llvm.icmp "eq" %180, %14 : i64
+            %182 = arith.xori %181, %true : i1
+            scf.condition(%182) %180 : i64
           } do {
           ^bb0(%arg3: i64):
             scf.yield %arg3 : i64
           }
-          %131 = llvm.add %arg2, %15 overflow<nsw> : i64
-          %132 = llvm.icmp "eq" %131, %125 : i64
-          %133 = arith.xori %132, %true : i1
-          scf.condition(%133) %131 : i64
+          %167 = llvm.add %arg2, %15 overflow<nsw> : i64
+          %168 = llvm.icmp "eq" %167, %161 : i64
+          %169 = arith.xori %168, %true : i1
+          scf.condition(%169) %167 : i64
         } do {
         ^bb0(%arg2: i64):
           scf.yield %arg2 : i64
@@ -1410,114 +1622,114 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
       }
       llvm.call @_ZNSt14basic_ifstreamIcSt11char_traitsIcEED1Ev(%48) {no_unwind} : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 256 : i64, llvm.nonnull, llvm.noundef}) -> ()
       llvm.intr.lifetime.end 520, %48 : !llvm.ptr
-      %95 = llvm.mul %68, %13 overflow<nsw> : i32
-      %96 = func.call @_Z5allocIdEPT_i(%95) : (i32) -> !llvm.ptr
-      func.call @_Z20initialize_variablesiPd(%69, %96) : (i32, !llvm.ptr) -> ()
-      %97 = func.call @_Z5allocIdEPT_i(%95) : (i32) -> !llvm.ptr
-      %98 = func.call @_Z5allocIdEPT_i(%95) : (i32) -> !llvm.ptr
-      %99 = func.call @_Z5allocIdEPT_i(%69) : (i32) -> !llvm.ptr
-      %100 = llvm.call @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc(%12, %11) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
-      %101 = llvm.call @_ZNSolsEPFRSoS_E(%100, %10) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
-      %102 = llvm.call @omp_get_wtime() : () -> f64
-      %103 = scf.while (%arg2 = %25) : (i32) -> i32 {
-        %119 = llvm.insertvalue %97, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %120 = llvm.insertvalue %97, %119[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %121 = llvm.insertvalue %19, %120[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %122 = llvm.insertvalue %0, %121[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %123 = llvm.insertvalue %15, %122[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %124 = builtin.unrealized_conversion_cast %123 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-        %125 = llvm.insertvalue %96, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %126 = llvm.insertvalue %96, %125[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %127 = llvm.insertvalue %19, %126[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %128 = llvm.insertvalue %0, %127[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %129 = llvm.insertvalue %15, %128[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %130 = builtin.unrealized_conversion_cast %129 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-        func.call @_Z4copyIdEvPT_S1_i.lifted(%124, %130, %95) : (memref<?xf64>, memref<?xf64>, i32) -> ()
-        %131 = llvm.insertvalue %99, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %132 = llvm.insertvalue %99, %131[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %133 = llvm.insertvalue %19, %132[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %134 = llvm.insertvalue %0, %133[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %135 = llvm.insertvalue %15, %134[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-        %136 = builtin.unrealized_conversion_cast %135 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-        func.call @_Z19compute_step_factoriPdS_S_.lifted(%69, %96, %alloc, %136) : (i32, !llvm.ptr, memref<?xf64>, memref<?xf64>) -> ()
-        %137 = scf.while (%arg3 = %25) : (i32) -> i32 {
-          %141 = llvm.insertvalue %96, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %142 = llvm.insertvalue %96, %141[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %143 = llvm.insertvalue %19, %142[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %144 = llvm.insertvalue %0, %143[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %145 = llvm.insertvalue %15, %144[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %146 = builtin.unrealized_conversion_cast %145 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-          %147 = llvm.insertvalue %98, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %148 = llvm.insertvalue %98, %147[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %149 = llvm.insertvalue %19, %148[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %150 = llvm.insertvalue %0, %149[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %151 = llvm.insertvalue %15, %150[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %152 = builtin.unrealized_conversion_cast %151 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-          func.call @_Z12compute_fluxiPiPdS0_S0_.lifted(%69, %alloc_7, %90, %146, %152) : (i32, memref<?xi32>, !llvm.ptr, memref<?xf64>, memref<?xf64>) -> ()
-          %153 = llvm.insertvalue %97, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %154 = llvm.insertvalue %97, %153[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %155 = llvm.insertvalue %19, %154[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %156 = llvm.insertvalue %0, %155[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %157 = llvm.insertvalue %15, %156[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %158 = builtin.unrealized_conversion_cast %157 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-          %159 = llvm.insertvalue %96, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %160 = llvm.insertvalue %96, %159[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %161 = llvm.insertvalue %19, %160[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %162 = llvm.insertvalue %0, %161[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %163 = llvm.insertvalue %15, %162[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %164 = builtin.unrealized_conversion_cast %163 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-          %165 = llvm.insertvalue %99, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %166 = llvm.insertvalue %99, %165[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %167 = llvm.insertvalue %19, %166[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %168 = llvm.insertvalue %0, %167[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %169 = llvm.insertvalue %15, %168[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %170 = builtin.unrealized_conversion_cast %169 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-          %171 = llvm.insertvalue %98, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %172 = llvm.insertvalue %98, %171[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %173 = llvm.insertvalue %19, %172[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %174 = llvm.insertvalue %0, %173[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %175 = llvm.insertvalue %15, %174[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %176 = builtin.unrealized_conversion_cast %175 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
-          func.call @_Z9time_stepiiPdS_S_S_.lifted(%arg3, %69, %158, %164, %170, %176) : (i32, i32, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>) -> ()
-          %177 = llvm.add %arg3, %33 overflow<nsw, nuw> : i32
-          %178 = llvm.icmp "eq" %177, %26 : i32
-          %179 = arith.xori %178, %true : i1
-          scf.condition(%179) %177 : i32
+      %131 = llvm.mul %104, %13 overflow<nsw> : i32
+      %132 = func.call @_Z5allocIdEPT_i(%131) : (i32) -> !llvm.ptr
+      func.call @_Z20initialize_variablesiPd(%105, %132) : (i32, !llvm.ptr) -> ()
+      %133 = func.call @_Z5allocIdEPT_i(%131) : (i32) -> !llvm.ptr
+      %134 = func.call @_Z5allocIdEPT_i(%131) : (i32) -> !llvm.ptr
+      %135 = func.call @_Z5allocIdEPT_i(%105) : (i32) -> !llvm.ptr
+      %136 = llvm.call @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc(%12, %11) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      %137 = llvm.call @_ZNSolsEPFRSoS_E(%136, %10) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      %138 = llvm.call @omp_get_wtime() : () -> f64
+      %139 = scf.while (%arg2 = %25) : (i32) -> i32 {
+        %155 = llvm.insertvalue %133, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %156 = llvm.insertvalue %133, %155[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %157 = llvm.insertvalue %19, %156[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %158 = llvm.insertvalue %0, %157[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %159 = llvm.insertvalue %15, %158[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %160 = builtin.unrealized_conversion_cast %159 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+        %161 = llvm.insertvalue %132, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %162 = llvm.insertvalue %132, %161[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %163 = llvm.insertvalue %19, %162[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %164 = llvm.insertvalue %0, %163[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %165 = llvm.insertvalue %15, %164[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %166 = builtin.unrealized_conversion_cast %165 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+        func.call @_Z4copyIdEvPT_S1_i.lifted(%160, %166, %131) : (memref<?xf64>, memref<?xf64>, i32) -> ()
+        %167 = llvm.insertvalue %135, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %168 = llvm.insertvalue %135, %167[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %169 = llvm.insertvalue %19, %168[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %170 = llvm.insertvalue %0, %169[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %171 = llvm.insertvalue %15, %170[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %172 = builtin.unrealized_conversion_cast %171 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+        func.call @_Z19compute_step_factoriPdS_S_.lifted(%105, %132, %alloc, %172) : (i32, !llvm.ptr, memref<?xf64>, memref<?xf64>) -> ()
+        %173 = scf.while (%arg3 = %25) : (i32) -> i32 {
+          %177 = llvm.insertvalue %132, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %178 = llvm.insertvalue %132, %177[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %179 = llvm.insertvalue %19, %178[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %180 = llvm.insertvalue %0, %179[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %181 = llvm.insertvalue %15, %180[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %182 = builtin.unrealized_conversion_cast %181 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+          %183 = llvm.insertvalue %134, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %184 = llvm.insertvalue %134, %183[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %185 = llvm.insertvalue %19, %184[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %186 = llvm.insertvalue %0, %185[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %187 = llvm.insertvalue %15, %186[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %188 = builtin.unrealized_conversion_cast %187 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+          func.call @_Z12compute_fluxiPiPdS0_S0_.lifted(%105, %alloc_7, %126, %182, %188) : (i32, memref<?xi32>, !llvm.ptr, memref<?xf64>, memref<?xf64>) -> ()
+          %189 = llvm.insertvalue %133, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %190 = llvm.insertvalue %133, %189[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %191 = llvm.insertvalue %19, %190[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %192 = llvm.insertvalue %0, %191[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %193 = llvm.insertvalue %15, %192[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %194 = builtin.unrealized_conversion_cast %193 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+          %195 = llvm.insertvalue %132, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %196 = llvm.insertvalue %132, %195[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %197 = llvm.insertvalue %19, %196[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %198 = llvm.insertvalue %0, %197[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %199 = llvm.insertvalue %15, %198[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %200 = builtin.unrealized_conversion_cast %199 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+          %201 = llvm.insertvalue %135, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %202 = llvm.insertvalue %135, %201[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %203 = llvm.insertvalue %19, %202[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %204 = llvm.insertvalue %0, %203[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %205 = llvm.insertvalue %15, %204[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %206 = builtin.unrealized_conversion_cast %205 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+          %207 = llvm.insertvalue %134, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %208 = llvm.insertvalue %134, %207[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %209 = llvm.insertvalue %19, %208[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %210 = llvm.insertvalue %0, %209[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %211 = llvm.insertvalue %15, %210[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+          %212 = builtin.unrealized_conversion_cast %211 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+          func.call @_Z9time_stepiiPdS_S_S_.lifted(%arg3, %105, %194, %200, %206, %212) : (i32, i32, memref<?xf64>, memref<?xf64>, memref<?xf64>, memref<?xf64>) -> ()
+          %213 = llvm.add %arg3, %33 overflow<nsw, nuw> : i32
+          %214 = llvm.icmp "eq" %213, %26 : i32
+          %215 = arith.xori %214, %true : i1
+          scf.condition(%215) %213 : i32
         } do {
         ^bb0(%arg3: i32):
           scf.yield %arg3 : i32
         }
-        %138 = llvm.add %arg2, %33 overflow<nsw, nuw> : i32
-        %139 = llvm.icmp "eq" %138, %9 : i32
-        %140 = arith.xori %139, %true : i1
-        scf.condition(%140) %138 : i32
+        %174 = llvm.add %arg2, %33 overflow<nsw, nuw> : i32
+        %175 = llvm.icmp "eq" %174, %9 : i32
+        %176 = arith.xori %175, %true : i1
+        scf.condition(%176) %174 : i32
       } do {
       ^bb0(%arg2: i32):
         scf.yield %arg2 : i32
       }
-      %104 = llvm.call @omp_get_wtime() : () -> f64
-      %105 = llvm.fsub %104, %102 : f64
-      %106 = llvm.fdiv %105, %8 : f64
-      %107 = llvm.call @_ZNSolsEd(%12, %106) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, f64 {llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
-      %108 = llvm.call @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc(%107, %7) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
-      %109 = llvm.call @_ZNSolsEPFRSoS_E(%108, %10) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
-      %110 = llvm.call @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc(%12, %6) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
-      %111 = llvm.call @_ZNSolsEPFRSoS_E(%110, %10) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
-      %112 = memref.load %alloca_0[%c0] : memref<1xi32>
-      func.call @_Z4dumpPdii(%96, %112, %69) : (!llvm.ptr, i32, i32) -> ()
-      %113 = llvm.call @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc(%12, %5) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
-      %114 = llvm.call @_ZNSolsEPFRSoS_E(%113, %10) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
-      %115 = llvm.call @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc(%12, %4) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
-      %116 = llvm.call @_ZNSolsEPFRSoS_E(%115, %10) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
-      func.call @_Z7deallocIdEvPT_(%76) : (!llvm.ptr) -> ()
-      func.call @_Z7deallocIiEvPT_(%83) : (!llvm.ptr) -> ()
-      func.call @_Z7deallocIdEvPT_(%90) : (!llvm.ptr) -> ()
-      func.call @_Z7deallocIdEvPT_(%96) : (!llvm.ptr) -> ()
-      func.call @_Z7deallocIdEvPT_(%97) : (!llvm.ptr) -> ()
-      func.call @_Z7deallocIdEvPT_(%98) : (!llvm.ptr) -> ()
-      func.call @_Z7deallocIdEvPT_(%99) : (!llvm.ptr) -> ()
-      %117 = llvm.call @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc(%12, %3) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
-      %118 = llvm.call @_ZNSolsEPFRSoS_E(%117, %10) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      %140 = llvm.call @omp_get_wtime() : () -> f64
+      %141 = llvm.fsub %140, %138 : f64
+      %142 = llvm.fdiv %141, %8 : f64
+      %143 = llvm.call @_ZNSolsEd(%12, %142) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, f64 {llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      %144 = llvm.call @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc(%143, %7) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      %145 = llvm.call @_ZNSolsEPFRSoS_E(%144, %10) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      %146 = llvm.call @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc(%12, %6) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      %147 = llvm.call @_ZNSolsEPFRSoS_E(%146, %10) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      %148 = memref.load %alloca_0[%c0] : memref<1xi32>
+      func.call @_Z4dumpPdii(%132, %148, %105) : (!llvm.ptr, i32, i32) -> ()
+      %149 = llvm.call @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc(%12, %5) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      %150 = llvm.call @_ZNSolsEPFRSoS_E(%149, %10) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      %151 = llvm.call @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc(%12, %4) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      %152 = llvm.call @_ZNSolsEPFRSoS_E(%151, %10) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      func.call @_Z7deallocIdEvPT_(%112) : (!llvm.ptr) -> ()
+      func.call @_Z7deallocIiEvPT_(%119) : (!llvm.ptr) -> ()
+      func.call @_Z7deallocIdEvPT_(%126) : (!llvm.ptr) -> ()
+      func.call @_Z7deallocIdEvPT_(%132) : (!llvm.ptr) -> ()
+      func.call @_Z7deallocIdEvPT_(%133) : (!llvm.ptr) -> ()
+      func.call @_Z7deallocIdEvPT_(%134) : (!llvm.ptr) -> ()
+      func.call @_Z7deallocIdEvPT_(%135) : (!llvm.ptr) -> ()
+      %153 = llvm.call @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc(%12, %3) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
+      %154 = llvm.call @_ZNSolsEPFRSoS_E(%153, %10) : (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 8 : i64, llvm.nonnull, llvm.noundef})
     }
     return %25 : i32
   }
@@ -1525,16 +1737,16 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
   llvm.func local_unnamed_addr @_ZNSirsERi(!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 16 : i64, llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.align = 4 : i64, llvm.dereferenceable = 4 : i64, llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 8 : i64, llvm.dereferenceable = 16 : i64, llvm.nonnull, llvm.noundef}) attributes {passthrough = [["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
   func.func private @_ZSt3minIiERKT_S2_S2_.lifted(%arg0: memref<?xi32> {llvm.align = 4 : i64, llvm.dereferenceable = 4 : i64, llvm.nonnull, llvm.noundef}, %arg1: memref<?xi32> {llvm.align = 4 : i64, llvm.dereferenceable = 4 : i64, llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.align = 4 : i64, llvm.dereferenceable = 4 : i64, llvm.nonnull, llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %c0 = arith.constant 0 : index
-    %intptr = memref.extract_aligned_pointer_as_index %arg1 : memref<?xi32> -> index
+    %intptr = memref.extract_aligned_pointer_as_index %arg0 : memref<?xi32> -> index
     %0 = arith.index_cast %intptr : index to i64
     %1 = llvm.inttoptr %0 : i64 to !llvm.ptr
-    %intptr_0 = memref.extract_aligned_pointer_as_index %arg0 : memref<?xi32> -> index
+    %intptr_0 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xi32> -> index
     %2 = arith.index_cast %intptr_0 : index to i64
     %3 = llvm.inttoptr %2 : i64 to !llvm.ptr
     %4 = memref.load %arg1[%c0] : memref<?xi32>
     %5 = memref.load %arg0[%c0] : memref<?xi32>
     %6 = llvm.icmp "slt" %4, %5 : i32
-    %7 = llvm.select %6, %1, %3 : i1, !llvm.ptr
+    %7 = llvm.select %6, %3, %1 : i1, !llvm.ptr
     return %7 : !llvm.ptr
   }
   func.func private @_ZSt3minIiERKT_S2_S2_(%arg0: !llvm.ptr {llvm.align = 4 : i64, llvm.dereferenceable = 4 : i64, llvm.nonnull, llvm.noundef}, %arg1: !llvm.ptr {llvm.align = 4 : i64, llvm.dereferenceable = 4 : i64, llvm.nonnull, llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<linkonce_odr>} {

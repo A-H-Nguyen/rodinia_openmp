@@ -36,54 +36,90 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     }
     return
   }
-  func.func private @get_interval_by_sec(%arg0: !llvm.ptr {llvm.noundef, llvm.readonly}) -> f64 attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
-    %0 = llvm.mlir.zero : !llvm.ptr
+  func.func private @get_interval_by_sec.lifted(%arg0: memref<?xi64> {llvm.noundef, llvm.readonly}) -> f64 attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+    %c1 = arith.constant 1 : index
+    %c3 = arith.constant 3 : index
+    %c0 = arith.constant 0 : index
+    %c2 = arith.constant 2 : index
+    %0 = llvm.mlir.constant(1.000000e+06 : f64) : f64
     %1 = llvm.mlir.constant(0.000000e+00 : f64) : f64
-    %2 = llvm.mlir.constant(1.000000e+06 : f64) : f64
-    %3 = llvm.icmp "eq" %arg0, %0 : !llvm.ptr
-    %4 = scf.if %3 -> (f64) {
+    %2 = llvm.mlir.zero : !llvm.ptr
+    %intptr = memref.extract_aligned_pointer_as_index %arg0 : memref<?xi64> -> index
+    %3 = arith.index_cast %intptr : index to i64
+    %4 = llvm.inttoptr %3 : i64 to !llvm.ptr
+    %5 = llvm.icmp "eq" %4, %2 : !llvm.ptr
+    %6 = scf.if %5 -> (f64) {
       scf.yield %1 : f64
     } else {
-      %5 = llvm.getelementptr %arg0[2] : (!llvm.ptr) -> !llvm.ptr, i64
-      %6 = llvm.load %5 : !llvm.ptr -> i64
-      %7 = llvm.load %arg0 : !llvm.ptr -> i64
-      %8 = llvm.sub %6, %7 overflow<nsw> : i64
-      %9 = llvm.sitofp %8 : i64 to f64
-      %10 = llvm.getelementptr %arg0[3] : (!llvm.ptr) -> !llvm.ptr, i64
-      %11 = llvm.load %10 : !llvm.ptr -> i64
-      %12 = llvm.getelementptr %arg0[1] : (!llvm.ptr) -> !llvm.ptr, i64
-      %13 = llvm.load %12 : !llvm.ptr -> i64
-      %14 = llvm.sub %11, %13 overflow<nsw> : i64
-      %15 = llvm.sitofp %14 : i64 to f64
-      %16 = llvm.fdiv %15, %2 : f64
-      %17 = llvm.fadd %16, %9 : f64
-      scf.yield %17 : f64
+      %7 = memref.load %arg0[%c2] : memref<?xi64>
+      %8 = memref.load %arg0[%c0] : memref<?xi64>
+      %9 = llvm.sub %7, %8 overflow<nsw> : i64
+      %10 = llvm.sitofp %9 : i64 to f64
+      %11 = memref.load %arg0[%c3] : memref<?xi64>
+      %12 = memref.load %arg0[%c1] : memref<?xi64>
+      %13 = llvm.sub %11, %12 overflow<nsw> : i64
+      %14 = llvm.sitofp %13 : i64 to f64
+      %15 = llvm.fdiv %14, %0 : f64
+      %16 = llvm.fadd %15, %10 : f64
+      scf.yield %16 : f64
     }
-    return %4 : f64
+    return %6 : f64
   }
-  func.func private @get_interval_by_usec(%arg0: !llvm.ptr {llvm.noundef, llvm.readonly}) -> i32 attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
-    %0 = llvm.mlir.zero : !llvm.ptr
+  func.func private @get_interval_by_sec(%arg0: !llvm.ptr {llvm.noundef, llvm.readonly}) -> f64 attributes {llvm.linkage = #llvm.linkage<external>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi64>
+    %10 = call @get_interval_by_sec.lifted(%9) : (memref<?xi64>) -> f64
+    return %10 : f64
+  }
+  func.func private @get_interval_by_usec.lifted(%arg0: memref<?xi64> {llvm.noundef, llvm.readonly}) -> i32 attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+    %c1 = arith.constant 1 : index
+    %c3 = arith.constant 3 : index
+    %c0 = arith.constant 0 : index
+    %c2 = arith.constant 2 : index
+    %0 = llvm.mlir.constant(1000000 : i64) : i64
     %1 = llvm.mlir.constant(0 : i32) : i32
-    %2 = llvm.mlir.constant(1000000 : i64) : i64
-    %3 = llvm.icmp "eq" %arg0, %0 : !llvm.ptr
-    %4 = scf.if %3 -> (i32) {
+    %2 = llvm.mlir.zero : !llvm.ptr
+    %intptr = memref.extract_aligned_pointer_as_index %arg0 : memref<?xi64> -> index
+    %3 = arith.index_cast %intptr : index to i64
+    %4 = llvm.inttoptr %3 : i64 to !llvm.ptr
+    %5 = llvm.icmp "eq" %4, %2 : !llvm.ptr
+    %6 = scf.if %5 -> (i32) {
       scf.yield %1 : i32
     } else {
-      %5 = llvm.getelementptr %arg0[2] : (!llvm.ptr) -> !llvm.ptr, i64
-      %6 = llvm.load %5 : !llvm.ptr -> i64
-      %7 = llvm.load %arg0 : !llvm.ptr -> i64
-      %8 = llvm.sub %6, %7 overflow<nsw> : i64
-      %9 = llvm.mul %8, %2 overflow<nsw> : i64
-      %10 = llvm.getelementptr %arg0[3] : (!llvm.ptr) -> !llvm.ptr, i64
-      %11 = llvm.load %10 : !llvm.ptr -> i64
-      %12 = llvm.getelementptr %arg0[1] : (!llvm.ptr) -> !llvm.ptr, i64
-      %13 = llvm.load %12 : !llvm.ptr -> i64
-      %14 = llvm.sub %11, %13 : i64
-      %15 = llvm.add %14, %9 overflow<nsw> : i64
-      %16 = llvm.trunc %15 : i64 to i32
-      scf.yield %16 : i32
+      %7 = memref.load %arg0[%c2] : memref<?xi64>
+      %8 = memref.load %arg0[%c0] : memref<?xi64>
+      %9 = llvm.sub %7, %8 overflow<nsw> : i64
+      %10 = llvm.mul %9, %0 overflow<nsw> : i64
+      %11 = memref.load %arg0[%c3] : memref<?xi64>
+      %12 = memref.load %arg0[%c1] : memref<?xi64>
+      %13 = llvm.sub %11, %12 : i64
+      %14 = llvm.add %13, %10 overflow<nsw> : i64
+      %15 = llvm.trunc %14 : i64 to i32
+      scf.yield %15 : i32
     }
-    return %4 : i32
+    return %6 : i32
+  }
+  func.func private @get_interval_by_usec(%arg0: !llvm.ptr {llvm.noundef, llvm.readonly}) -> i32 attributes {llvm.linkage = #llvm.linkage<external>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi64>
+    %10 = call @get_interval_by_usec.lifted(%9) : (memref<?xi64>) -> i32
+    return %10 : i32
   }
   func.func private @create_matrix_from_file.lifted(%arg0: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.writeonly}, %arg1: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg2: memref<?xi32> {llvm.nocapture, llvm.noundef, llvm.writeonly}) -> (i32 {llvm.range = #llvm.constant_range<i32, 0, 2>}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %c0 = arith.constant 0 : index

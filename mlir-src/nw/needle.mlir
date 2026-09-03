@@ -153,118 +153,60 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %44 = llvm.zext nneg %43 : i32 to i64
     %45 = llvm.shl %44, %4 overflow<nsw, nuw> : i64
     %46 = arith.index_cast %45 : i64 to index
-    %alloc = memref.alloc(%46) : memref<?xi8>
-    %47 = lifter.memref2pointer(%alloc) : memref<?xi8> -> !llvm.ptr
-    %48 = arith.index_cast %45 : i64 to index
-    %alloc_0 = memref.alloc(%48) : memref<?xi8>
-    %49 = lifter.memref2pointer(%alloc_0) : memref<?xi8> -> !llvm.ptr
-    %50 = llvm.icmp "eq" %49, %5 : !llvm.ptr
-    scf.if %50 {
-      %74 = llvm.load %6 {alignment = 8 : i64, tbaa = [#tbaa_tag2]} : !llvm.ptr -> !llvm.ptr
-      %75 = llvm.call tail @fwrite(%7, %8, %9, %74) : (!llvm.ptr {llvm.nonnull}, i64, i64, !llvm.ptr) -> i64
+    %alloc = memref.alloc(%46) : memref<?xi32>
+    %intptr = memref.extract_aligned_pointer_as_index %alloc : memref<?xi32> -> index
+    %47 = arith.index_cast %intptr : index to i64
+    %48 = llvm.inttoptr %47 : i64 to !llvm.ptr
+    %49 = arith.index_cast %45 : i64 to index
+    %alloc_0 = memref.alloc(%49) : memref<?xi32>
+    %intptr_1 = memref.extract_aligned_pointer_as_index %alloc_0 : memref<?xi32> -> index
+    %50 = arith.index_cast %intptr_1 : index to i64
+    %51 = llvm.inttoptr %50 : i64 to !llvm.ptr
+    %52 = llvm.icmp "eq" %51, %5 : !llvm.ptr
+    scf.if %52 {
+      %76 = llvm.load %6 {alignment = 8 : i64, tbaa = [#tbaa_tag2]} : !llvm.ptr -> !llvm.ptr
+      %77 = llvm.call tail @fwrite(%7, %8, %9, %76) : (!llvm.ptr {llvm.nonnull}, i64, i64, !llvm.ptr) -> i64
     }
     llvm.call tail @srand(%10) {no_unwind} : (i32 {llvm.noundef}) -> ()
-    %51 = llvm.icmp "slt" %35, %11 : i32
-    scf.if %51 {
-    } else {
-      %74 = llvm.zext nneg %42 : i32 to i64
-      %75 = llvm.shl %74, %4 overflow<nsw, nuw> : i64
-      %76 = llvm.zext nneg %42 : i32 to i64
-      %77 = scf.while (%arg2 = %12) : (i64) -> i64 {
-        %78 = llvm.trunc %arg2 overflow<nsw, nuw> : i64 to i32
-        %79 = llvm.mul %42, %78 : i32
-        %80 = llvm.zext %79 : i32 to i64
-        %81 = llvm.shl %80, %4 overflow<nsw, nuw> : i64
-        %82 = llvm.getelementptr %49[%81] : (!llvm.ptr, i64) -> !llvm.ptr, i8
-        "llvm.intr.memset"(%82, %13, %75) <{isVolatile = false, tbaa = [#tbaa_tag]}> : (!llvm.ptr, i8, i64) -> ()
-        %83 = llvm.add %arg2, %9 overflow<nsw, nuw> : i64
-        %84 = llvm.icmp "eq" %83, %76 : i64
-        %85 = arith.xori %84, %true : i1
-        scf.condition(%85) %83 : i64
-      } do {
-      ^bb0(%arg2: i64):
-        scf.yield %arg2 : i64
-      }
-    }
-    %52 = llvm.call tail @puts(%14) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull}) -> i32
-    %53 = llvm.icmp "slt" %35, %3 : i32
+    %53 = llvm.icmp "slt" %35, %11 : i32
     scf.if %53 {
     } else {
-      %74 = llvm.zext nneg %42 : i32 to i64
-      %75 = llvm.zext nneg %42 : i32 to i64
-      %76 = scf.while (%arg2 = %9) : (i64) -> i64 {
-        %77 = llvm.call tail @rand() {no_unwind} : () -> i32
-        %78 = llvm.srem %77, %15 : i32
-        %79 = llvm.add %78, %3 overflow<nsw> : i32
-        %80 = llvm.mul %arg2, %74 overflow<nsw, nuw> : i64
-        %81 = arith.index_cast %80 : i64 to index
-        %82 = lifter.pointer2memref(%49) : !llvm.ptr -> memref<?xi32>
-        memref.store %79, %82[%81] : memref<?xi32>
-        %83 = llvm.add %arg2, %9 overflow<nsw, nuw> : i64
-        %84 = llvm.icmp "eq" %83, %75 : i64
-        %85 = arith.xori %84, %true : i1
-        scf.condition(%85) %83 : i64
+      %76 = llvm.zext nneg %42 : i32 to i64
+      %77 = llvm.shl %76, %4 overflow<nsw, nuw> : i64
+      %78 = llvm.zext nneg %42 : i32 to i64
+      %79 = scf.while (%arg2 = %12) : (i64) -> i64 {
+        %80 = llvm.trunc %arg2 overflow<nsw, nuw> : i64 to i32
+        %81 = llvm.mul %42, %80 : i32
+        %82 = llvm.zext %81 : i32 to i64
+        %83 = llvm.shl %82, %4 overflow<nsw, nuw> : i64
+        %84 = llvm.getelementptr %51[%83] : (!llvm.ptr, i64) -> !llvm.ptr, i8
+        "llvm.intr.memset"(%84, %13, %77) <{isVolatile = false, tbaa = [#tbaa_tag]}> : (!llvm.ptr, i8, i64) -> ()
+        %85 = llvm.add %arg2, %9 overflow<nsw, nuw> : i64
+        %86 = llvm.icmp "eq" %85, %78 : i64
+        %87 = arith.xori %86, %true : i1
+        scf.condition(%87) %85 : i64
       } do {
       ^bb0(%arg2: i64):
         scf.yield %arg2 : i64
       }
     }
-    %54 = llvm.icmp "slt" %35, %3 : i32
-    scf.if %54 {
-    } else {
-      %74 = llvm.zext nneg %42 : i32 to i64
-      %75 = scf.while (%arg2 = %9) : (i64) -> i64 {
-        %76 = llvm.call tail @rand() {no_unwind} : () -> i32
-        %77 = llvm.srem %76, %15 : i32
-        %78 = llvm.add %77, %3 overflow<nsw> : i32
-        %79 = arith.index_cast %arg2 : i64 to index
-        %80 = lifter.pointer2memref(%49) : !llvm.ptr -> memref<?xi32>
-        memref.store %78, %80[%79] : memref<?xi32>
-        %81 = llvm.add %arg2, %9 overflow<nsw, nuw> : i64
-        %82 = llvm.icmp "eq" %81, %74 : i64
-        %83 = arith.xori %82, %true : i1
-        scf.condition(%83) %81 : i64
-      } do {
-      ^bb0(%arg2: i64):
-        scf.yield %arg2 : i64
-      }
-    }
+    %54 = llvm.call tail @puts(%14) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull}) -> i32
     %55 = llvm.icmp "slt" %35, %3 : i32
     scf.if %55 {
     } else {
-      %74 = llvm.zext nneg %42 : i32 to i64
-      %75 = llvm.zext nneg %42 : i32 to i64
       %76 = llvm.zext nneg %42 : i32 to i64
-      %77 = scf.while (%arg2 = %9) : (i64) -> i64 {
-        %78 = llvm.mul %arg2, %74 overflow<nsw, nuw> : i64
-        %79 = arith.index_cast %78 : i64 to index
-        %80 = lifter.pointer2memref(%49) : !llvm.ptr -> memref<?xi32>
-        %81 = memref.load %80[%79] : memref<?xi32>
-        %82 = llvm.sext %81 : i32 to i64
-        %83 = llvm.getelementptr %47[%78] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-        %84 = scf.while (%arg3 = %9) : (i64) -> i64 {
-          %88 = arith.index_cast %arg3 : i64 to index
-          %89 = lifter.pointer2memref(%49) : !llvm.ptr -> memref<?xi32>
-          %90 = memref.load %89[%88] : memref<?xi32>
-          %91 = llvm.sext %90 : i32 to i64
-          %92 = arith.index_cast %82 : i64 to index
-          %93 = arith.index_cast %91 : i64 to index
-          %94 = lifter.pointer2memref(%16) : !llvm.ptr -> memref<24x24xi32>
-          %95 = memref.load %94[%92, %93] : memref<24x24xi32>
-          %96 = llvm.getelementptr %83[%arg3] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-          llvm.store %95, %96 : i32, !llvm.ptr
-          %97 = llvm.add %arg3, %9 overflow<nsw, nuw> : i64
-          %98 = llvm.icmp "eq" %97, %76 : i64
-          %99 = arith.xori %98, %true : i1
-          scf.condition(%99) %97 : i64
-        } do {
-        ^bb0(%arg3: i64):
-          scf.yield %arg3 : i64
-        }
-        %85 = llvm.add %arg2, %9 overflow<nsw, nuw> : i64
-        %86 = llvm.icmp "eq" %85, %75 : i64
-        %87 = arith.xori %86, %true : i1
-        scf.condition(%87) %85 : i64
+      %77 = llvm.zext nneg %42 : i32 to i64
+      %78 = scf.while (%arg2 = %9) : (i64) -> i64 {
+        %79 = llvm.call tail @rand() {no_unwind} : () -> i32
+        %80 = llvm.srem %79, %15 : i32
+        %81 = llvm.add %80, %3 overflow<nsw> : i32
+        %82 = llvm.mul %arg2, %76 overflow<nsw, nuw> : i64
+        %83 = arith.index_cast %82 : i64 to index
+        memref.store %81, %alloc_0[%83] : memref<?xi32>
+        %84 = llvm.add %arg2, %9 overflow<nsw, nuw> : i64
+        %85 = llvm.icmp "eq" %84, %77 : i64
+        %86 = arith.xori %85, %true : i1
+        scf.condition(%86) %84 : i64
       } do {
       ^bb0(%arg2: i64):
         scf.yield %arg2 : i64
@@ -273,20 +215,17 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %56 = llvm.icmp "slt" %35, %3 : i32
     scf.if %56 {
     } else {
-      %74 = llvm.zext nneg %42 : i32 to i64
-      %75 = llvm.zext nneg %42 : i32 to i64
-      %76 = scf.while (%arg2 = %9) : (i64) -> i64 {
-        %77 = llvm.trunc %arg2 overflow<nsw, nuw> : i64 to i32
-        %78 = llvm.mul %38, %77 : i32
-        %79 = llvm.sub %11, %78 : i32
-        %80 = llvm.mul %arg2, %74 overflow<nsw, nuw> : i64
-        %81 = arith.index_cast %80 : i64 to index
-        %82 = lifter.pointer2memref(%49) : !llvm.ptr -> memref<?xi32>
-        memref.store %79, %82[%81] : memref<?xi32>
-        %83 = llvm.add %arg2, %9 overflow<nsw, nuw> : i64
-        %84 = llvm.icmp "eq" %83, %75 : i64
-        %85 = arith.xori %84, %true : i1
-        scf.condition(%85) %83 : i64
+      %76 = llvm.zext nneg %42 : i32 to i64
+      %77 = scf.while (%arg2 = %9) : (i64) -> i64 {
+        %78 = llvm.call tail @rand() {no_unwind} : () -> i32
+        %79 = llvm.srem %78, %15 : i32
+        %80 = llvm.add %79, %3 overflow<nsw> : i32
+        %81 = arith.index_cast %arg2 : i64 to index
+        memref.store %80, %alloc_0[%81] : memref<?xi32>
+        %82 = llvm.add %arg2, %9 overflow<nsw, nuw> : i64
+        %83 = llvm.icmp "eq" %82, %76 : i64
+        %84 = arith.xori %83, %true : i1
+        scf.condition(%84) %82 : i64
       } do {
       ^bb0(%arg2: i64):
         scf.yield %arg2 : i64
@@ -295,144 +234,205 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %57 = llvm.icmp "slt" %35, %3 : i32
     scf.if %57 {
     } else {
-      %74 = llvm.zext nneg %42 : i32 to i64
-      %75 = scf.while (%arg2 = %9) : (i64) -> i64 {
-        %76 = llvm.trunc %arg2 overflow<nsw, nuw> : i64 to i32
-        %77 = llvm.mul %38, %76 : i32
-        %78 = llvm.sub %11, %77 : i32
-        %79 = arith.index_cast %arg2 : i64 to index
-        %80 = lifter.pointer2memref(%49) : !llvm.ptr -> memref<?xi32>
-        memref.store %78, %80[%79] : memref<?xi32>
-        %81 = llvm.add %arg2, %9 overflow<nsw, nuw> : i64
-        %82 = llvm.icmp "eq" %81, %74 : i64
-        %83 = arith.xori %82, %true : i1
-        scf.condition(%83) %81 : i64
+      %76 = llvm.zext nneg %42 : i32 to i64
+      %77 = llvm.zext nneg %42 : i32 to i64
+      %78 = llvm.zext nneg %42 : i32 to i64
+      %79 = scf.while (%arg2 = %9) : (i64) -> i64 {
+        %80 = llvm.mul %arg2, %76 overflow<nsw, nuw> : i64
+        %81 = arith.index_cast %80 : i64 to index
+        %82 = memref.load %alloc_0[%81] : memref<?xi32>
+        %83 = llvm.sext %82 : i32 to i64
+        %intptr_2 = memref.extract_aligned_pointer_as_index %alloc : memref<?xi32> -> index
+        %84 = arith.index_cast %intptr_2 : index to i64
+        %85 = llvm.inttoptr %84 : i64 to !llvm.ptr
+        %86 = llvm.getelementptr %85[%80] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+        %87 = scf.while (%arg3 = %9) : (i64) -> i64 {
+          %91 = arith.index_cast %arg3 : i64 to index
+          %92 = memref.load %alloc_0[%91] : memref<?xi32>
+          %93 = llvm.sext %92 : i32 to i64
+          %94 = arith.index_cast %83 : i64 to index
+          %95 = arith.index_cast %93 : i64 to index
+          %96 = lifter.pointer2memref(%16) : !llvm.ptr -> memref<24x24xi32>
+          %97 = memref.load %96[%94, %95] : memref<24x24xi32>
+          %98 = llvm.getelementptr %86[%arg3] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+          llvm.store %97, %98 : i32, !llvm.ptr
+          %99 = llvm.add %arg3, %9 overflow<nsw, nuw> : i64
+          %100 = llvm.icmp "eq" %99, %78 : i64
+          %101 = arith.xori %100, %true : i1
+          scf.condition(%101) %99 : i64
+        } do {
+        ^bb0(%arg3: i64):
+          scf.yield %arg3 : i64
+        }
+        %88 = llvm.add %arg2, %9 overflow<nsw, nuw> : i64
+        %89 = llvm.icmp "eq" %88, %77 : i64
+        %90 = arith.xori %89, %true : i1
+        scf.condition(%90) %88 : i64
       } do {
       ^bb0(%arg2: i64):
         scf.yield %arg2 : i64
       }
     }
-    %58 = llvm.call tail @printf(%17, %41) vararg(!llvm.func<i32 (ptr, ...)>) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull, llvm.noundef}, i32 {llvm.noundef}) -> i32
-    %59 = llvm.call tail @puts(%18) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull}) -> i32
-    %60 = call @_Z8get_timev() : () -> i64
-    call @_Z12nw_optimizedPiS_S_iii(%49, %19, %47, %42, %42, %38) : (!llvm.ptr, !llvm.ptr, !llvm.ptr, i32, i32, i32) -> ()
-    %61 = call @_Z8get_timev() : () -> i64
-    %62 = llvm.sub %61, %60 overflow<nsw> : i64
-    %63 = llvm.sitofp %62 : i64 to f32
-    %64 = llvm.fdiv %63, %20 : f32
-    %65 = llvm.fpext %64 : f32 to f64
-    %66 = llvm.call tail @printf(%21, %65) vararg(!llvm.func<i32 (ptr, ...)>) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull, llvm.noundef}, f64 {llvm.noundef}) -> i32
-    %67 = llvm.call tail @fopen(%22, %23) : (!llvm.ptr {llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.noalias})
-    %68 = llvm.call tail @fwrite(%24, %25, %9, %67) : (!llvm.ptr {llvm.nonnull}, i64, i64, !llvm.ptr) -> i64
-    %69 = llvm.add %35, %26 overflow<nsw> : i32
-    %70 = llvm.getelementptr %49[-4] : (!llvm.ptr) -> !llvm.ptr, i8
-    %71 = llvm.getelementptr %49[-4] : (!llvm.ptr) -> !llvm.ptr, i8
-    %72 = llvm.icmp "sgt" %35, %11 : i32
-    scf.if %72 {
-      %74:5 = scf.while (%arg2 = %27, %arg3 = %27, %arg4 = %27, %arg5 = %69, %arg6 = %69) : (i32, i32, i32, i32, i32) -> (i32, i32, i32, i32, i32) {
-        %75 = llvm.icmp "eq" %arg6, %69 : i32
-        %76 = llvm.icmp "eq" %arg5, %69 : i32
-        %77 = llvm.and %75, %76 : i1
-        scf.if %77 {
-          %88 = llvm.mul %arg6, %42 overflow<nsw> : i32
-          %89 = llvm.add %88, %arg5 overflow<nsw> : i32
-          %90 = llvm.sext %89 : i32 to i64
-          %91 = arith.index_cast %90 : i64 to index
-          %92 = lifter.pointer2memref(%49) : !llvm.ptr -> memref<?xi32>
-          %93 = memref.load %92[%91] : memref<?xi32>
-          %94 = llvm.call tail @fprintf(%67, %28, %93) vararg(!llvm.func<i32 (ptr, ptr, ...)>) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}, i32 {llvm.noundef}) -> i32
+    %58 = llvm.icmp "slt" %35, %3 : i32
+    scf.if %58 {
+    } else {
+      %76 = llvm.zext nneg %42 : i32 to i64
+      %77 = llvm.zext nneg %42 : i32 to i64
+      %78 = scf.while (%arg2 = %9) : (i64) -> i64 {
+        %79 = llvm.trunc %arg2 overflow<nsw, nuw> : i64 to i32
+        %80 = llvm.mul %38, %79 : i32
+        %81 = llvm.sub %11, %80 : i32
+        %82 = llvm.mul %arg2, %76 overflow<nsw, nuw> : i64
+        %83 = arith.index_cast %82 : i64 to index
+        memref.store %81, %alloc_0[%83] : memref<?xi32>
+        %84 = llvm.add %arg2, %9 overflow<nsw, nuw> : i64
+        %85 = llvm.icmp "eq" %84, %77 : i64
+        %86 = arith.xori %85, %true : i1
+        scf.condition(%86) %84 : i64
+      } do {
+      ^bb0(%arg2: i64):
+        scf.yield %arg2 : i64
+      }
+    }
+    %59 = llvm.icmp "slt" %35, %3 : i32
+    scf.if %59 {
+    } else {
+      %76 = llvm.zext nneg %42 : i32 to i64
+      %77 = scf.while (%arg2 = %9) : (i64) -> i64 {
+        %78 = llvm.trunc %arg2 overflow<nsw, nuw> : i64 to i32
+        %79 = llvm.mul %38, %78 : i32
+        %80 = llvm.sub %11, %79 : i32
+        %81 = arith.index_cast %arg2 : i64 to index
+        memref.store %80, %alloc_0[%81] : memref<?xi32>
+        %82 = llvm.add %arg2, %9 overflow<nsw, nuw> : i64
+        %83 = llvm.icmp "eq" %82, %76 : i64
+        %84 = arith.xori %83, %true : i1
+        scf.condition(%84) %82 : i64
+      } do {
+      ^bb0(%arg2: i64):
+        scf.yield %arg2 : i64
+      }
+    }
+    %60 = llvm.call tail @printf(%17, %41) vararg(!llvm.func<i32 (ptr, ...)>) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull, llvm.noundef}, i32 {llvm.noundef}) -> i32
+    %61 = llvm.call tail @puts(%18) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull}) -> i32
+    %62 = call @_Z8get_timev() : () -> i64
+    call @_Z12nw_optimizedPiS_S_iii(%51, %19, %48, %42, %42, %38) : (!llvm.ptr, !llvm.ptr, !llvm.ptr, i32, i32, i32) -> ()
+    %63 = call @_Z8get_timev() : () -> i64
+    %64 = llvm.sub %63, %62 overflow<nsw> : i64
+    %65 = llvm.sitofp %64 : i64 to f32
+    %66 = llvm.fdiv %65, %20 : f32
+    %67 = llvm.fpext %66 : f32 to f64
+    %68 = llvm.call tail @printf(%21, %67) vararg(!llvm.func<i32 (ptr, ...)>) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull, llvm.noundef}, f64 {llvm.noundef}) -> i32
+    %69 = llvm.call tail @fopen(%22, %23) : (!llvm.ptr {llvm.nonnull, llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> (!llvm.ptr {llvm.noalias})
+    %70 = llvm.call tail @fwrite(%24, %25, %9, %69) : (!llvm.ptr {llvm.nonnull}, i64, i64, !llvm.ptr) -> i64
+    %71 = llvm.add %35, %26 overflow<nsw> : i32
+    %72 = llvm.getelementptr %51[-4] : (!llvm.ptr) -> !llvm.ptr, i8
+    %73 = llvm.getelementptr %51[-4] : (!llvm.ptr) -> !llvm.ptr, i8
+    %74 = llvm.icmp "sgt" %35, %11 : i32
+    scf.if %74 {
+      %76:5 = scf.while (%arg2 = %27, %arg3 = %27, %arg4 = %27, %arg5 = %71, %arg6 = %71) : (i32, i32, i32, i32, i32) -> (i32, i32, i32, i32, i32) {
+        %77 = llvm.icmp "eq" %arg6, %71 : i32
+        %78 = llvm.icmp "eq" %arg5, %71 : i32
+        %79 = llvm.and %77, %78 : i1
+        scf.if %79 {
+          %90 = llvm.mul %arg6, %42 overflow<nsw> : i32
+          %91 = llvm.add %90, %arg5 overflow<nsw> : i32
+          %92 = llvm.sext %91 : i32 to i64
+          %93 = arith.index_cast %92 : i64 to index
+          %94 = memref.load %alloc_0[%93] : memref<?xi32>
+          %95 = llvm.call tail @fprintf(%69, %28, %94) vararg(!llvm.func<i32 (ptr, ptr, ...)>) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}, i32 {llvm.noundef}) -> i32
         }
-        %78 = llvm.icmp "eq" %arg6, %11 : i32
-        %79 = llvm.icmp "eq" %arg5, %11 : i32
-        %80 = llvm.or %arg5, %arg6 : i32
-        %81 = llvm.icmp "eq" %80, %11 : i32
-        %82:6 = scf.if %81 -> (i32, i32, i32, i32, i32, i32) {
+        %80 = llvm.icmp "eq" %arg6, %11 : i32
+        %81 = llvm.icmp "eq" %arg5, %11 : i32
+        %82 = llvm.or %arg5, %arg6 : i32
+        %83 = llvm.icmp "eq" %82, %11 : i32
+        %84:6 = scf.if %83 -> (i32, i32, i32, i32, i32, i32) {
           scf.yield %29, %11, %11, %arg4, %arg3, %arg2 : i32, i32, i32, i32, i32, i32
         } else {
-          %88 = llvm.icmp "sgt" %arg6, %11 : i32
-          %89 = llvm.icmp "ne" %arg5, %11 : i32
-          %90 = llvm.and %88, %89 : i1
-          %91:3 = scf.if %90 -> (i32, i32, i32) {
-            %111 = llvm.add %arg6, %26 overflow<nsw> : i32
-            %112 = llvm.mul %111, %42 overflow<nsw> : i32
-            %113 = llvm.add %112, %arg5 overflow<nsw> : i32
-            %114 = llvm.sext %113 : i32 to i64
-            %115 = arith.index_cast %114 : i64 to index
-            %116 = lifter.pointer2memref(%49) : !llvm.ptr -> memref<?xi32>
-            %117 = llvm.getelementptr %49[%114] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-            %118 = llvm.getelementptr %117[-4] : (!llvm.ptr) -> !llvm.ptr, i8
-            %119 = llvm.load %118 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> i32
-            %120 = llvm.mul %arg6, %42 overflow<nsw, nuw> : i32
-            %121 = llvm.add %120, %arg5 overflow<nsw> : i32
-            %122 = llvm.sext %121 : i32 to i64
-            %123 = llvm.getelementptr %71[%122] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-            %124 = llvm.load %123 : !llvm.ptr -> i32
-            %125 = memref.load %116[%115] : memref<?xi32>
-            scf.yield %119, %125, %124 : i32, i32, i32
+          %90 = llvm.icmp "sgt" %arg6, %11 : i32
+          %91 = llvm.icmp "ne" %arg5, %11 : i32
+          %92 = llvm.and %90, %91 : i1
+          %93:3 = scf.if %92 -> (i32, i32, i32) {
+            %112 = llvm.add %arg6, %26 overflow<nsw> : i32
+            %113 = llvm.mul %112, %42 overflow<nsw> : i32
+            %114 = llvm.add %113, %arg5 overflow<nsw> : i32
+            %115 = llvm.sext %114 : i32 to i64
+            %116 = arith.index_cast %115 : i64 to index
+            %intptr_2 = memref.extract_aligned_pointer_as_index %alloc_0 : memref<?xi32> -> index
+            %117 = arith.index_cast %intptr_2 : index to i64
+            %118 = llvm.inttoptr %117 : i64 to !llvm.ptr
+            %119 = llvm.getelementptr %118[%115] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+            %120 = llvm.getelementptr %119[-4] : (!llvm.ptr) -> !llvm.ptr, i8
+            %121 = llvm.load %120 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> i32
+            %122 = llvm.mul %arg6, %42 overflow<nsw, nuw> : i32
+            %123 = llvm.add %122, %arg5 overflow<nsw> : i32
+            %124 = llvm.sext %123 : i32 to i64
+            %125 = llvm.getelementptr %73[%124] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+            %126 = llvm.load %125 : !llvm.ptr -> i32
+            %127 = memref.load %alloc_0[%116] : memref<?xi32>
+            scf.yield %121, %127, %126 : i32, i32, i32
           } else {
-            %111:3 = scf.if %78 -> (i32, i32, i32) {
-              %112 = llvm.zext nneg %arg5 : i32 to i64
-              %113 = llvm.getelementptr %70[%112] : (!llvm.ptr, i64) -> !llvm.ptr, i32
-              %114 = llvm.load %113 : !llvm.ptr -> i32
-              scf.yield %30, %30, %114 : i32, i32, i32
+            %112:3 = scf.if %80 -> (i32, i32, i32) {
+              %113 = llvm.zext nneg %arg5 : i32 to i64
+              %114 = llvm.getelementptr %72[%113] : (!llvm.ptr, i64) -> !llvm.ptr, i32
+              %115 = llvm.load %114 : !llvm.ptr -> i32
+              scf.yield %30, %30, %115 : i32, i32, i32
             } else {
-              %112 = arith.select %79, %30, %arg4 : i32
-              %113 = arith.select %79, %30, %arg2 : i32
-              %114 = scf.if %79 -> (i32) {
-                %115 = llvm.add %arg6, %26 overflow<nsw> : i32
-                %116 = llvm.mul %115, %42 overflow<nsw> : i32
-                %117 = llvm.sext %116 : i32 to i64
-                %118 = arith.index_cast %117 : i64 to index
-                %119 = lifter.pointer2memref(%49) : !llvm.ptr -> memref<?xi32>
-                %120 = memref.load %119[%118] : memref<?xi32>
+              %113 = arith.select %81, %30, %arg4 : i32
+              %114 = arith.select %81, %30, %arg2 : i32
+              %115 = scf.if %81 -> (i32) {
+                %116 = llvm.add %arg6, %26 overflow<nsw> : i32
+                %117 = llvm.mul %116, %42 overflow<nsw> : i32
+                %118 = llvm.sext %117 : i32 to i64
+                %119 = arith.index_cast %118 : i64 to index
+                %120 = memref.load %alloc_0[%119] : memref<?xi32>
                 scf.yield %120 : i32
               } else {
                 scf.yield %arg3 : i32
               }
-              scf.yield %112, %114, %113 : i32, i32, i32
-            }
-            scf.yield %111#0, %111#1, %111#2 : i32, i32, i32
-          }
-          %92 = llvm.mul %arg6, %42 overflow<nsw> : i32
-          %93 = llvm.add %92, %arg5 overflow<nsw> : i32
-          %94 = llvm.sext %93 : i32 to i64
-          %95 = arith.index_cast %94 : i64 to index
-          %96 = lifter.pointer2memref(%47) : !llvm.ptr -> memref<?xi32>
-          %97 = memref.load %96[%95] : memref<?xi32>
-          %98 = llvm.add %97, %91#0 overflow<nsw> : i32
-          %99 = llvm.sub %91#2, %38 overflow<nsw> : i32
-          %100 = llvm.sub %91#1, %38 overflow<nsw> : i32
-          %101 = func.call @_Z7maximumiii(%98, %99, %100) : (i32, i32, i32) -> i32
-          %102 = llvm.icmp "eq" %101, %98 : i32
-          %103 = llvm.select %102, %91#0, %101 : i1, i32
-          %104 = llvm.icmp "eq" %103, %99 : i32
-          %105 = llvm.select %104, %91#2, %103 : i1, i32
-          %106 = llvm.icmp "eq" %105, %100 : i32
-          %107 = llvm.select %106, %91#1, %105 : i1, i32
-          %108 = llvm.call tail @fprintf(%67, %28, %107) vararg(!llvm.func<i32 (ptr, ptr, ...)>) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}, i32 {llvm.noundef}) -> i32
-          %109 = llvm.icmp "eq" %107, %91#0 : i32
-          %110:3 = scf.if %109 -> (i32, i32, i32) {
-            %111 = llvm.add %arg6, %26 overflow<nsw> : i32
-            %112 = llvm.add %arg5, %26 overflow<nsw> : i32
-            scf.yield %31, %111, %112 : i32, i32, i32
-          } else {
-            %111 = llvm.icmp "eq" %107, %91#2 : i32
-            %112:3 = scf.if %111 -> (i32, i32, i32) {
-              %113 = llvm.add %arg5, %26 overflow<nsw> : i32
-              scf.yield %31, %arg6, %113 : i32, i32, i32
-            } else {
-              %113 = llvm.icmp "eq" %107, %91#1 : i32
-              %114 = llvm.select %113, %31, %11 : i1, i32
-              %115 = llvm.sext %113 : i1 to i32
-              %116 = llvm.add %arg6, %115 overflow<nsw> : i32
-              scf.yield %114, %116, %arg5 : i32, i32, i32
+              scf.yield %113, %115, %114 : i32, i32, i32
             }
             scf.yield %112#0, %112#1, %112#2 : i32, i32, i32
           }
-          scf.yield %110#0, %110#1, %110#2, %91#0, %91#1, %91#2 : i32, i32, i32, i32, i32, i32
+          %94 = llvm.mul %arg6, %42 overflow<nsw> : i32
+          %95 = llvm.add %94, %arg5 overflow<nsw> : i32
+          %96 = llvm.sext %95 : i32 to i64
+          %97 = arith.index_cast %96 : i64 to index
+          %98 = memref.load %alloc[%97] : memref<?xi32>
+          %99 = llvm.add %98, %93#0 overflow<nsw> : i32
+          %100 = llvm.sub %93#2, %38 overflow<nsw> : i32
+          %101 = llvm.sub %93#1, %38 overflow<nsw> : i32
+          %102 = func.call @_Z7maximumiii(%99, %100, %101) : (i32, i32, i32) -> i32
+          %103 = llvm.icmp "eq" %102, %99 : i32
+          %104 = llvm.select %103, %93#0, %102 : i1, i32
+          %105 = llvm.icmp "eq" %104, %100 : i32
+          %106 = llvm.select %105, %93#2, %104 : i1, i32
+          %107 = llvm.icmp "eq" %106, %101 : i32
+          %108 = llvm.select %107, %93#1, %106 : i1, i32
+          %109 = llvm.call tail @fprintf(%69, %28, %108) vararg(!llvm.func<i32 (ptr, ptr, ...)>) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}, i32 {llvm.noundef}) -> i32
+          %110 = llvm.icmp "eq" %108, %93#0 : i32
+          %111:3 = scf.if %110 -> (i32, i32, i32) {
+            %112 = llvm.add %arg6, %26 overflow<nsw> : i32
+            %113 = llvm.add %arg5, %26 overflow<nsw> : i32
+            scf.yield %31, %112, %113 : i32, i32, i32
+          } else {
+            %112 = llvm.icmp "eq" %108, %93#2 : i32
+            %113:3 = scf.if %112 -> (i32, i32, i32) {
+              %114 = llvm.add %arg5, %26 overflow<nsw> : i32
+              scf.yield %31, %arg6, %114 : i32, i32, i32
+            } else {
+              %114 = llvm.icmp "eq" %108, %93#1 : i32
+              %115 = llvm.select %114, %31, %11 : i1, i32
+              %116 = llvm.sext %114 : i1 to i32
+              %117 = llvm.add %arg6, %116 overflow<nsw> : i32
+              scf.yield %115, %117, %arg5 : i32, i32, i32
+            }
+            scf.yield %113#0, %113#1, %113#2 : i32, i32, i32
+          }
+          scf.yield %111#0, %111#1, %111#2, %93#0, %93#1, %93#2 : i32, i32, i32, i32, i32, i32
         }
-        %83 = arith.index_castui %82#0 : i32 to index
-        %84:8 = scf.index_switch %83 -> i32, i32, i32, i32, i32, i32, i32, i32 
+        %85 = arith.index_castui %84#0 : i32 to index
+        %86:8 = scf.index_switch %85 -> i32, i32, i32, i32, i32, i32, i32, i32 
         case 0 {
           scf.yield %0, %0, %0, %0, %0, %0, %0, %c1_i32 : i32, i32, i32, i32, i32, i32, i32, i32
         }
@@ -442,28 +442,28 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
         default {
           scf.yield %0, %0, %0, %0, %0, %c1_i32, %c0_i32, %c0_i32 : i32, i32, i32, i32, i32, i32, i32, i32
         }
-        %85 = arith.index_castui %84#7 : i32 to index
-        %86:7 = scf.index_switch %85 -> i32, i32, i32, i32, i32, i32, i32 
+        %87 = arith.index_castui %86#7 : i32 to index
+        %88:7 = scf.index_switch %87 -> i32, i32, i32, i32, i32, i32, i32 
         case 0 {
-          scf.yield %84#0, %84#1, %84#2, %84#3, %84#4, %84#5, %84#6 : i32, i32, i32, i32, i32, i32, i32
+          scf.yield %86#0, %86#1, %86#2, %86#3, %86#4, %86#5, %86#6 : i32, i32, i32, i32, i32, i32, i32
         }
         default {
-          %88 = llvm.icmp "sgt" %82#2, %26 : i32
-          %89 = arith.xori %88, %true : i1
-          %90 = arith.extui %89 : i1 to i32
-          %91 = arith.extui %88 : i1 to i32
-          scf.yield %82#5, %82#4, %82#3, %82#2, %82#1, %90, %91 : i32, i32, i32, i32, i32, i32, i32
+          %90 = llvm.icmp "sgt" %84#2, %26 : i32
+          %91 = arith.xori %90, %true : i1
+          %92 = arith.extui %91 : i1 to i32
+          %93 = arith.extui %90 : i1 to i32
+          scf.yield %84#5, %84#4, %84#3, %84#2, %84#1, %92, %93 : i32, i32, i32, i32, i32, i32, i32
         }
-        %87 = arith.trunci %86#6 : i32 to i1
-        scf.condition(%87) %86#0, %86#1, %86#2, %86#3, %86#4 : i32, i32, i32, i32, i32
+        %89 = arith.trunci %88#6 : i32 to i1
+        scf.condition(%89) %88#0, %88#1, %88#2, %88#3, %88#4 : i32, i32, i32, i32, i32
       } do {
       ^bb0(%arg2: i32, %arg3: i32, %arg4: i32, %arg5: i32, %arg6: i32):
         scf.yield %arg2, %arg3, %arg4, %arg5, %arg6 : i32, i32, i32, i32, i32
       }
     }
-    %73 = llvm.call tail @fclose(%67) : (!llvm.ptr {llvm.noundef}) -> i32
-    memref.dealloc %alloc : memref<?xi8>
-    memref.dealloc %alloc_0 : memref<?xi8>
+    %75 = llvm.call tail @fclose(%69) : (!llvm.ptr {llvm.noundef}) -> i32
+    memref.dealloc %alloc : memref<?xi32>
+    memref.dealloc %alloc_0 : memref<?xi32>
     return
   ^bb2:  // pred: ^bb0
     call @_Z5usageiPPc(%2, %arg1) : (i32, !llvm.ptr) -> ()

@@ -42,61 +42,79 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     return %0 : i32
   }
   llvm.func local_unnamed_addr @setup(i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}) -> i32 attributes {passthrough = [["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
-  func.func private @bpnn_train_kernel(%arg0: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg1: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readnone}, %arg2: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readnone}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
+  func.func private @bpnn_train_kernel.lifted(%arg0: memref<?xi32> {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg1: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readnone}, %arg2: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readnone}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+    %c2 = arith.constant 2 : index
+    %c0 = arith.constant 0 : index
+    %c1 = arith.constant 1 : index
     %0 = llvm.mlir.addressof @str : !llvm.ptr
-    %alloca = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
-    %cast = memref.cast %alloca : memref<1xf32> to memref<?xf32>
-    %intptr = memref.extract_aligned_pointer_as_index %cast : memref<?xf32> -> index
+    %intptr = memref.extract_aligned_pointer_as_index %arg0 : memref<?xi32> -> index
     %1 = arith.index_cast %intptr : index to i64
     %2 = llvm.inttoptr %1 : i64 to !llvm.ptr
-    %alloca_0 = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
-    %cast_1 = memref.cast %alloca_0 : memref<1xf32> to memref<?xf32>
-    %intptr_2 = memref.extract_aligned_pointer_as_index %cast_1 : memref<?xf32> -> index
-    %3 = arith.index_cast %intptr_2 : index to i64
+    %alloca = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
+    %cast = memref.cast %alloca : memref<1xf32> to memref<?xf32>
+    %intptr_0 = memref.extract_aligned_pointer_as_index %cast : memref<?xf32> -> index
+    %3 = arith.index_cast %intptr_0 : index to i64
     %4 = llvm.inttoptr %3 : i64 to !llvm.ptr
-    %5 = llvm.load %arg0 : !llvm.ptr -> i32
-    %6 = llvm.getelementptr %arg0[1] : (!llvm.ptr) -> !llvm.ptr, i32
-    %7 = llvm.load %6 : !llvm.ptr -> i32
-    %8 = llvm.getelementptr %arg0[2] : (!llvm.ptr) -> !llvm.ptr, i32
-    %9 = llvm.load %8 : !llvm.ptr -> i32
+    %alloca_1 = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
+    %cast_2 = memref.cast %alloca_1 : memref<1xf32> to memref<?xf32>
+    %intptr_3 = memref.extract_aligned_pointer_as_index %cast_2 : memref<?xf32> -> index
+    %5 = arith.index_cast %intptr_3 : index to i64
+    %6 = llvm.inttoptr %5 : i64 to !llvm.ptr
+    %7 = memref.load %arg0[%c0] : memref<?xi32>
+    %8 = memref.load %arg0[%c1] : memref<?xi32>
+    %9 = memref.load %arg0[%c2] : memref<?xi32>
     %10 = llvm.call tail @puts(%0) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull}) -> i32
-    %11 = llvm.getelementptr inbounds|nuw %arg0[16] : (!llvm.ptr) -> !llvm.ptr, i8
+    %11 = llvm.getelementptr inbounds|nuw %2[16] : (!llvm.ptr) -> !llvm.ptr, i8
     %12 = llvm.load %11 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> !llvm.ptr
-    %13 = llvm.getelementptr inbounds|nuw %arg0[24] : (!llvm.ptr) -> !llvm.ptr, i8
+    %13 = llvm.getelementptr inbounds|nuw %2[24] : (!llvm.ptr) -> !llvm.ptr, i8
     %14 = llvm.load %13 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-    %15 = llvm.getelementptr inbounds|nuw %arg0[64] : (!llvm.ptr) -> !llvm.ptr, i8
+    %15 = llvm.getelementptr inbounds|nuw %2[64] : (!llvm.ptr) -> !llvm.ptr, i8
     %16 = llvm.load %15 {alignment = 8 : i64, tbaa = [#tbaa_tag2]} : !llvm.ptr -> !llvm.ptr
-    llvm.call tail @bpnn_layerforward(%12, %14, %16, %5, %7) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, i32 {llvm.noundef}) -> ()
+    llvm.call tail @bpnn_layerforward(%12, %14, %16, %7, %8) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, i32 {llvm.noundef}) -> ()
     %17 = llvm.load %13 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-    %18 = llvm.getelementptr inbounds|nuw %arg0[32] : (!llvm.ptr) -> !llvm.ptr, i8
+    %18 = llvm.getelementptr inbounds|nuw %2[32] : (!llvm.ptr) -> !llvm.ptr, i8
     %19 = llvm.load %18 {alignment = 8 : i64, tbaa = [#tbaa_tag3]} : !llvm.ptr -> !llvm.ptr
-    %20 = llvm.getelementptr inbounds|nuw %arg0[72] : (!llvm.ptr) -> !llvm.ptr, i8
+    %20 = llvm.getelementptr inbounds|nuw %2[72] : (!llvm.ptr) -> !llvm.ptr, i8
     %21 = llvm.load %20 {alignment = 8 : i64, tbaa = [#tbaa_tag4]} : !llvm.ptr -> !llvm.ptr
-    llvm.call tail @bpnn_layerforward(%17, %19, %21, %7, %9) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, i32 {llvm.noundef}) -> ()
-    %22 = llvm.getelementptr inbounds|nuw %arg0[48] : (!llvm.ptr) -> !llvm.ptr, i8
+    llvm.call tail @bpnn_layerforward(%17, %19, %21, %8, %9) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, i32 {llvm.noundef}) -> ()
+    %22 = llvm.getelementptr inbounds|nuw %2[48] : (!llvm.ptr) -> !llvm.ptr, i8
     %23 = llvm.load %22 {alignment = 8 : i64, tbaa = [#tbaa_tag5]} : !llvm.ptr -> !llvm.ptr
-    %24 = llvm.getelementptr inbounds|nuw %arg0[56] : (!llvm.ptr) -> !llvm.ptr, i8
+    %24 = llvm.getelementptr inbounds|nuw %2[56] : (!llvm.ptr) -> !llvm.ptr, i8
     %25 = llvm.load %24 {alignment = 8 : i64, tbaa = [#tbaa_tag6]} : !llvm.ptr -> !llvm.ptr
     %26 = llvm.load %18 {alignment = 8 : i64, tbaa = [#tbaa_tag3]} : !llvm.ptr -> !llvm.ptr
-    llvm.call @bpnn_output_error(%23, %25, %26, %9, %2) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> ()
-    %27 = llvm.getelementptr inbounds|nuw %arg0[40] : (!llvm.ptr) -> !llvm.ptr, i8
+    llvm.call @bpnn_output_error(%23, %25, %26, %9, %4) {no_unwind} : (!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> ()
+    %27 = llvm.getelementptr inbounds|nuw %2[40] : (!llvm.ptr) -> !llvm.ptr, i8
     %28 = llvm.load %27 {alignment = 8 : i64, tbaa = [#tbaa_tag7]} : !llvm.ptr -> !llvm.ptr
     %29 = llvm.load %22 {alignment = 8 : i64, tbaa = [#tbaa_tag5]} : !llvm.ptr -> !llvm.ptr
     %30 = llvm.load %20 {alignment = 8 : i64, tbaa = [#tbaa_tag4]} : !llvm.ptr -> !llvm.ptr
     %31 = llvm.load %13 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
-    llvm.call @bpnn_hidden_error(%28, %7, %29, %9, %30, %31, %4) {no_unwind} : (!llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> ()
+    llvm.call @bpnn_hidden_error(%28, %8, %29, %9, %30, %31, %6) {no_unwind} : (!llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.nonnull, llvm.noundef}) -> ()
     %32 = llvm.load %22 {alignment = 8 : i64, tbaa = [#tbaa_tag5]} : !llvm.ptr -> !llvm.ptr
     %33 = llvm.load %13 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> !llvm.ptr
     %34 = llvm.load %20 {alignment = 8 : i64, tbaa = [#tbaa_tag4]} : !llvm.ptr -> !llvm.ptr
-    %35 = llvm.getelementptr inbounds|nuw %arg0[88] : (!llvm.ptr) -> !llvm.ptr, i8
+    %35 = llvm.getelementptr inbounds|nuw %2[88] : (!llvm.ptr) -> !llvm.ptr, i8
     %36 = llvm.load %35 {alignment = 8 : i64, tbaa = [#tbaa_tag8]} : !llvm.ptr -> !llvm.ptr
-    llvm.call @bpnn_adjust_weights(%32, %9, %33, %7, %34, %36) {no_unwind} : (!llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}) -> ()
+    llvm.call @bpnn_adjust_weights(%32, %9, %33, %8, %34, %36) {no_unwind} : (!llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}) -> ()
     %37 = llvm.load %27 {alignment = 8 : i64, tbaa = [#tbaa_tag7]} : !llvm.ptr -> !llvm.ptr
     %38 = llvm.load %11 {alignment = 8 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> !llvm.ptr
     %39 = llvm.load %15 {alignment = 8 : i64, tbaa = [#tbaa_tag2]} : !llvm.ptr -> !llvm.ptr
-    %40 = llvm.getelementptr inbounds|nuw %arg0[80] : (!llvm.ptr) -> !llvm.ptr, i8
+    %40 = llvm.getelementptr inbounds|nuw %2[80] : (!llvm.ptr) -> !llvm.ptr, i8
     %41 = llvm.load %40 {alignment = 8 : i64, tbaa = [#tbaa_tag9]} : !llvm.ptr -> !llvm.ptr
-    llvm.call @bpnn_adjust_weights(%37, %7, %38, %5, %39, %41) {no_unwind} : (!llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}) -> ()
+    llvm.call @bpnn_adjust_weights(%37, %8, %38, %7, %39, %41) {no_unwind} : (!llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}) -> ()
+    return
+  }
+  func.func private @bpnn_train_kernel(%arg0: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg1: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readnone}, %arg2: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readnone}) attributes {llvm.linkage = #llvm.linkage<external>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
+    call @bpnn_train_kernel.lifted(%9, %arg1, %arg2) : (memref<?xi32>, !llvm.ptr, !llvm.ptr) -> ()
     return
   }
   llvm.func local_unnamed_addr @bpnn_layerforward(!llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, !llvm.ptr {llvm.noundef}, i32 {llvm.noundef}, i32 {llvm.noundef}) attributes {passthrough = [["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}

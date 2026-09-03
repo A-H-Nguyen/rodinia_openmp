@@ -79,7 +79,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     return %9 : i64
   }
   llvm.func local_unnamed_addr @gettimeofday(!llvm.ptr {llvm.nocapture, llvm.noundef}, !llvm.ptr {llvm.nocapture, llvm.noundef}) -> (i32 {llvm.noundef}) attributes {no_unwind, passthrough = ["nofree", ["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
-  func.func private @_Z16single_iterationPfS_S_iifffff.lifted(%arg0: memref<?xf32> {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: memref<?xf32> {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: f32 {llvm.noundef}, %arg6: f32 {llvm.noundef}, %arg7: f32 {llvm.noundef}, %arg8: f32 {llvm.noundef}, %arg9: f32) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @_Z16single_iterationPfS_S_iifffff.lifted(%arg0: memref<?xf32> {llvm.noundef}, %arg1: memref<?xf32> {llvm.noundef}, %arg2: memref<?xf32> {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: f32 {llvm.noundef}, %arg6: f32 {llvm.noundef}, %arg7: f32 {llvm.noundef}, %arg8: f32 {llvm.noundef}, %arg9: f32) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %true = arith.constant true
     %0 = llvm.mlir.constant(1 : index) : i32
     %c0_i32 = arith.constant 0 : i32
@@ -113,482 +113,527 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %intptr = memref.extract_aligned_pointer_as_index %arg2 : memref<?xf32> -> index
     %26 = arith.index_cast %intptr : index to i64
     %27 = llvm.inttoptr %26 : i64 to !llvm.ptr
+    %intptr_0 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+    %28 = arith.index_cast %intptr_0 : index to i64
+    %29 = llvm.inttoptr %28 : i64 to !llvm.ptr
     %alloca = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
-    %alloca_0 = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
     %alloca_1 = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
     %alloca_2 = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
-    %alloca_3 = memref.alloca() {alignment = 4 : i64} : memref<1xi32>
+    %alloca_3 = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
+    %alloca_4 = memref.alloca() {alignment = 4 : i64} : memref<1xi32>
     memref.store %arg5, %alloca[%c0] : memref<1xf32>
-    memref.store %arg6, %alloca_0[%c0] : memref<1xf32>
-    memref.store %arg7, %alloca_1[%c0] : memref<1xf32>
-    memref.store %arg8, %alloca_2[%c0] : memref<1xf32>
-    %28 = llvm.mul %arg4, %arg3 overflow<nsw> : i32
-    %29 = llvm.sdiv %28, %5 : i32
-    %30 = llvm.sdiv %arg4, %4 : i32
-    %31 = llvm.sdiv %arg3, %4 : i32
-    memref.store %31, %alloca_3[%c0] : memref<1xi32>
-    %32 = llvm.load %3 : !llvm.ptr -> i32
-    llvm.call tail @omp_set_num_threads(%32) : (i32 {llvm.noundef}) -> ()
-    %33 = llvm.zext %29 : i32 to i64
-    %34 = llvm.zext %30 : i32 to i64
-    %35 = llvm.zext %arg3 : i32 to i64
-    %36 = llvm.zext %arg4 : i32 to i64
+    memref.store %arg6, %alloca_1[%c0] : memref<1xf32>
+    memref.store %arg7, %alloca_2[%c0] : memref<1xf32>
+    memref.store %arg8, %alloca_3[%c0] : memref<1xf32>
+    %30 = llvm.mul %arg4, %arg3 overflow<nsw> : i32
+    %31 = llvm.sdiv %30, %5 : i32
+    %32 = llvm.sdiv %arg4, %4 : i32
+    %33 = llvm.sdiv %arg3, %4 : i32
+    memref.store %33, %alloca_4[%c0] : memref<1xi32>
+    %34 = llvm.load %3 : !llvm.ptr -> i32
+    llvm.call tail @omp_set_num_threads(%34) : (i32 {llvm.noundef}) -> ()
+    %35 = llvm.zext %31 : i32 to i64
+    %36 = llvm.zext %32 : i32 to i64
+    %37 = llvm.zext %arg3 : i32 to i64
+    %38 = llvm.zext %arg4 : i32 to i64
     omp.parallel {
-      %alloca_4 = memref.alloca() {alignment = 4 : i64} : memref<1xi32>
-      %37 = llvm.call @__kmpc_global_thread_num(%2) : (!llvm.ptr) -> i32
-      %38 = llvm.call @__kmpc_bound_thread_num(%2) : (!llvm.ptr) -> i32
+      %alloca_5 = memref.alloca() {alignment = 4 : i64} : memref<1xi32>
+      %39 = llvm.call @__kmpc_global_thread_num(%2) : (!llvm.ptr) -> i32
+      %40 = llvm.call @__kmpc_bound_thread_num(%2) : (!llvm.ptr) -> i32
       llvm.intr.experimental.noalias.scope.decl #alias_scope
       llvm.intr.experimental.noalias.scope.decl #alias_scope1
-      %39 = llvm.trunc %33 : i64 to i32
-      %40 = llvm.trunc %34 : i64 to i32
       %41 = llvm.trunc %35 : i64 to i32
       %42 = llvm.trunc %36 : i64 to i32
-      %43 = llvm.icmp "sgt" %39, %7 : i32
-      scf.if %43 {
-        %44 = llvm.add %39, %8 overflow<nsw> : i32
-        %45 = llvm.add %44, %0 : i32
-        memref.store %44, %alloca_4[%c0] : memref<1xi32>
-        %46 = memref.load %alloca_4[%c0] : memref<1xi32>
-        %47 = llvm.intr.smin(%46, %44) : (i32, i32) -> i32
-        memref.store %47, %alloca_4[%c0] : memref<1xi32>
-        %48 = memref.load %alloca_3[%c0] : memref<1xi32>
-        %49 = llvm.shl %36, %9 : i64
-        %50 = llvm.ashr exact %49, %10 : i64
-        %51 = llvm.shl %36, %9 : i64
-        %52 = llvm.shl %36, %9 : i64
-        %53 = llvm.shl %36, %9 : i64
-        %54 = llvm.ashr exact %53, %9 : i64
-        %55 = llvm.shl %36, %9 : i64
+      %43 = llvm.trunc %37 : i64 to i32
+      %44 = llvm.trunc %38 : i64 to i32
+      %45 = llvm.icmp "sgt" %41, %7 : i32
+      scf.if %45 {
+        %46 = llvm.add %41, %8 overflow<nsw> : i32
+        %47 = llvm.add %46, %0 : i32
+        memref.store %46, %alloca_5[%c0] : memref<1xi32>
+        %48 = memref.load %alloca_5[%c0] : memref<1xi32>
+        %49 = llvm.intr.smin(%48, %46) : (i32, i32) -> i32
+        memref.store %49, %alloca_5[%c0] : memref<1xi32>
+        %50 = memref.load %alloca_4[%c0] : memref<1xi32>
+        %51 = llvm.shl %38, %9 : i64
+        %52 = llvm.ashr exact %51, %10 : i64
+        %53 = llvm.shl %38, %9 : i64
+        %54 = llvm.shl %38, %9 : i64
+        %55 = llvm.shl %38, %9 : i64
         %56 = llvm.ashr exact %55, %9 : i64
-        %57 = llvm.shl %36, %9 : i64
+        %57 = llvm.shl %38, %9 : i64
         %58 = llvm.ashr exact %57, %9 : i64
-        %59 = llvm.shl %36, %9 : i64
+        %59 = llvm.shl %38, %9 : i64
         %60 = llvm.ashr exact %59, %9 : i64
-        %61 = llvm.shl %36, %9 : i64
+        %61 = llvm.shl %38, %9 : i64
         %62 = llvm.ashr exact %61, %9 : i64
-        %63 = llvm.shl %36, %9 : i64
+        %63 = llvm.shl %38, %9 : i64
         %64 = llvm.ashr exact %63, %9 : i64
-        %65 = llvm.shl %36, %9 : i64
+        %65 = llvm.shl %38, %9 : i64
         %66 = llvm.ashr exact %65, %9 : i64
-        %67 = llvm.shl %36, %9 : i64
+        %67 = llvm.shl %38, %9 : i64
         %68 = llvm.ashr exact %67, %9 : i64
-        %69 = llvm.shl %36, %9 : i64
+        %69 = llvm.shl %38, %9 : i64
         %70 = llvm.ashr exact %69, %9 : i64
-        %71 = llvm.shl %36, %9 : i64
+        %71 = llvm.shl %38, %9 : i64
         %72 = llvm.ashr exact %71, %9 : i64
-        %73 = llvm.shl %36, %9 : i64
+        %73 = llvm.shl %38, %9 : i64
         %74 = llvm.ashr exact %73, %9 : i64
-        %75 = llvm.shl %36, %9 : i64
+        %75 = llvm.shl %38, %9 : i64
         %76 = llvm.ashr exact %75, %9 : i64
-        %77 = llvm.shl %36, %9 : i64
+        %77 = llvm.shl %38, %9 : i64
         %78 = llvm.ashr exact %77, %9 : i64
-        %79 = llvm.shl %36, %9 : i64
+        %79 = llvm.shl %38, %9 : i64
         %80 = llvm.ashr exact %79, %9 : i64
-        %81 = llvm.shl %36, %9 : i64
+        %81 = llvm.shl %38, %9 : i64
         %82 = llvm.ashr exact %81, %9 : i64
-        %83 = llvm.shl %36, %9 : i64
+        %83 = llvm.shl %38, %9 : i64
         %84 = llvm.ashr exact %83, %9 : i64
-        %85 = llvm.shl %35, %9 : i64
-        %86 = llvm.add %85, %11 : i64
-        %87 = llvm.ashr exact %86, %9 : i64
-        %88 = llvm.shl %36, %9 : i64
-        %89 = llvm.add %88, %11 : i64
-        %90 = llvm.ashr exact %89, %9 : i64
-        %91 = llvm.ashr exact %52, %10 : i64
-        %92 = llvm.ashr exact %51, %10 : i64
+        %85 = llvm.shl %38, %9 : i64
+        %86 = llvm.ashr exact %85, %9 : i64
+        %87 = llvm.shl %37, %9 : i64
+        %88 = llvm.add %87, %11 : i64
+        %89 = llvm.ashr exact %88, %9 : i64
+        %90 = llvm.shl %38, %9 : i64
+        %91 = llvm.add %90, %11 : i64
+        %92 = llvm.ashr exact %91, %9 : i64
+        %93 = llvm.ashr exact %54, %10 : i64
+        %94 = llvm.ashr exact %53, %10 : i64
         omp.wsloop {
-          omp.loop_nest (%arg10) : i32 = (%7) to (%45) step (%6) {
-            %93 = llvm.sdiv %arg10, %48 : i32
-            %94 = llvm.shl %93, %13 : i32
-            %95 = llvm.srem %arg10, %40 : i32
+          omp.loop_nest (%arg10) : i32 = (%7) to (%47) step (%6) {
+            %95 = llvm.sdiv %arg10, %50 : i32
             %96 = llvm.shl %95, %13 : i32
-            %97 = llvm.add %94, %4 overflow<nsw> : i32
-            %98 = llvm.add %96, %4 overflow<nsw> : i32
-            %99 = llvm.icmp "ne" %93, %7 : i32
-            %100 = llvm.icmp "ne" %95, %7 : i32
-            %101 = llvm.and %99, %100 : i1
-            %102 = llvm.icmp "slt" %97, %41 : i32
-            %103 = llvm.select %101, %102, %14 : i1, i1
-            %104 = llvm.icmp "slt" %98, %42 : i32
+            %97 = llvm.srem %arg10, %42 : i32
+            %98 = llvm.shl %97, %13 : i32
+            %99 = llvm.add %96, %4 overflow<nsw> : i32
+            %100 = llvm.add %98, %4 overflow<nsw> : i32
+            %101 = llvm.icmp "ne" %95, %7 : i32
+            %102 = llvm.icmp "ne" %97, %7 : i32
+            %103 = llvm.and %101, %102 : i1
+            %104 = llvm.icmp "slt" %99, %43 : i32
             %105 = llvm.select %103, %104, %14 : i1, i1
-            %106 = llvm.sext %96 : i32 to i64
-            scf.if %105 {
-              %107 = llvm.sext %94 : i32 to i64
-              %108 = llvm.sext %97 : i32 to i64
-              %109 = scf.while (%arg11 = %107) : (i64) -> i64 {
-                %110 = llvm.mul %arg11, %82 overflow<nsw> : i64
-                %111 = llvm.add %arg11, %16 overflow<nsw> : i64
-                %112 = llvm.mul %111, %84 overflow<nsw> : i64
-                %113 = llvm.add %arg11, %17 overflow<nsw> : i64
-                %114 = llvm.mul %113, %80 overflow<nsw> : i64
-                %115 = scf.while (%arg12 = %15) : (i64) -> i64 {
-                  %117 = llvm.or disjoint %arg12, %106 : i64
-                  %118 = llvm.add %117, %110 overflow<nsw> : i64
-                  %119 = llvm.getelementptr %arg1[%118] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                  %120 = llvm.load %119 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> vector<4xf32>
-                  %121 = memref.load %alloca[%c0] : memref<1xf32>
-                  %122 = llvm.insertelement %121, %22[%15 : i64] : vector<4xf32>
-                  %123 = llvm.shufflevector %122, %22 [0, 0, 0, 0] : vector<4xf32> 
-                  %intptr_5 = memref.extract_aligned_pointer_as_index %arg2 : memref<?xf32> -> index
-                  %124 = arith.index_cast %intptr_5 : index to i64
-                  %125 = llvm.inttoptr %124 : i64 to !llvm.ptr
-                  %126 = llvm.getelementptr %125[%118] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                  %127 = llvm.load %126 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> vector<4xf32>
-                  %128 = llvm.getelementptr %arg1[%117] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                  %129 = llvm.getelementptr %128[%112] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                  %130 = llvm.load %129 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> vector<4xf32>
-                  %131 = llvm.getelementptr %128[%114] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                  %132 = llvm.load %131 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> vector<4xf32>
-                  %133 = llvm.fadd %130, %132 : vector<4xf32>
-                  %134 = llvm.intr.fmuladd(%120, %23, %133) : (vector<4xf32>, vector<4xf32>, vector<4xf32>) -> vector<4xf32>
-                  %135 = memref.load %alloca_1[%c0] : memref<1xf32>
-                  %136 = llvm.insertelement %135, %22[%15 : i64] : vector<4xf32>
-                  %137 = llvm.shufflevector %136, %22 [0, 0, 0, 0] : vector<4xf32> 
-                  %138 = llvm.intr.fmuladd(%134, %137, %127) : (vector<4xf32>, vector<4xf32>, vector<4xf32>) -> vector<4xf32>
-                  %139 = llvm.getelementptr %119[4] : (!llvm.ptr) -> !llvm.ptr, i8
-                  %140 = llvm.load %139 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> vector<4xf32>
-                  %141 = llvm.getelementptr %119[-4] : (!llvm.ptr) -> !llvm.ptr, i8
-                  %142 = llvm.load %141 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> vector<4xf32>
-                  %143 = llvm.fadd %140, %142 : vector<4xf32>
-                  %144 = llvm.intr.fmuladd(%120, %23, %143) : (vector<4xf32>, vector<4xf32>, vector<4xf32>) -> vector<4xf32>
-                  %145 = memref.load %alloca_0[%c0] : memref<1xf32>
-                  %146 = llvm.insertelement %145, %22[%15 : i64] : vector<4xf32>
-                  %147 = llvm.shufflevector %146, %22 [0, 0, 0, 0] : vector<4xf32> 
-                  %148 = llvm.intr.fmuladd(%144, %147, %138) : (vector<4xf32>, vector<4xf32>, vector<4xf32>) -> vector<4xf32>
-                  %149 = llvm.fsub %24, %120 : vector<4xf32>
-                  %150 = memref.load %alloca_2[%c0] : memref<1xf32>
-                  %151 = llvm.insertelement %150, %22[%15 : i64] : vector<4xf32>
-                  %152 = llvm.shufflevector %151, %22 [0, 0, 0, 0] : vector<4xf32> 
-                  %153 = llvm.intr.fmuladd(%149, %152, %148) : (vector<4xf32>, vector<4xf32>, vector<4xf32>) -> vector<4xf32>
-                  %154 = llvm.intr.fmuladd(%123, %153, %120) : (vector<4xf32>, vector<4xf32>, vector<4xf32>) -> vector<4xf32>
-                  %intptr_6 = memref.extract_aligned_pointer_as_index %arg0 : memref<?xf32> -> index
-                  %155 = arith.index_cast %intptr_6 : index to i64
-                  %156 = llvm.inttoptr %155 : i64 to !llvm.ptr
-                  %157 = llvm.getelementptr %156[%118] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                  llvm.store %154, %157 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : vector<4xf32>, !llvm.ptr
-                  %158 = llvm.add %arg12, %18 overflow<nuw> : i64
-                  %159 = llvm.icmp "eq" %158, %25 : i64
-                  %160 = arith.xori %159, %true : i1
-                  scf.condition(%160) %158 : i64
+            %106 = llvm.icmp "slt" %100, %44 : i32
+            %107 = llvm.select %105, %106, %14 : i1, i1
+            %108 = llvm.sext %98 : i32 to i64
+            scf.if %107 {
+              %109 = llvm.sext %96 : i32 to i64
+              %110 = llvm.sext %99 : i32 to i64
+              %111 = scf.while (%arg11 = %109) : (i64) -> i64 {
+                %112 = llvm.mul %arg11, %84 overflow<nsw> : i64
+                %113 = llvm.add %arg11, %16 overflow<nsw> : i64
+                %114 = llvm.mul %113, %86 overflow<nsw> : i64
+                %115 = llvm.add %arg11, %17 overflow<nsw> : i64
+                %116 = llvm.mul %115, %82 overflow<nsw> : i64
+                %117 = scf.while (%arg12 = %15) : (i64) -> i64 {
+                  %119 = llvm.or disjoint %arg12, %108 : i64
+                  %120 = llvm.add %119, %112 overflow<nsw> : i64
+                  %intptr_6 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                  %121 = arith.index_cast %intptr_6 : index to i64
+                  %122 = llvm.inttoptr %121 : i64 to !llvm.ptr
+                  %123 = llvm.getelementptr %122[%120] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                  %124 = llvm.load %123 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> vector<4xf32>
+                  %125 = memref.load %alloca[%c0] : memref<1xf32>
+                  %126 = llvm.insertelement %125, %22[%15 : i64] : vector<4xf32>
+                  %127 = llvm.shufflevector %126, %22 [0, 0, 0, 0] : vector<4xf32> 
+                  %intptr_7 = memref.extract_aligned_pointer_as_index %arg2 : memref<?xf32> -> index
+                  %128 = arith.index_cast %intptr_7 : index to i64
+                  %129 = llvm.inttoptr %128 : i64 to !llvm.ptr
+                  %130 = llvm.getelementptr %129[%120] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                  %131 = llvm.load %130 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> vector<4xf32>
+                  %intptr_8 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                  %132 = arith.index_cast %intptr_8 : index to i64
+                  %133 = llvm.inttoptr %132 : i64 to !llvm.ptr
+                  %134 = llvm.getelementptr %133[%119] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                  %135 = llvm.getelementptr %134[%114] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                  %136 = llvm.load %135 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> vector<4xf32>
+                  %137 = llvm.getelementptr %134[%116] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                  %138 = llvm.load %137 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> vector<4xf32>
+                  %139 = llvm.fadd %136, %138 : vector<4xf32>
+                  %140 = llvm.intr.fmuladd(%124, %23, %139) : (vector<4xf32>, vector<4xf32>, vector<4xf32>) -> vector<4xf32>
+                  %141 = memref.load %alloca_2[%c0] : memref<1xf32>
+                  %142 = llvm.insertelement %141, %22[%15 : i64] : vector<4xf32>
+                  %143 = llvm.shufflevector %142, %22 [0, 0, 0, 0] : vector<4xf32> 
+                  %144 = llvm.intr.fmuladd(%140, %143, %131) : (vector<4xf32>, vector<4xf32>, vector<4xf32>) -> vector<4xf32>
+                  %145 = llvm.getelementptr %123[4] : (!llvm.ptr) -> !llvm.ptr, i8
+                  %146 = llvm.load %145 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> vector<4xf32>
+                  %147 = llvm.getelementptr %123[-4] : (!llvm.ptr) -> !llvm.ptr, i8
+                  %148 = llvm.load %147 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> vector<4xf32>
+                  %149 = llvm.fadd %146, %148 : vector<4xf32>
+                  %150 = llvm.intr.fmuladd(%124, %23, %149) : (vector<4xf32>, vector<4xf32>, vector<4xf32>) -> vector<4xf32>
+                  %151 = memref.load %alloca_1[%c0] : memref<1xf32>
+                  %152 = llvm.insertelement %151, %22[%15 : i64] : vector<4xf32>
+                  %153 = llvm.shufflevector %152, %22 [0, 0, 0, 0] : vector<4xf32> 
+                  %154 = llvm.intr.fmuladd(%150, %153, %144) : (vector<4xf32>, vector<4xf32>, vector<4xf32>) -> vector<4xf32>
+                  %155 = llvm.fsub %24, %124 : vector<4xf32>
+                  %156 = memref.load %alloca_3[%c0] : memref<1xf32>
+                  %157 = llvm.insertelement %156, %22[%15 : i64] : vector<4xf32>
+                  %158 = llvm.shufflevector %157, %22 [0, 0, 0, 0] : vector<4xf32> 
+                  %159 = llvm.intr.fmuladd(%155, %158, %154) : (vector<4xf32>, vector<4xf32>, vector<4xf32>) -> vector<4xf32>
+                  %160 = llvm.intr.fmuladd(%127, %159, %124) : (vector<4xf32>, vector<4xf32>, vector<4xf32>) -> vector<4xf32>
+                  %intptr_9 = memref.extract_aligned_pointer_as_index %arg0 : memref<?xf32> -> index
+                  %161 = arith.index_cast %intptr_9 : index to i64
+                  %162 = llvm.inttoptr %161 : i64 to !llvm.ptr
+                  %163 = llvm.getelementptr %162[%120] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                  llvm.store %160, %163 {access_groups = [#access_group], alignment = 4 : i64, tbaa = [#tbaa_tag]} : vector<4xf32>, !llvm.ptr
+                  %164 = llvm.add %arg12, %18 overflow<nuw> : i64
+                  %165 = llvm.icmp "eq" %164, %25 : i64
+                  %166 = arith.xori %165, %true : i1
+                  scf.condition(%166) %164 : i64
                 } do {
                 ^bb0(%arg12: i64):
                   scf.yield %arg12 : i64
                 }
-                %116 = llvm.icmp "slt" %111, %108 : i64
-                scf.condition(%116) %111 : i64
+                %118 = llvm.icmp "slt" %113, %110 : i64
+                scf.condition(%118) %113 : i64
               } do {
               ^bb0(%arg11: i64):
                 scf.yield %arg11 : i64
               }
             } else {
-              %107 = llvm.sext %98 : i32 to i64
-              %108 = llvm.sext %94 : i32 to i64
-              %109 = llvm.sext %97 : i32 to i64
-              %110:2 = scf.while (%arg11 = %108, %arg12 = %12) : (i64, f32) -> (i64, f32) {
-                %111 = llvm.icmp "eq" %arg11, %15 : i64
-                %112 = llvm.mul %arg11, %78 overflow<nsw> : i64
-                %113 = llvm.icmp "eq" %arg11, %87 : i64
-                %114 = llvm.mul %arg11, %64 overflow<nsw> : i64
-                %115 = arith.index_cast %114 : i64 to index
-                %116 = llvm.add %arg11, %16 overflow<nsw> : i64
-                %117 = llvm.mul %116, %66 overflow<nsw> : i64
-                %118 = llvm.add %arg11, %17 overflow<nsw> : i64
-                %119 = llvm.mul %118, %62 overflow<nsw> : i64
-                %120 = llvm.getelementptr %arg1[%114] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                %121 = llvm.mul %arg11, %68 overflow<nsw> : i64
-                %122 = llvm.add %arg11, %17 overflow<nsw> : i64
-                %123 = llvm.mul %122, %60 overflow<nsw> : i64
-                %124 = llvm.mul %arg11, %70 overflow<nsw> : i64
-                %125 = llvm.mul %116, %72 overflow<nsw> : i64
-                %126 = llvm.add %arg11, %17 overflow<nsw> : i64
-                %127 = llvm.mul %126, %58 overflow<nsw> : i64
-                %128 = llvm.mul %arg11, %74 overflow<nsw> : i64
-                %intptr_5 = memref.extract_aligned_pointer_as_index %arg2 : memref<?xf32> -> index
-                %129 = arith.index_cast %intptr_5 : index to i64
-                %130 = llvm.inttoptr %129 : i64 to !llvm.ptr
-                %131 = llvm.getelementptr %130[%128] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                %132 = llvm.getelementptr %arg1[%128] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                %133 = llvm.getelementptr %132[4] : (!llvm.ptr) -> !llvm.ptr, i8
-                %134 = llvm.add %arg11, %17 overflow<nsw> : i64
-                %135 = llvm.mul %134, %56 overflow<nsw> : i64
-                %136 = llvm.getelementptr %arg1[%135] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                %137 = llvm.mul %arg11, %76 overflow<nsw> : i64
-                %138 = llvm.add %arg11, %17 overflow<nsw> : i64
-                %139 = llvm.mul %138, %54 overflow<nsw> : i64
-                %140 = llvm.getelementptr inbounds|nuw %arg1[4] : (!llvm.ptr) -> !llvm.ptr, i8
-                %141 = llvm.getelementptr inbounds %arg1[%50] : (!llvm.ptr, i64) -> !llvm.ptr, i8
-                %142 = llvm.getelementptr %arg1[%123] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                %143 = llvm.getelementptr %arg1[%125] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                %144 = llvm.getelementptr %arg1[%127] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                %145 = llvm.getelementptr %arg1[%91] : (!llvm.ptr, i64) -> !llvm.ptr, i8
-                %146 = llvm.getelementptr %arg1[%139] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                %147 = llvm.getelementptr %arg1[%92] : (!llvm.ptr, i64) -> !llvm.ptr, i8
-                %148:2 = scf.while (%arg13 = %106, %arg14 = %arg12) : (i64, f32) -> (i64, f32) {
-                  %150 = llvm.icmp "eq" %arg13, %15 : i64
-                  %151 = llvm.or %arg13, %arg11 : i64
-                  %152 = llvm.and %151, %19 : i64
-                  %153 = llvm.icmp "eq" %152, %15 : i64
-                  %154 = arith.select %153, %27, %131 : !llvm.ptr
-                  %155 = arith.select %153, %140, %133 : !llvm.ptr
-                  %156 = arith.select %153, %arg1, %132 : !llvm.ptr
-                  %157 = arith.select %153, %141, %136 : !llvm.ptr
-                  %158:2 = scf.if %153 -> (f32, i32) {
+              %109 = llvm.sext %100 : i32 to i64
+              %110 = llvm.sext %96 : i32 to i64
+              %111 = llvm.sext %99 : i32 to i64
+              %112:2 = scf.while (%arg11 = %110, %arg12 = %12) : (i64, f32) -> (i64, f32) {
+                %113 = llvm.icmp "eq" %arg11, %15 : i64
+                %114 = llvm.mul %arg11, %80 overflow<nsw> : i64
+                %115 = llvm.icmp "eq" %arg11, %89 : i64
+                %116 = llvm.mul %arg11, %66 overflow<nsw> : i64
+                %117 = arith.index_cast %116 : i64 to index
+                %118 = llvm.add %arg11, %16 overflow<nsw> : i64
+                %119 = llvm.mul %118, %68 overflow<nsw> : i64
+                %120 = arith.index_cast %119 : i64 to index
+                %121 = llvm.add %arg11, %17 overflow<nsw> : i64
+                %122 = llvm.mul %121, %64 overflow<nsw> : i64
+                %123 = arith.index_cast %122 : i64 to index
+                %124 = arith.index_cast %116 : i64 to index
+                %intptr_6 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                %125 = arith.index_cast %intptr_6 : index to i64
+                %126 = llvm.inttoptr %125 : i64 to !llvm.ptr
+                %127 = llvm.getelementptr %126[%116] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                %128 = llvm.mul %arg11, %70 overflow<nsw> : i64
+                %129 = llvm.add %arg11, %17 overflow<nsw> : i64
+                %130 = llvm.mul %129, %62 overflow<nsw> : i64
+                %131 = llvm.mul %arg11, %72 overflow<nsw> : i64
+                %132 = llvm.mul %118, %74 overflow<nsw> : i64
+                %133 = llvm.add %arg11, %17 overflow<nsw> : i64
+                %134 = llvm.mul %133, %60 overflow<nsw> : i64
+                %135 = llvm.mul %arg11, %76 overflow<nsw> : i64
+                %intptr_7 = memref.extract_aligned_pointer_as_index %arg2 : memref<?xf32> -> index
+                %136 = arith.index_cast %intptr_7 : index to i64
+                %137 = llvm.inttoptr %136 : i64 to !llvm.ptr
+                %138 = llvm.getelementptr %137[%135] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                %intptr_8 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                %139 = arith.index_cast %intptr_8 : index to i64
+                %140 = llvm.inttoptr %139 : i64 to !llvm.ptr
+                %141 = llvm.getelementptr %140[%135] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                %142 = llvm.getelementptr %141[4] : (!llvm.ptr) -> !llvm.ptr, i8
+                %143 = llvm.add %arg11, %17 overflow<nsw> : i64
+                %144 = llvm.mul %143, %58 overflow<nsw> : i64
+                %intptr_9 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                %145 = arith.index_cast %intptr_9 : index to i64
+                %146 = llvm.inttoptr %145 : i64 to !llvm.ptr
+                %147 = llvm.getelementptr %146[%144] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                %148 = llvm.mul %arg11, %78 overflow<nsw> : i64
+                %149 = llvm.add %arg11, %17 overflow<nsw> : i64
+                %150 = llvm.mul %149, %56 overflow<nsw> : i64
+                %151 = llvm.getelementptr inbounds|nuw %29[4] : (!llvm.ptr) -> !llvm.ptr, i8
+                %152 = llvm.getelementptr inbounds %29[%52] : (!llvm.ptr, i64) -> !llvm.ptr, i8
+                %intptr_10 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                %153 = arith.index_cast %intptr_10 : index to i64
+                %154 = llvm.inttoptr %153 : i64 to !llvm.ptr
+                %155 = llvm.getelementptr %154[%130] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                %intptr_11 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                %156 = arith.index_cast %intptr_11 : index to i64
+                %157 = llvm.inttoptr %156 : i64 to !llvm.ptr
+                %158 = llvm.getelementptr %157[%132] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                %intptr_12 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                %159 = arith.index_cast %intptr_12 : index to i64
+                %160 = llvm.inttoptr %159 : i64 to !llvm.ptr
+                %161 = llvm.getelementptr %160[%134] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                %162 = llvm.getelementptr %29[%93] : (!llvm.ptr, i64) -> !llvm.ptr, i8
+                %intptr_13 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                %163 = arith.index_cast %intptr_13 : index to i64
+                %164 = llvm.inttoptr %163 : i64 to !llvm.ptr
+                %165 = llvm.getelementptr %164[%150] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                %166 = llvm.getelementptr %29[%94] : (!llvm.ptr, i64) -> !llvm.ptr, i8
+                %167:2 = scf.while (%arg13 = %108, %arg14 = %arg12) : (i64, f32) -> (i64, f32) {
+                  %169 = llvm.icmp "eq" %arg13, %15 : i64
+                  %170 = llvm.or %arg13, %arg11 : i64
+                  %171 = llvm.and %170, %19 : i64
+                  %172 = llvm.icmp "eq" %171, %15 : i64
+                  %173 = arith.select %172, %27, %138 : !llvm.ptr
+                  %174 = arith.select %172, %151, %142 : !llvm.ptr
+                  %175 = arith.select %172, %29, %141 : !llvm.ptr
+                  %176 = arith.select %172, %152, %147 : !llvm.ptr
+                  %177:2 = scf.if %172 -> (f32, i32) {
                     scf.yield %1, %c0_i32 : f32, i32
                   } else {
-                    %168 = llvm.icmp "eq" %arg13, %90 : i64
-                    %169 = llvm.select %111, %168, %14 : i1, i1
-                    %170:2 = scf.if %169 -> (f32, i32) {
-                      %171 = memref.load %alloca[%c0] : memref<1xf32>
-                      %172 = arith.index_cast %arg13 : i64 to index
-                      %173 = memref.load %arg2[%172] : memref<?xf32>
-                      %174 = llvm.getelementptr %arg1[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                      %175 = llvm.getelementptr %174[-4] : (!llvm.ptr) -> !llvm.ptr, i8
-                      %176 = llvm.load %175 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f32
-                      %177 = llvm.getelementptr %arg1[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                      %178 = llvm.load %177 : !llvm.ptr -> f32
-                      %179 = llvm.fsub %176, %178 : f32
-                      %180 = memref.load %alloca_0[%c0] : memref<1xf32>
-                      %181 = llvm.intr.fmuladd(%179, %180, %173) : (f32, f32, f32) -> f32
-                      %182 = llvm.getelementptr %147[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                      %183 = llvm.load %182 : !llvm.ptr -> f32
-                      %184 = llvm.fsub %183, %178 : f32
-                      %185 = memref.load %alloca_1[%c0] : memref<1xf32>
-                      %186 = llvm.intr.fmuladd(%184, %185, %181) : (f32, f32, f32) -> f32
-                      %187 = llvm.fsub %21, %178 : f32
-                      %188 = memref.load %alloca_2[%c0] : memref<1xf32>
-                      %189 = llvm.intr.fmuladd(%187, %188, %186) : (f32, f32, f32) -> f32
-                      %190 = llvm.fmul %171, %189 : f32
-                      scf.yield %190, %c1_i32 : f32, i32
+                    %187 = llvm.icmp "eq" %arg13, %92 : i64
+                    %188 = llvm.select %113, %187, %14 : i1, i1
+                    %189:2 = scf.if %188 -> (f32, i32) {
+                      %190 = memref.load %alloca[%c0] : memref<1xf32>
+                      %191 = arith.index_cast %arg13 : i64 to index
+                      %192 = memref.load %arg2[%191] : memref<?xf32>
+                      %193 = arith.index_cast %arg13 : i64 to index
+                      %intptr_14 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                      %194 = arith.index_cast %intptr_14 : index to i64
+                      %195 = llvm.inttoptr %194 : i64 to !llvm.ptr
+                      %196 = llvm.getelementptr %195[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                      %197 = llvm.getelementptr %196[-4] : (!llvm.ptr) -> !llvm.ptr, i8
+                      %198 = llvm.load %197 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f32
+                      %199 = memref.load %arg1[%193] : memref<?xf32>
+                      %200 = llvm.fsub %198, %199 : f32
+                      %201 = memref.load %alloca_1[%c0] : memref<1xf32>
+                      %202 = llvm.intr.fmuladd(%200, %201, %192) : (f32, f32, f32) -> f32
+                      %203 = llvm.getelementptr %166[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                      %204 = llvm.load %203 : !llvm.ptr -> f32
+                      %205 = llvm.fsub %204, %199 : f32
+                      %206 = memref.load %alloca_2[%c0] : memref<1xf32>
+                      %207 = llvm.intr.fmuladd(%205, %206, %202) : (f32, f32, f32) -> f32
+                      %208 = llvm.fsub %21, %199 : f32
+                      %209 = memref.load %alloca_3[%c0] : memref<1xf32>
+                      %210 = llvm.intr.fmuladd(%208, %209, %207) : (f32, f32, f32) -> f32
+                      %211 = llvm.fmul %190, %210 : f32
+                      scf.yield %211, %c1_i32 : f32, i32
                     } else {
-                      %171 = llvm.select %113, %168, %14 : i1, i1
-                      %172:2 = scf.if %171 -> (f32, i32) {
-                        %173 = memref.load %alloca[%c0] : memref<1xf32>
-                        %174 = llvm.add %arg13, %137 overflow<nsw> : i64
-                        %175 = arith.index_cast %174 : i64 to index
-                        %176 = memref.load %arg2[%175] : memref<?xf32>
-                        %177 = llvm.getelementptr %arg1[%174] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                        %178 = llvm.getelementptr %177[-4] : (!llvm.ptr) -> !llvm.ptr, i8
-                        %179 = llvm.load %178 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f32
-                        %180 = llvm.getelementptr %arg1[%174] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                        %181 = llvm.load %180 : !llvm.ptr -> f32
-                        %182 = llvm.fsub %179, %181 : f32
-                        %183 = memref.load %alloca_0[%c0] : memref<1xf32>
-                        %184 = llvm.intr.fmuladd(%182, %183, %176) : (f32, f32, f32) -> f32
-                        %185 = llvm.getelementptr %146[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                        %186 = llvm.load %185 : !llvm.ptr -> f32
-                        %187 = llvm.fsub %186, %181 : f32
-                        %188 = memref.load %alloca_1[%c0] : memref<1xf32>
-                        %189 = llvm.intr.fmuladd(%187, %188, %184) : (f32, f32, f32) -> f32
-                        %190 = llvm.fsub %21, %181 : f32
-                        %191 = memref.load %alloca_2[%c0] : memref<1xf32>
-                        %192 = llvm.intr.fmuladd(%190, %191, %189) : (f32, f32, f32) -> f32
-                        %193 = llvm.fmul %173, %192 : f32
-                        scf.yield %193, %c1_i32 : f32, i32
+                      %190 = llvm.select %115, %187, %14 : i1, i1
+                      %191:2 = scf.if %190 -> (f32, i32) {
+                        %192 = memref.load %alloca[%c0] : memref<1xf32>
+                        %193 = llvm.add %arg13, %148 overflow<nsw> : i64
+                        %194 = arith.index_cast %193 : i64 to index
+                        %195 = memref.load %arg2[%194] : memref<?xf32>
+                        %196 = arith.index_cast %193 : i64 to index
+                        %intptr_14 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                        %197 = arith.index_cast %intptr_14 : index to i64
+                        %198 = llvm.inttoptr %197 : i64 to !llvm.ptr
+                        %199 = llvm.getelementptr %198[%193] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                        %200 = llvm.getelementptr %199[-4] : (!llvm.ptr) -> !llvm.ptr, i8
+                        %201 = llvm.load %200 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f32
+                        %202 = memref.load %arg1[%196] : memref<?xf32>
+                        %203 = llvm.fsub %201, %202 : f32
+                        %204 = memref.load %alloca_1[%c0] : memref<1xf32>
+                        %205 = llvm.intr.fmuladd(%203, %204, %195) : (f32, f32, f32) -> f32
+                        %206 = llvm.getelementptr %165[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                        %207 = llvm.load %206 : !llvm.ptr -> f32
+                        %208 = llvm.fsub %207, %202 : f32
+                        %209 = memref.load %alloca_2[%c0] : memref<1xf32>
+                        %210 = llvm.intr.fmuladd(%208, %209, %205) : (f32, f32, f32) -> f32
+                        %211 = llvm.fsub %21, %202 : f32
+                        %212 = memref.load %alloca_3[%c0] : memref<1xf32>
+                        %213 = llvm.intr.fmuladd(%211, %212, %210) : (f32, f32, f32) -> f32
+                        %214 = llvm.fmul %192, %213 : f32
+                        scf.yield %214, %c1_i32 : f32, i32
                       } else {
-                        %173 = llvm.and %113, %150 : i1
-                        %174 = arith.xori %173, %true : i1
-                        %175 = arith.extui %174 : i1 to i32
-                        %176 = scf.if %173 -> (f32) {
+                        %192 = llvm.and %115, %169 : i1
+                        %193 = arith.xori %192, %true : i1
+                        %194 = arith.extui %193 : i1 to i32
+                        %195 = scf.if %192 -> (f32) {
                           scf.yield %1 : f32
                         } else {
-                          %177 = scf.if %111 -> (f32) {
-                            %178 = memref.load %alloca[%c0] : memref<1xf32>
-                            %179 = llvm.fpext %178 : f32 to f64
-                            %180 = arith.index_cast %arg13 : i64 to index
-                            %181 = memref.load %arg2[%180] : memref<?xf32>
-                            %182 = llvm.fpext %181 : f32 to f64
-                            %183 = llvm.getelementptr %arg1[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                            %184 = llvm.getelementptr %183[1] : (!llvm.ptr) -> !llvm.ptr, f32
-                            %185 = llvm.load %184 : !llvm.ptr -> f32
-                            %186 = llvm.getelementptr %183[-4] : (!llvm.ptr) -> !llvm.ptr, i8
-                            %187 = llvm.load %186 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f32
-                            %188 = llvm.fadd %185, %187 : f32
-                            %189 = llvm.fpext %188 : f32 to f64
-                            %190 = llvm.getelementptr %arg1[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                            %191 = llvm.load %190 : !llvm.ptr -> f32
-                            %192 = llvm.fpext %191 : f32 to f64
-                            %193 = llvm.intr.fmuladd(%192, %20, %189) : (f64, f64, f64) -> f64
-                            %194 = memref.load %alloca_0[%c0] : memref<1xf32>
-                            %195 = llvm.fpext %194 : f32 to f64
-                            %196 = llvm.intr.fmuladd(%193, %195, %182) : (f64, f64, f64) -> f64
-                            %197 = llvm.getelementptr %145[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                            %198 = llvm.load %197 : !llvm.ptr -> f32
-                            %199 = llvm.fsub %198, %191 : f32
-                            %200 = memref.load %alloca_1[%c0] : memref<1xf32>
-                            %201 = llvm.fmul %199, %200 : f32
-                            %202 = llvm.fpext %201 : f32 to f64
-                            %203 = llvm.fadd %196, %202 : f64
-                            %204 = llvm.fsub %21, %191 : f32
-                            %205 = memref.load %alloca_2[%c0] : memref<1xf32>
-                            %206 = llvm.fmul %204, %205 : f32
-                            %207 = llvm.fpext %206 : f32 to f64
-                            %208 = llvm.fadd %203, %207 : f64
-                            %209 = llvm.fmul %208, %179 : f64
-                            %210 = llvm.fptrunc %209 : f64 to f32
-                            scf.yield %210 : f32
+                          %196 = scf.if %113 -> (f32) {
+                            %197 = memref.load %alloca[%c0] : memref<1xf32>
+                            %198 = llvm.fpext %197 : f32 to f64
+                            %199 = arith.index_cast %arg13 : i64 to index
+                            %200 = memref.load %arg2[%199] : memref<?xf32>
+                            %201 = llvm.fpext %200 : f32 to f64
+                            %202 = arith.index_cast %arg13 : i64 to index
+                            %intptr_14 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                            %203 = arith.index_cast %intptr_14 : index to i64
+                            %204 = llvm.inttoptr %203 : i64 to !llvm.ptr
+                            %205 = llvm.getelementptr %204[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                            %206 = llvm.getelementptr %205[1] : (!llvm.ptr) -> !llvm.ptr, f32
+                            %207 = llvm.load %206 : !llvm.ptr -> f32
+                            %208 = llvm.getelementptr %205[-4] : (!llvm.ptr) -> !llvm.ptr, i8
+                            %209 = llvm.load %208 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f32
+                            %210 = llvm.fadd %207, %209 : f32
+                            %211 = llvm.fpext %210 : f32 to f64
+                            %212 = memref.load %arg1[%202] : memref<?xf32>
+                            %213 = llvm.fpext %212 : f32 to f64
+                            %214 = llvm.intr.fmuladd(%213, %20, %211) : (f64, f64, f64) -> f64
+                            %215 = memref.load %alloca_1[%c0] : memref<1xf32>
+                            %216 = llvm.fpext %215 : f32 to f64
+                            %217 = llvm.intr.fmuladd(%214, %216, %201) : (f64, f64, f64) -> f64
+                            %218 = llvm.getelementptr %162[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                            %219 = llvm.load %218 : !llvm.ptr -> f32
+                            %220 = llvm.fsub %219, %212 : f32
+                            %221 = memref.load %alloca_2[%c0] : memref<1xf32>
+                            %222 = llvm.fmul %220, %221 : f32
+                            %223 = llvm.fpext %222 : f32 to f64
+                            %224 = llvm.fadd %217, %223 : f64
+                            %225 = llvm.fsub %21, %212 : f32
+                            %226 = memref.load %alloca_3[%c0] : memref<1xf32>
+                            %227 = llvm.fmul %225, %226 : f32
+                            %228 = llvm.fpext %227 : f32 to f64
+                            %229 = llvm.fadd %224, %228 : f64
+                            %230 = llvm.fmul %229, %198 : f64
+                            %231 = llvm.fptrunc %230 : f64 to f32
+                            scf.yield %231 : f32
                           } else {
-                            %178 = scf.if %168 -> (f32) {
-                              %179 = memref.load %alloca[%c0] : memref<1xf32>
-                              %180 = llvm.fpext %179 : f32 to f64
-                              %181 = llvm.add %arg13, %124 overflow<nsw> : i64
-                              %182 = arith.index_cast %181 : i64 to index
-                              %183 = memref.load %arg2[%182] : memref<?xf32>
-                              %184 = llvm.fpext %183 : f32 to f64
-                              %185 = llvm.getelementptr %143[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                              %186 = llvm.load %185 : !llvm.ptr -> f32
-                              %187 = llvm.getelementptr %144[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                              %188 = llvm.load %187 : !llvm.ptr -> f32
-                              %189 = llvm.fadd %186, %188 : f32
-                              %190 = llvm.fpext %189 : f32 to f64
-                              %191 = llvm.getelementptr %arg1[%181] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                              %192 = llvm.getelementptr %arg1[%181] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                              %193 = llvm.load %192 : !llvm.ptr -> f32
-                              %194 = llvm.fpext %193 : f32 to f64
-                              %195 = llvm.intr.fmuladd(%194, %20, %190) : (f64, f64, f64) -> f64
-                              %196 = memref.load %alloca_1[%c0] : memref<1xf32>
-                              %197 = llvm.fpext %196 : f32 to f64
-                              %198 = llvm.intr.fmuladd(%195, %197, %184) : (f64, f64, f64) -> f64
-                              %199 = llvm.getelementptr %191[-4] : (!llvm.ptr) -> !llvm.ptr, i8
-                              %200 = llvm.load %199 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f32
-                              %201 = llvm.fsub %200, %193 : f32
-                              %202 = memref.load %alloca_0[%c0] : memref<1xf32>
-                              %203 = llvm.fmul %201, %202 : f32
-                              %204 = llvm.fpext %203 : f32 to f64
-                              %205 = llvm.fadd %198, %204 : f64
-                              %206 = llvm.fsub %21, %193 : f32
-                              %207 = memref.load %alloca_2[%c0] : memref<1xf32>
-                              %208 = llvm.fmul %206, %207 : f32
+                            %197 = scf.if %187 -> (f32) {
+                              %198 = memref.load %alloca[%c0] : memref<1xf32>
+                              %199 = llvm.fpext %198 : f32 to f64
+                              %200 = llvm.add %arg13, %131 overflow<nsw> : i64
+                              %201 = arith.index_cast %200 : i64 to index
+                              %202 = memref.load %arg2[%201] : memref<?xf32>
+                              %203 = llvm.fpext %202 : f32 to f64
+                              %204 = llvm.getelementptr %158[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                              %205 = llvm.load %204 : !llvm.ptr -> f32
+                              %206 = llvm.getelementptr %161[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                              %207 = llvm.load %206 : !llvm.ptr -> f32
+                              %208 = llvm.fadd %205, %207 : f32
                               %209 = llvm.fpext %208 : f32 to f64
-                              %210 = llvm.fadd %205, %209 : f64
-                              %211 = llvm.fmul %210, %180 : f64
-                              %212 = llvm.fptrunc %211 : f64 to f32
-                              scf.yield %212 : f32
+                              %210 = arith.index_cast %200 : i64 to index
+                              %intptr_14 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                              %211 = arith.index_cast %intptr_14 : index to i64
+                              %212 = llvm.inttoptr %211 : i64 to !llvm.ptr
+                              %213 = llvm.getelementptr %212[%200] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                              %214 = memref.load %arg1[%210] : memref<?xf32>
+                              %215 = llvm.fpext %214 : f32 to f64
+                              %216 = llvm.intr.fmuladd(%215, %20, %209) : (f64, f64, f64) -> f64
+                              %217 = memref.load %alloca_2[%c0] : memref<1xf32>
+                              %218 = llvm.fpext %217 : f32 to f64
+                              %219 = llvm.intr.fmuladd(%216, %218, %203) : (f64, f64, f64) -> f64
+                              %220 = llvm.getelementptr %213[-4] : (!llvm.ptr) -> !llvm.ptr, i8
+                              %221 = llvm.load %220 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f32
+                              %222 = llvm.fsub %221, %214 : f32
+                              %223 = memref.load %alloca_1[%c0] : memref<1xf32>
+                              %224 = llvm.fmul %222, %223 : f32
+                              %225 = llvm.fpext %224 : f32 to f64
+                              %226 = llvm.fadd %219, %225 : f64
+                              %227 = llvm.fsub %21, %214 : f32
+                              %228 = memref.load %alloca_3[%c0] : memref<1xf32>
+                              %229 = llvm.fmul %227, %228 : f32
+                              %230 = llvm.fpext %229 : f32 to f64
+                              %231 = llvm.fadd %226, %230 : f64
+                              %232 = llvm.fmul %231, %199 : f64
+                              %233 = llvm.fptrunc %232 : f64 to f32
+                              scf.yield %233 : f32
                             } else {
-                              %179 = scf.if %113 -> (f32) {
-                                %180 = memref.load %alloca[%c0] : memref<1xf32>
-                                %181 = llvm.fpext %180 : f32 to f64
-                                %182 = llvm.add %arg13, %121 overflow<nsw> : i64
-                                %183 = arith.index_cast %182 : i64 to index
-                                %184 = memref.load %arg2[%183] : memref<?xf32>
-                                %185 = llvm.fpext %184 : f32 to f64
-                                %186 = llvm.getelementptr %arg1[%182] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                                %187 = llvm.getelementptr %186[1] : (!llvm.ptr) -> !llvm.ptr, f32
-                                %188 = llvm.load %187 : !llvm.ptr -> f32
-                                %189 = llvm.getelementptr %186[-4] : (!llvm.ptr) -> !llvm.ptr, i8
-                                %190 = llvm.load %189 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f32
-                                %191 = llvm.fadd %188, %190 : f32
-                                %192 = llvm.fpext %191 : f32 to f64
-                                %193 = llvm.getelementptr %arg1[%182] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                                %194 = llvm.load %193 : !llvm.ptr -> f32
-                                %195 = llvm.fpext %194 : f32 to f64
-                                %196 = llvm.intr.fmuladd(%195, %20, %192) : (f64, f64, f64) -> f64
-                                %197 = memref.load %alloca_0[%c0] : memref<1xf32>
-                                %198 = llvm.fpext %197 : f32 to f64
-                                %199 = llvm.intr.fmuladd(%196, %198, %185) : (f64, f64, f64) -> f64
-                                %200 = llvm.getelementptr %142[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                                %201 = llvm.load %200 : !llvm.ptr -> f32
-                                %202 = llvm.fsub %201, %194 : f32
-                                %203 = memref.load %alloca_1[%c0] : memref<1xf32>
-                                %204 = llvm.fmul %202, %203 : f32
-                                %205 = llvm.fpext %204 : f32 to f64
-                                %206 = llvm.fadd %199, %205 : f64
-                                %207 = llvm.fsub %21, %194 : f32
-                                %208 = memref.load %alloca_2[%c0] : memref<1xf32>
-                                %209 = llvm.fmul %207, %208 : f32
-                                %210 = llvm.fpext %209 : f32 to f64
-                                %211 = llvm.fadd %206, %210 : f64
-                                %212 = llvm.fmul %211, %181 : f64
-                                %213 = llvm.fptrunc %212 : f64 to f32
-                                scf.yield %213 : f32
+                              %198 = scf.if %115 -> (f32) {
+                                %199 = memref.load %alloca[%c0] : memref<1xf32>
+                                %200 = llvm.fpext %199 : f32 to f64
+                                %201 = llvm.add %arg13, %128 overflow<nsw> : i64
+                                %202 = arith.index_cast %201 : i64 to index
+                                %203 = memref.load %arg2[%202] : memref<?xf32>
+                                %204 = llvm.fpext %203 : f32 to f64
+                                %205 = arith.index_cast %201 : i64 to index
+                                %intptr_14 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+                                %206 = arith.index_cast %intptr_14 : index to i64
+                                %207 = llvm.inttoptr %206 : i64 to !llvm.ptr
+                                %208 = llvm.getelementptr %207[%201] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                                %209 = llvm.getelementptr %208[1] : (!llvm.ptr) -> !llvm.ptr, f32
+                                %210 = llvm.load %209 : !llvm.ptr -> f32
+                                %211 = llvm.getelementptr %208[-4] : (!llvm.ptr) -> !llvm.ptr, i8
+                                %212 = llvm.load %211 {alignment = 4 : i64, tbaa = [#tbaa_tag]} : !llvm.ptr -> f32
+                                %213 = llvm.fadd %210, %212 : f32
+                                %214 = llvm.fpext %213 : f32 to f64
+                                %215 = memref.load %arg1[%205] : memref<?xf32>
+                                %216 = llvm.fpext %215 : f32 to f64
+                                %217 = llvm.intr.fmuladd(%216, %20, %214) : (f64, f64, f64) -> f64
+                                %218 = memref.load %alloca_1[%c0] : memref<1xf32>
+                                %219 = llvm.fpext %218 : f32 to f64
+                                %220 = llvm.intr.fmuladd(%217, %219, %204) : (f64, f64, f64) -> f64
+                                %221 = llvm.getelementptr %155[%arg13] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                                %222 = llvm.load %221 : !llvm.ptr -> f32
+                                %223 = llvm.fsub %222, %215 : f32
+                                %224 = memref.load %alloca_2[%c0] : memref<1xf32>
+                                %225 = llvm.fmul %223, %224 : f32
+                                %226 = llvm.fpext %225 : f32 to f64
+                                %227 = llvm.fadd %220, %226 : f64
+                                %228 = llvm.fsub %21, %215 : f32
+                                %229 = memref.load %alloca_3[%c0] : memref<1xf32>
+                                %230 = llvm.fmul %228, %229 : f32
+                                %231 = llvm.fpext %230 : f32 to f64
+                                %232 = llvm.fadd %227, %231 : f64
+                                %233 = llvm.fmul %232, %200 : f64
+                                %234 = llvm.fptrunc %233 : f64 to f32
+                                scf.yield %234 : f32
                               } else {
-                                %180 = scf.if %150 -> (f32) {
-                                  %181 = memref.load %alloca[%c0] : memref<1xf32>
-                                  %182 = llvm.fpext %181 : f32 to f64
-                                  %183 = memref.load %arg2[%115] : memref<?xf32>
-                                  %184 = llvm.fpext %183 : f32 to f64
-                                  %185 = llvm.getelementptr %arg1[%117] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                                  %186 = llvm.load %185 : !llvm.ptr -> f32
-                                  %187 = llvm.getelementptr %arg1[%119] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                                  %188 = llvm.load %187 : !llvm.ptr -> f32
-                                  %189 = llvm.fadd %186, %188 : f32
-                                  %190 = llvm.fpext %189 : f32 to f64
-                                  %191 = llvm.getelementptr %arg1[%114] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                                  %192 = llvm.load %191 : !llvm.ptr -> f32
-                                  %193 = llvm.fpext %192 : f32 to f64
-                                  %194 = llvm.intr.fmuladd(%193, %20, %190) : (f64, f64, f64) -> f64
-                                  %195 = memref.load %alloca_1[%c0] : memref<1xf32>
-                                  %196 = llvm.fpext %195 : f32 to f64
-                                  %197 = llvm.intr.fmuladd(%194, %196, %184) : (f64, f64, f64) -> f64
-                                  %198 = llvm.getelementptr %120[1] : (!llvm.ptr) -> !llvm.ptr, f32
-                                  %199 = llvm.load %198 : !llvm.ptr -> f32
-                                  %200 = llvm.fsub %199, %192 : f32
-                                  %201 = memref.load %alloca_0[%c0] : memref<1xf32>
-                                  %202 = llvm.fmul %200, %201 : f32
+                                %199 = scf.if %169 -> (f32) {
+                                  %200 = memref.load %alloca[%c0] : memref<1xf32>
+                                  %201 = llvm.fpext %200 : f32 to f64
+                                  %202 = memref.load %arg2[%117] : memref<?xf32>
                                   %203 = llvm.fpext %202 : f32 to f64
-                                  %204 = llvm.fadd %197, %203 : f64
-                                  %205 = llvm.fsub %21, %192 : f32
-                                  %206 = memref.load %alloca_2[%c0] : memref<1xf32>
-                                  %207 = llvm.fmul %205, %206 : f32
-                                  %208 = llvm.fpext %207 : f32 to f64
-                                  %209 = llvm.fadd %204, %208 : f64
-                                  %210 = llvm.fmul %209, %182 : f64
-                                  %211 = llvm.fptrunc %210 : f64 to f32
-                                  scf.yield %211 : f32
+                                  %204 = memref.load %arg1[%120] : memref<?xf32>
+                                  %205 = memref.load %arg1[%123] : memref<?xf32>
+                                  %206 = llvm.fadd %204, %205 : f32
+                                  %207 = llvm.fpext %206 : f32 to f64
+                                  %208 = memref.load %arg1[%124] : memref<?xf32>
+                                  %209 = llvm.fpext %208 : f32 to f64
+                                  %210 = llvm.intr.fmuladd(%209, %20, %207) : (f64, f64, f64) -> f64
+                                  %211 = memref.load %alloca_2[%c0] : memref<1xf32>
+                                  %212 = llvm.fpext %211 : f32 to f64
+                                  %213 = llvm.intr.fmuladd(%210, %212, %203) : (f64, f64, f64) -> f64
+                                  %214 = llvm.getelementptr %127[1] : (!llvm.ptr) -> !llvm.ptr, f32
+                                  %215 = llvm.load %214 : !llvm.ptr -> f32
+                                  %216 = llvm.fsub %215, %208 : f32
+                                  %217 = memref.load %alloca_1[%c0] : memref<1xf32>
+                                  %218 = llvm.fmul %216, %217 : f32
+                                  %219 = llvm.fpext %218 : f32 to f64
+                                  %220 = llvm.fadd %213, %219 : f64
+                                  %221 = llvm.fsub %21, %208 : f32
+                                  %222 = memref.load %alloca_3[%c0] : memref<1xf32>
+                                  %223 = llvm.fmul %221, %222 : f32
+                                  %224 = llvm.fpext %223 : f32 to f64
+                                  %225 = llvm.fadd %220, %224 : f64
+                                  %226 = llvm.fmul %225, %201 : f64
+                                  %227 = llvm.fptrunc %226 : f64 to f32
+                                  scf.yield %227 : f32
                                 } else {
                                   scf.yield %arg14 : f32
                                 }
-                                scf.yield %180 : f32
+                                scf.yield %199 : f32
                               }
-                              scf.yield %179 : f32
+                              scf.yield %198 : f32
                             }
-                            scf.yield %178 : f32
+                            scf.yield %197 : f32
                           }
-                          scf.yield %177 : f32
+                          scf.yield %196 : f32
                         }
-                        scf.yield %176, %175 : f32, i32
+                        scf.yield %195, %194 : f32, i32
                       }
-                      scf.yield %172#0, %172#1 : f32, i32
+                      scf.yield %191#0, %191#1 : f32, i32
                     }
-                    scf.yield %170#0, %170#1 : f32, i32
+                    scf.yield %189#0, %189#1 : f32, i32
                   }
-                  %159 = arith.index_castui %158#1 : i32 to index
-                  %160 = scf.index_switch %159 -> f32 
+                  %178 = arith.index_castui %177#1 : i32 to index
+                  %179 = scf.index_switch %178 -> f32 
                   case 0 {
-                    %168 = memref.load %alloca[%c0] : memref<1xf32>
-                    %169 = llvm.load %154 : !llvm.ptr -> f32
-                    %170 = llvm.load %155 : !llvm.ptr -> f32
-                    %171 = llvm.load %156 : !llvm.ptr -> f32
-                    %172 = llvm.fsub %170, %171 : f32
-                    %173 = memref.load %alloca_0[%c0] : memref<1xf32>
-                    %174 = llvm.intr.fmuladd(%172, %173, %169) : (f32, f32, f32) -> f32
-                    %175 = llvm.load %157 : !llvm.ptr -> f32
-                    %176 = llvm.fsub %175, %171 : f32
-                    %177 = memref.load %alloca_1[%c0] : memref<1xf32>
-                    %178 = llvm.intr.fmuladd(%176, %177, %174) : (f32, f32, f32) -> f32
-                    %179 = llvm.fsub %21, %171 : f32
-                    %180 = memref.load %alloca_2[%c0] : memref<1xf32>
-                    %181 = llvm.intr.fmuladd(%179, %180, %178) : (f32, f32, f32) -> f32
-                    %182 = llvm.fmul %168, %181 : f32
-                    scf.yield %182 : f32
+                    %187 = memref.load %alloca[%c0] : memref<1xf32>
+                    %188 = llvm.load %173 : !llvm.ptr -> f32
+                    %189 = llvm.load %174 : !llvm.ptr -> f32
+                    %190 = llvm.load %175 : !llvm.ptr -> f32
+                    %191 = llvm.fsub %189, %190 : f32
+                    %192 = memref.load %alloca_1[%c0] : memref<1xf32>
+                    %193 = llvm.intr.fmuladd(%191, %192, %188) : (f32, f32, f32) -> f32
+                    %194 = llvm.load %176 : !llvm.ptr -> f32
+                    %195 = llvm.fsub %194, %190 : f32
+                    %196 = memref.load %alloca_2[%c0] : memref<1xf32>
+                    %197 = llvm.intr.fmuladd(%195, %196, %193) : (f32, f32, f32) -> f32
+                    %198 = llvm.fsub %21, %190 : f32
+                    %199 = memref.load %alloca_3[%c0] : memref<1xf32>
+                    %200 = llvm.intr.fmuladd(%198, %199, %197) : (f32, f32, f32) -> f32
+                    %201 = llvm.fmul %187, %200 : f32
+                    scf.yield %201 : f32
                   }
                   default {
-                    scf.yield %158#0 : f32
+                    scf.yield %177#0 : f32
                   }
-                  %161 = llvm.add %arg13, %112 overflow<nsw> : i64
-                  %162 = llvm.getelementptr %arg1[%161] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                  %163 = llvm.load %162 : !llvm.ptr -> f32
-                  %164 = llvm.fadd %160, %163 : f32
-                  %165 = arith.index_cast %161 : i64 to index
-                  memref.store %164, %arg0[%165] : memref<?xf32>
-                  %166 = llvm.add %arg13, %16 overflow<nsw> : i64
-                  %167 = llvm.icmp "slt" %166, %107 : i64
-                  scf.condition(%167) %166, %160 : i64, f32
+                  %180 = llvm.add %arg13, %114 overflow<nsw> : i64
+                  %181 = arith.index_cast %180 : i64 to index
+                  %182 = memref.load %arg1[%181] : memref<?xf32>
+                  %183 = llvm.fadd %179, %182 : f32
+                  %184 = arith.index_cast %180 : i64 to index
+                  memref.store %183, %arg0[%184] : memref<?xf32>
+                  %185 = llvm.add %arg13, %16 overflow<nsw> : i64
+                  %186 = llvm.icmp "slt" %185, %109 : i64
+                  scf.condition(%186) %185, %179 : i64, f32
                 } do {
                 ^bb0(%arg13: i64, %arg14: f32):
                   scf.yield %arg13, %arg14 : i64, f32
                 }
-                %149 = llvm.icmp "slt" %116, %109 : i64
-                scf.condition(%149) %116, %148#1 : i64, f32
+                %168 = llvm.icmp "slt" %118, %111 : i64
+                scf.condition(%168) %118, %167#1 : i64, f32
               } do {
               ^bb0(%arg11: i64, %arg12: f32):
                 scf.yield %arg11, %arg12 : i64, f32
@@ -613,13 +658,19 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    %10 = llvm.insertvalue %arg2, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %11 = llvm.insertvalue %arg2, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %10 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %11 = llvm.insertvalue %arg1, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %12 = llvm.insertvalue %2, %11[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %13 = llvm.insertvalue %1, %12[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %14 = llvm.insertvalue %0, %13[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %15 = builtin.unrealized_conversion_cast %14 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @_Z16single_iterationPfS_S_iifffff.lifted(%9, %arg1, %15, %arg3, %arg4, %arg5, %arg6, %arg7, %arg8, %arg9) : (memref<?xf32>, !llvm.ptr, memref<?xf32>, i32, i32, f32, f32, f32, f32, f32) -> ()
+    %16 = llvm.insertvalue %arg2, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %17 = llvm.insertvalue %arg2, %16[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %18 = llvm.insertvalue %2, %17[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %19 = llvm.insertvalue %1, %18[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %20 = llvm.insertvalue %0, %19[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %21 = builtin.unrealized_conversion_cast %20 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
+    call @_Z16single_iterationPfS_S_iifffff.lifted(%9, %15, %21, %arg3, %arg4, %arg5, %arg6, %arg7, %arg8, %arg9) : (memref<?xf32>, memref<?xf32>, memref<?xf32>, i32, i32, f32, f32, f32, f32, f32) -> ()
     return
   }
   llvm.func local_unnamed_addr @omp_set_num_threads(i32 {llvm.noundef}) attributes {no_unwind, passthrough = [["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
@@ -673,11 +724,17 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
         %41 = llvm.insertvalue %1, %40[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
         %42 = llvm.insertvalue %0, %41[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
         %43 = builtin.unrealized_conversion_cast %42 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-        func.call @_Z16single_iterationPfS_S_iifffff.lifted(%43, %arg8, %arg3, %arg4, %arg5, %35, %32, %33, %34, %5) : (memref<?xf32>, !llvm.ptr, memref<?xf32>, i32, i32, f32, f32, f32, f32, f32) -> ()
-        %44 = llvm.add %arg7, %4 overflow<nsw, nuw> : i32
-        %45 = llvm.icmp "eq" %44, %arg1 : i32
-        %46 = arith.xori %45, %true : i1
-        scf.condition(%46) %arg8, %44, %arg6 : !llvm.ptr, i32, !llvm.ptr
+        %44 = llvm.insertvalue %arg8, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %45 = llvm.insertvalue %arg8, %44[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %46 = llvm.insertvalue %2, %45[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %47 = llvm.insertvalue %1, %46[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %48 = llvm.insertvalue %0, %47[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+        %49 = builtin.unrealized_conversion_cast %48 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
+        func.call @_Z16single_iterationPfS_S_iifffff.lifted(%43, %49, %arg3, %arg4, %arg5, %35, %32, %33, %34, %5) : (memref<?xf32>, memref<?xf32>, memref<?xf32>, i32, i32, f32, f32, f32, f32, f32) -> ()
+        %50 = llvm.add %arg7, %4 overflow<nsw, nuw> : i32
+        %51 = llvm.icmp "eq" %50, %arg1 : i32
+        %52 = arith.xori %51, %true : i1
+        scf.condition(%52) %arg8, %50, %arg6 : !llvm.ptr, i32, !llvm.ptr
       } do {
       ^bb0(%arg6: !llvm.ptr, %arg7: i32, %arg8: !llvm.ptr):
         scf.yield %arg6, %arg7, %arg8 : !llvm.ptr, i32, !llvm.ptr

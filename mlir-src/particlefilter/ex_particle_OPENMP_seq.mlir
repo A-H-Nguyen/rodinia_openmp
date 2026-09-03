@@ -1000,124 +1000,144 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %10 = call @findIndex.lifted(%9, %arg1, %arg2) : (memref<?xf64>, i32, f64) -> i32
     return %10 : i32
   }
-  func.func private @findIndexBin(%arg0: !llvm.ptr {llvm.noundef, llvm.readonly}, %arg1: i32 {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: f64 {llvm.noundef}) -> i32 attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
+  func.func private @findIndexBin.lifted(%arg0: memref<?xf64> {llvm.noundef, llvm.readonly}, %arg1: i32 {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: f64 {llvm.noundef}) -> i32 attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %true = arith.constant true
     %c2_i32 = arith.constant 2 : i32
     %0 = ub.poison : i64
     %1 = ub.poison : i32
     %c1_i32 = arith.constant 1 : i32
     %c0_i32 = arith.constant 0 : i32
-    %2 = llvm.mlir.constant(-1 : i32) : i32
-    %3 = llvm.mlir.constant(1 : i32) : i32
+    %2 = llvm.mlir.constant(1 : i64) : i64
+    %3 = llvm.mlir.constant(-1 : i64) : i64
     %4 = llvm.mlir.constant(0 : i32) : i32
-    %5 = llvm.mlir.constant(-1 : i64) : i64
-    %6 = llvm.mlir.constant(1 : i64) : i64
-    %7:5 = scf.while (%arg4 = %arg1, %arg5 = %arg2) : (i32, i32) -> (i32, i32, i32, i32, i32) {
-      %10 = llvm.icmp "slt" %arg5, %arg4 : i32
-      %11:6 = scf.if %10 -> (i32, i32, i32, i32, i32, i32) {
-        scf.yield %1, %1, %2, %c2_i32, %c0_i32, %1 : i32, i32, i32, i32, i32, i32
+    %5 = llvm.mlir.constant(1 : i32) : i32
+    %6 = llvm.mlir.constant(-1 : i32) : i32
+    %intptr = memref.extract_aligned_pointer_as_index %arg0 : memref<?xf64> -> index
+    %7 = arith.index_cast %intptr : index to i64
+    %8 = llvm.inttoptr %7 : i64 to !llvm.ptr
+    %9:5 = scf.while (%arg4 = %arg1, %arg5 = %arg2) : (i32, i32) -> (i32, i32, i32, i32, i32) {
+      %12 = llvm.icmp "slt" %arg5, %arg4 : i32
+      %13:6 = scf.if %12 -> (i32, i32, i32, i32, i32, i32) {
+        scf.yield %1, %1, %6, %c2_i32, %c0_i32, %1 : i32, i32, i32, i32, i32, i32
       } else {
-        %13 = llvm.sub %arg5, %arg4 overflow<nsw> : i32
-        %14 = llvm.lshr %13, %3 : i32
-        %15 = llvm.add %14, %arg4 overflow<nsw> : i32
-        %16 = llvm.sext %15 : i32 to i64
-        %17 = llvm.getelementptr %arg0[%16] : (!llvm.ptr, i64) -> !llvm.ptr, f64
-        %18 = llvm.getelementptr %arg0[%16] : (!llvm.ptr, i64) -> !llvm.ptr, f64
-        %19 = llvm.load %18 : !llvm.ptr -> f64
-        %20 = llvm.fcmp "ult" %19, %arg3 : f64
-        %21:3 = scf.if %20 -> (i32, i32, i32) {
+        %15 = llvm.sub %arg5, %arg4 overflow<nsw> : i32
+        %16 = llvm.lshr %15, %5 : i32
+        %17 = llvm.add %16, %arg4 overflow<nsw> : i32
+        %18 = llvm.sext %17 : i32 to i64
+        %19 = arith.index_cast %18 : i64 to index
+        %intptr_0 = memref.extract_aligned_pointer_as_index %arg0 : memref<?xf64> -> index
+        %20 = arith.index_cast %intptr_0 : index to i64
+        %21 = llvm.inttoptr %20 : i64 to !llvm.ptr
+        %22 = llvm.getelementptr %21[%18] : (!llvm.ptr, i64) -> !llvm.ptr, f64
+        %23 = memref.load %arg0[%19] : memref<?xf64>
+        %24 = llvm.fcmp "ult" %23, %arg3 : f64
+        %25:3 = scf.if %24 -> (i32, i32, i32) {
           scf.yield %1, %1, %c0_i32 : i32, i32, i32
         } else {
-          %24 = llvm.icmp "eq" %15, %4 : i32
-          %25 = arith.select %24, %4, %15 : i32
-          %26:2 = scf.if %24 -> (i32, i32) {
+          %28 = llvm.icmp "eq" %17, %4 : i32
+          %29 = arith.select %28, %4, %17 : i32
+          %30:2 = scf.if %28 -> (i32, i32) {
             scf.yield %c2_i32, %c1_i32 : i32, i32
           } else {
-            %27 = llvm.getelementptr %17[-8] : (!llvm.ptr) -> !llvm.ptr, i8
-            %28 = llvm.load %27 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> f64
-            %29 = llvm.fcmp "olt" %28, %arg3 : f64
-            %30 = arith.select %29, %c2_i32, %c1_i32 : i32
-            %31 = scf.if %29 -> (i32) {
+            %31 = llvm.getelementptr %22[-8] : (!llvm.ptr) -> !llvm.ptr, i8
+            %32 = llvm.load %31 {alignment = 8 : i64, tbaa = [#tbaa_tag1]} : !llvm.ptr -> f64
+            %33 = llvm.fcmp "olt" %32, %arg3 : f64
+            %34 = arith.select %33, %c2_i32, %c1_i32 : i32
+            %35 = scf.if %33 -> (i32) {
               scf.yield %c1_i32 : i32
             } else {
-              %32 = llvm.fcmp "oeq" %28, %arg3 : f64
-              %33 = arith.extui %32 : i1 to i32
-              scf.yield %33 : i32
+              %36 = llvm.fcmp "oeq" %32, %arg3 : f64
+              %37 = arith.extui %36 : i1 to i32
+              scf.yield %37 : i32
             }
-            scf.yield %30, %31 : i32, i32
+            scf.yield %34, %35 : i32, i32
           }
-          scf.yield %25, %26#0, %26#1 : i32, i32, i32
+          scf.yield %29, %30#0, %30#1 : i32, i32, i32
         }
-        %22 = arith.index_castui %21#2 : i32 to index
-        %23:6 = scf.index_switch %22 -> i32, i32, i32, i32, i32, i32 
+        %26 = arith.index_castui %25#2 : i32 to index
+        %27:6 = scf.index_switch %26 -> i32, i32, i32, i32, i32, i32 
         case 0 {
-          %24 = llvm.fcmp "ogt" %19, %arg3 : f64
-          %25:2 = scf.if %24 -> (i32, i32) {
-            %26 = llvm.add %15, %3 overflow<nsw> : i32
-            scf.yield %arg4, %26 : i32, i32
+          %28 = llvm.fcmp "ogt" %23, %arg3 : f64
+          %29:2 = scf.if %28 -> (i32, i32) {
+            %30 = llvm.add %17, %5 overflow<nsw> : i32
+            scf.yield %arg4, %30 : i32, i32
           } else {
-            %26 = llvm.add %15, %2 overflow<nsw> : i32
-            scf.yield %26, %arg5 : i32, i32
+            %30 = llvm.add %17, %6 overflow<nsw> : i32
+            scf.yield %30, %arg5 : i32, i32
           }
-          scf.yield %25#0, %25#1, %1, %c0_i32, %c1_i32, %15 : i32, i32, i32, i32, i32, i32
+          scf.yield %29#0, %29#1, %1, %c0_i32, %c1_i32, %17 : i32, i32, i32, i32, i32, i32
         }
         default {
-          scf.yield %1, %1, %21#0, %21#1, %c0_i32, %15 : i32, i32, i32, i32, i32, i32
+          scf.yield %1, %1, %25#0, %25#1, %c0_i32, %17 : i32, i32, i32, i32, i32, i32
         }
-        scf.yield %23#0, %23#1, %23#2, %23#3, %23#4, %23#5 : i32, i32, i32, i32, i32, i32
+        scf.yield %27#0, %27#1, %27#2, %27#3, %27#4, %27#5 : i32, i32, i32, i32, i32, i32
       }
-      %12 = arith.trunci %11#4 : i32 to i1
-      scf.condition(%12) %11#0, %11#1, %11#5, %11#2, %11#3 : i32, i32, i32, i32, i32
+      %14 = arith.trunci %13#4 : i32 to i1
+      scf.condition(%14) %13#0, %13#1, %13#5, %13#2, %13#3 : i32, i32, i32, i32, i32
     } do {
     ^bb0(%arg4: i32, %arg5: i32, %arg6: i32, %arg7: i32, %arg8: i32):
       scf.yield %arg4, %arg5 : i32, i32
     }
-    %8 = arith.index_castui %7#4 : i32 to index
-    %9 = scf.index_switch %8 -> i32 
+    %10 = arith.index_castui %9#4 : i32 to index
+    %11 = scf.index_switch %10 -> i32 
     case 1 {
-      %10 = llvm.getelementptr %arg0[-8] : (!llvm.ptr) -> !llvm.ptr, i8
-      %11 = llvm.icmp "sgt" %7#2, %4 : i32
-      %12 = scf.if %11 -> (i32) {
-        %13 = llvm.zext nneg %7#2 : i32 to i64
-        %14:3 = scf.while (%arg4 = %13) : (i64) -> (i64, i64, i32) {
-          %17 = llvm.getelementptr %10[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, f64
-          %18 = llvm.load %17 : !llvm.ptr -> f64
-          %19 = llvm.fcmp "oeq" %18, %arg3 : f64
-          %20:3 = scf.if %19 -> (i64, i32, i32) {
-            %22 = llvm.add %arg4, %5 overflow<nsw> : i64
-            %23 = llvm.icmp "sgt" %arg4, %6 : i64
-            %24 = arith.xori %23, %true : i1
-            %25 = arith.extui %24 : i1 to i32
-            %26 = arith.extui %23 : i1 to i32
-            scf.yield %22, %25, %26 : i64, i32, i32
+      %12 = llvm.getelementptr %8[-8] : (!llvm.ptr) -> !llvm.ptr, i8
+      %13 = llvm.icmp "sgt" %9#2, %4 : i32
+      %14 = scf.if %13 -> (i32) {
+        %15 = llvm.zext nneg %9#2 : i32 to i64
+        %16:3 = scf.while (%arg4 = %15) : (i64) -> (i64, i64, i32) {
+          %19 = llvm.getelementptr %12[%arg4] : (!llvm.ptr, i64) -> !llvm.ptr, f64
+          %20 = llvm.load %19 : !llvm.ptr -> f64
+          %21 = llvm.fcmp "oeq" %20, %arg3 : f64
+          %22:3 = scf.if %21 -> (i64, i32, i32) {
+            %24 = llvm.add %arg4, %3 overflow<nsw> : i64
+            %25 = llvm.icmp "sgt" %arg4, %2 : i64
+            %26 = arith.xori %25, %true : i1
+            %27 = arith.extui %26 : i1 to i32
+            %28 = arith.extui %25 : i1 to i32
+            scf.yield %24, %27, %28 : i64, i32, i32
           } else {
             scf.yield %0, %c2_i32, %c0_i32 : i64, i32, i32
           }
-          %21 = arith.trunci %20#2 : i32 to i1
-          scf.condition(%21) %20#0, %arg4, %20#1 : i64, i64, i32
+          %23 = arith.trunci %22#2 : i32 to i1
+          scf.condition(%23) %22#0, %arg4, %22#1 : i64, i64, i32
         } do {
         ^bb0(%arg4: i64, %arg5: i64, %arg6: i32):
           scf.yield %arg4 : i64
         }
-        %15 = arith.index_castui %14#2 : i32 to index
-        %16 = scf.index_switch %15 -> i32 
+        %17 = arith.index_castui %16#2 : i32 to index
+        %18 = scf.index_switch %17 -> i32 
         case 1 {
           scf.yield %4 : i32
         }
         default {
-          %17 = llvm.trunc %14#1 overflow<nsw, nuw> : i64 to i32
-          scf.yield %17 : i32
+          %19 = llvm.trunc %16#1 overflow<nsw, nuw> : i64 to i32
+          scf.yield %19 : i32
         }
-        scf.yield %16 : i32
+        scf.yield %18 : i32
       } else {
-        scf.yield %7#2 : i32
+        scf.yield %9#2 : i32
       }
-      scf.yield %12 : i32
+      scf.yield %14 : i32
     }
     default {
-      scf.yield %7#3 : i32
+      scf.yield %9#3 : i32
     }
-    return %9 : i32
+    return %11 : i32
+  }
+  func.func private @findIndexBin(%arg0: !llvm.ptr {llvm.noundef, llvm.readonly}, %arg1: i32 {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: f64 {llvm.noundef}) -> i32 attributes {llvm.linkage = #llvm.linkage<external>} {
+    %0 = llvm.mlir.constant(1 : i64) : i64
+    %1 = llvm.mlir.poison : i64
+    %2 = llvm.mlir.constant(0 : i64) : i64
+    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
+    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf64>
+    %10 = call @findIndexBin.lifted(%9, %arg1, %arg2, %arg3) : (memref<?xf64>, i32, i32, f64) -> i32
+    return %10 : i32
   }
   func.func private @particleFilter.lifted(%arg0: memref<?xi32> {llvm.noundef}, %arg1: i32 {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: memref<?xi32> {llvm.noundef}, %arg5: i32 {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %true = arith.constant true

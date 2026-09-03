@@ -2042,10 +2042,8 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     call @fin.lifted(%9, %arg1, %arg2, %arg3, %arg4, %arg5, %15, %arg7, %arg8, %arg9) : (memref<?xf32>, i32, i32, i32, i32, !llvm.ptr, memref<?xf32>, f32, f32, f32) -> ()
     return
   }
-  func.func private @master.lifted(%arg0: f32 {llvm.noundef}, %arg1: memref<?xf32> {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}, %arg3: memref<?xf32> {llvm.noundef}, %arg4: i32 {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @master.lifted(%arg0: f32 {llvm.noundef}, %arg1: memref<?xf32> {llvm.noundef}, %arg2: memref<?xf32> {llvm.noundef}, %arg3: memref<?xf32> {llvm.noundef}, %arg4: i32 {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %true = arith.constant true
-    %0 = llvm.mlir.poison : i64
-    %1 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
     %c0_i32 = arith.constant 0 : i32
     %c37 = arith.constant 37 : index
     %c3 = arith.constant 3 : index
@@ -2054,24 +2052,27 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %c35 = arith.constant 35 : index
     %c0 = arith.constant 0 : index
     %c1 = arith.constant 1 : index
-    %2 = llvm.mlir.constant(91 : i64) : i64
-    %3 = llvm.mlir.constant(9.99999974E-5 : f32) : f32
-    %4 = llvm.mlir.constant(-1 : i32) : i32
-    %5 = llvm.mlir.constant(0x7F800000 : f32) : f32
-    %6 = llvm.mlir.constant(0.000000e+00 : f32) : f32
-    %7 = llvm.mlir.addressof @mlir.llvm.nameless_global_1 : !llvm.ptr
-    %8 = llvm.mlir.constant(4 : i64) : i64
-    %9 = llvm.mlir.constant(1 : i64) : i64
-    %10 = llvm.mlir.constant(11 : i32) : i32
-    %11 = llvm.mlir.constant(76 : i32) : i32
-    %12 = llvm.mlir.constant(6 : i32) : i32
-    %13 = llvm.mlir.constant(61 : i32) : i32
-    %14 = llvm.mlir.poison : f32
-    %15 = llvm.mlir.constant(1.000000e+03 : f32) : f32
-    %16 = llvm.mlir.constant(46 : i32) : i32
-    %17 = llvm.mlir.constant(0 : i64) : i64
-    %18 = llvm.mlir.constant(0 : i32) : i32
-    %19 = llvm.mlir.constant(1 : i32) : i32
+    %0 = llvm.mlir.constant(91 : i64) : i64
+    %1 = llvm.mlir.constant(9.99999974E-5 : f32) : f32
+    %2 = llvm.mlir.constant(-1 : i32) : i32
+    %3 = llvm.mlir.constant(0x7F800000 : f32) : f32
+    %4 = llvm.mlir.constant(0.000000e+00 : f32) : f32
+    %5 = llvm.mlir.addressof @mlir.llvm.nameless_global_1 : !llvm.ptr
+    %6 = llvm.mlir.constant(4 : i64) : i64
+    %7 = llvm.mlir.constant(1 : i64) : i64
+    %8 = llvm.mlir.constant(11 : i32) : i32
+    %9 = llvm.mlir.constant(76 : i32) : i32
+    %10 = llvm.mlir.constant(6 : i32) : i32
+    %11 = llvm.mlir.constant(61 : i32) : i32
+    %12 = llvm.mlir.poison : f32
+    %13 = llvm.mlir.constant(1.000000e+03 : f32) : f32
+    %14 = llvm.mlir.constant(46 : i32) : i32
+    %15 = llvm.mlir.constant(0 : i64) : i64
+    %16 = llvm.mlir.constant(0 : i32) : i32
+    %17 = llvm.mlir.constant(1 : i32) : i32
+    %intptr = memref.extract_aligned_pointer_as_index %arg2 : memref<?xf32> -> index
+    %18 = arith.index_cast %intptr : index to i64
+    %19 = llvm.inttoptr %18 : i64 to !llvm.ptr
     %alloca = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
     %alloca_0 = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
     %alloca_1 = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
@@ -2083,16 +2084,16 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %alloca_7 = memref.alloca() {alignment = 16 : i64} : memref<4xi32>
     memref.store %arg0, %alloca[%c0] : memref<1xf32>
     %20 = llvm.call tail @omp_get_max_threads() : () -> i32
-    %21 = llvm.icmp "eq" %arg4, %18 : i32
+    %21 = llvm.icmp "eq" %arg4, %16 : i32
     scf.if %21 {
-      %30:2 = scf.while (%arg5 = %17, %arg6 = %18) : (i64, i32) -> (i64, i32) {
+      %30:2 = scf.while (%arg5 = %15, %arg6 = %16) : (i64, i32) -> (i64, i32) {
         %31 = llvm.icmp "slt" %arg6, %20 : i32
-        %32 = llvm.select %31, %arg6, %18 : i1, i32
+        %32 = llvm.select %31, %arg6, %16 : i1, i32
         %33 = arith.index_cast %arg5 : i64 to index
         memref.store %32, %alloca_7[%33] : memref<4xi32>
-        %34 = llvm.add %32, %19 overflow<nsw> : i32
-        %35 = llvm.add %arg5, %9 overflow<nsw, nuw> : i64
-        %36 = llvm.icmp "eq" %35, %8 : i64
+        %34 = llvm.add %32, %17 overflow<nsw> : i32
+        %35 = llvm.add %arg5, %7 overflow<nsw, nuw> : i64
+        %36 = llvm.icmp "eq" %35, %6 : i64
         %37 = arith.xori %36, %true : i1
         scf.condition(%37) %35, %34 : i64, i32
       } do {
@@ -2100,118 +2101,70 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
         scf.yield %arg5, %arg6 : i64, i32
       }
       omp.parallel {
-        %31 = llvm.call @__kmpc_global_thread_num(%7) : (!llvm.ptr) -> i32
-        %32 = llvm.call @__kmpc_bound_thread_num(%7) : (!llvm.ptr) -> i32
+        %31 = llvm.call @__kmpc_global_thread_num(%5) : (!llvm.ptr) -> i32
+        %32 = llvm.call @__kmpc_bound_thread_num(%5) : (!llvm.ptr) -> i32
         llvm.intr.experimental.noalias.scope.decl #alias_scope
         llvm.intr.experimental.noalias.scope.decl #alias_scope1
         %33 = llvm.call tail @omp_get_thread_num() {noalias_scopes = [#alias_scope, #alias_scope1]} : () -> i32
         %34 = memref.load %alloca_7[%c0] : memref<4xi32>
         %35 = llvm.icmp "eq" %33, %34 : i32
         scf.if %35 {
-          memref.store %18, %alloca_3[%c0] : memref<1xi32>
+          memref.store %16, %alloca_3[%c0] : memref<1xi32>
           %42 = memref.load %alloca[%c0] : memref<1xf32>
           %43 = memref.load %alloca_3[%c0] : memref<1xi32>
-          %44 = llvm.insertvalue %arg2, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %45 = llvm.insertvalue %arg2, %44[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %46 = llvm.insertvalue %17, %45[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %47 = llvm.insertvalue %0, %46[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %48 = llvm.insertvalue %9, %47[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %49 = builtin.unrealized_conversion_cast %48 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-          func.call @ecc.lifted(%42, %arg1, %43, %49, %18, %arg3) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>) -> ()
+          func.call @ecc.lifted(%42, %arg1, %43, %arg2, %16, %arg3) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>) -> ()
         }
         %36 = memref.load %alloca_7[%c1] : memref<4xi32>
         %37 = llvm.icmp "eq" %33, %36 : i32
         scf.if %37 {
-          memref.store %16, %alloca_4[%c0] : memref<1xi32>
+          memref.store %14, %alloca_4[%c0] : memref<1xi32>
           %42 = memref.load %arg1[%c35] : memref<?xf32>
-          %43 = llvm.fmul %42, %15 : f32
+          %43 = llvm.fmul %42, %13 : f32
           %44 = memref.load %alloca_4[%c0] : memref<1xi32>
-          %45 = llvm.insertvalue %arg2, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %46 = llvm.insertvalue %arg2, %45[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %47 = llvm.insertvalue %17, %46[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %48 = llvm.insertvalue %0, %47[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %49 = llvm.insertvalue %9, %48[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %50 = builtin.unrealized_conversion_cast %49 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-          %51 = func.call @cam.lifted(%14, %arg1, %44, %50, %19, %arg3, %43) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>, f32) -> f32
-          memref.store %51, %alloca_0[%c0] : memref<1xf32>
+          %45 = func.call @cam.lifted(%12, %arg1, %44, %arg2, %17, %arg3, %43) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>, f32) -> f32
+          memref.store %45, %alloca_0[%c0] : memref<1xf32>
         }
         %38 = memref.load %alloca_7[%c2] : memref<4xi32>
         %39 = llvm.icmp "eq" %33, %38 : i32
         scf.if %39 {
-          memref.store %13, %alloca_5[%c0] : memref<1xi32>
+          memref.store %11, %alloca_5[%c0] : memref<1xi32>
           %42 = memref.load %arg1[%c36] : memref<?xf32>
-          %43 = llvm.fmul %42, %15 : f32
+          %43 = llvm.fmul %42, %13 : f32
           %44 = memref.load %alloca_5[%c0] : memref<1xi32>
-          %45 = llvm.insertvalue %arg2, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %46 = llvm.insertvalue %arg2, %45[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %47 = llvm.insertvalue %17, %46[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %48 = llvm.insertvalue %0, %47[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %49 = llvm.insertvalue %9, %48[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %50 = builtin.unrealized_conversion_cast %49 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-          %51 = func.call @cam.lifted(%14, %arg1, %44, %50, %12, %arg3, %43) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>, f32) -> f32
-          memref.store %51, %alloca_1[%c0] : memref<1xf32>
+          %45 = func.call @cam.lifted(%12, %arg1, %44, %arg2, %10, %arg3, %43) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>, f32) -> f32
+          memref.store %45, %alloca_1[%c0] : memref<1xf32>
         }
         %40 = memref.load %alloca_7[%c3] : memref<4xi32>
         %41 = llvm.icmp "eq" %33, %40 : i32
         scf.if %41 {
-          memref.store %11, %alloca_6[%c0] : memref<1xi32>
+          memref.store %9, %alloca_6[%c0] : memref<1xi32>
           %42 = memref.load %arg1[%c37] : memref<?xf32>
-          %43 = llvm.fmul %42, %15 : f32
+          %43 = llvm.fmul %42, %13 : f32
           %44 = memref.load %alloca_6[%c0] : memref<1xi32>
-          %45 = llvm.insertvalue %arg2, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %46 = llvm.insertvalue %arg2, %45[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %47 = llvm.insertvalue %17, %46[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %48 = llvm.insertvalue %0, %47[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %49 = llvm.insertvalue %9, %48[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-          %50 = builtin.unrealized_conversion_cast %49 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-          %51 = func.call @cam.lifted(%14, %arg1, %44, %50, %10, %arg3, %43) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>, f32) -> f32
-          memref.store %51, %alloca_2[%c0] : memref<1xf32>
+          %45 = func.call @cam.lifted(%12, %arg1, %44, %arg2, %8, %arg3, %43) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>, f32) -> f32
+          memref.store %45, %alloca_2[%c0] : memref<1xf32>
         }
         omp.terminator
       }
     } else {
-      memref.store %18, %alloca_3[%c0] : memref<1xi32>
+      memref.store %16, %alloca_3[%c0] : memref<1xi32>
       %30 = memref.load %alloca[%c0] : memref<1xf32>
-      %31 = llvm.insertvalue %arg2, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %32 = llvm.insertvalue %arg2, %31[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %33 = llvm.insertvalue %17, %32[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %34 = llvm.insertvalue %0, %33[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %35 = llvm.insertvalue %9, %34[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %36 = builtin.unrealized_conversion_cast %35 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-      func.call @ecc.lifted(%30, %arg1, %18, %36, %18, %arg3) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>) -> ()
-      memref.store %16, %alloca_4[%c0] : memref<1xi32>
-      %37 = memref.load %arg1[%c35] : memref<?xf32>
-      %38 = llvm.fmul %37, %15 : f32
-      %39 = llvm.insertvalue %arg2, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %40 = llvm.insertvalue %arg2, %39[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %41 = llvm.insertvalue %17, %40[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %42 = llvm.insertvalue %0, %41[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %43 = llvm.insertvalue %9, %42[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %44 = builtin.unrealized_conversion_cast %43 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-      %45 = func.call @cam.lifted(%14, %arg1, %16, %44, %19, %arg3, %38) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>, f32) -> f32
-      memref.store %45, %alloca_0[%c0] : memref<1xf32>
-      memref.store %13, %alloca_5[%c0] : memref<1xi32>
-      %46 = memref.load %arg1[%c36] : memref<?xf32>
-      %47 = llvm.fmul %46, %15 : f32
-      %48 = llvm.insertvalue %arg2, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %49 = llvm.insertvalue %arg2, %48[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %50 = llvm.insertvalue %17, %49[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %51 = llvm.insertvalue %0, %50[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %52 = llvm.insertvalue %9, %51[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %53 = builtin.unrealized_conversion_cast %52 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-      %54 = func.call @cam.lifted(%14, %arg1, %13, %53, %12, %arg3, %47) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>, f32) -> f32
-      memref.store %54, %alloca_1[%c0] : memref<1xf32>
-      memref.store %11, %alloca_6[%c0] : memref<1xi32>
-      %55 = memref.load %arg1[%c37] : memref<?xf32>
-      %56 = llvm.fmul %55, %15 : f32
-      %57 = llvm.insertvalue %arg2, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %58 = llvm.insertvalue %arg2, %57[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %59 = llvm.insertvalue %17, %58[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %60 = llvm.insertvalue %0, %59[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %61 = llvm.insertvalue %9, %60[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-      %62 = builtin.unrealized_conversion_cast %61 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-      %63 = func.call @cam.lifted(%14, %arg1, %11, %62, %10, %arg3, %56) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>, f32) -> f32
-      memref.store %63, %alloca_2[%c0] : memref<1xf32>
+      func.call @ecc.lifted(%30, %arg1, %16, %arg2, %16, %arg3) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>) -> ()
+      memref.store %14, %alloca_4[%c0] : memref<1xi32>
+      %31 = memref.load %arg1[%c35] : memref<?xf32>
+      %32 = llvm.fmul %31, %13 : f32
+      %33 = func.call @cam.lifted(%12, %arg1, %14, %arg2, %17, %arg3, %32) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>, f32) -> f32
+      memref.store %33, %alloca_0[%c0] : memref<1xf32>
+      memref.store %11, %alloca_5[%c0] : memref<1xi32>
+      %34 = memref.load %arg1[%c36] : memref<?xf32>
+      %35 = llvm.fmul %34, %13 : f32
+      %36 = func.call @cam.lifted(%12, %arg1, %11, %arg2, %10, %arg3, %35) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>, f32) -> f32
+      memref.store %36, %alloca_1[%c0] : memref<1xf32>
+      memref.store %9, %alloca_6[%c0] : memref<1xi32>
+      %37 = memref.load %arg1[%c37] : memref<?xf32>
+      %38 = llvm.fmul %37, %13 : f32
+      %39 = func.call @cam.lifted(%12, %arg1, %9, %arg2, %8, %arg3, %38) : (f32, memref<?xf32>, i32, memref<?xf32>, i32, memref<?xf32>, f32) -> f32
+      memref.store %39, %alloca_2[%c0] : memref<1xf32>
     }
     %22 = memref.load %alloca_3[%c0] : memref<1xi32>
     %23 = memref.load %alloca_4[%c0] : memref<1xi32>
@@ -2220,18 +2173,18 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %26 = memref.load %alloca_0[%c0] : memref<1xf32>
     %27 = memref.load %alloca_1[%c0] : memref<1xf32>
     %28 = memref.load %alloca_2[%c0] : memref<1xf32>
-    call @fin.lifted(%arg1, %22, %23, %24, %25, %arg2, %arg3, %26, %27, %28) : (memref<?xf32>, i32, i32, i32, i32, !llvm.ptr, memref<?xf32>, f32, f32, f32) -> ()
-    %29 = scf.while (%arg5 = %17) : (i64) -> i64 {
+    call @fin.lifted(%arg1, %22, %23, %24, %25, %19, %arg3, %26, %27, %28) : (memref<?xf32>, i32, i32, i32, i32, !llvm.ptr, memref<?xf32>, f32, f32, f32) -> ()
+    %29 = scf.while (%arg5 = %15) : (i64) -> i64 {
       %30 = arith.index_cast %arg5 : i64 to index
       %31 = memref.load %arg3[%30] : memref<?xf32>
-      %32 = llvm.fcmp "uno" %31, %6 : f32
+      %32 = llvm.fcmp "uno" %31, %4 : f32
       %33 = scf.if %32 -> (i32) {
         scf.yield %c0_i32 : i32
       } else {
         %38 = llvm.intr.fabs(%31) : (f32) -> f32
-        %39 = llvm.fcmp "oeq" %38, %5 : f32
+        %39 = llvm.fcmp "oeq" %38, %3 : f32
         %40 = llvm.bitcast %31 : f32 to i32
-        %41 = llvm.icmp "sgt" %40, %4 : i32
+        %41 = llvm.icmp "sgt" %40, %2 : i32
         %42 = llvm.and %39, %41 : i1
         %43 = arith.xori %42, %true : i1
         %44 = arith.extui %43 : i1 to i32
@@ -2240,13 +2193,13 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
       %34 = arith.index_castui %33 : i32 to index
       scf.index_switch %34 
       case 0 {
-        memref.store %3, %arg3[%30] : memref<?xf32>
+        memref.store %1, %arg3[%30] : memref<?xf32>
         scf.yield
       }
       default {
       }
-      %35 = llvm.add %arg5, %9 overflow<nsw, nuw> : i64
-      %36 = llvm.icmp "eq" %35, %2 : i64
+      %35 = llvm.add %arg5, %7 overflow<nsw, nuw> : i64
+      %36 = llvm.icmp "eq" %35, %0 : i64
       %37 = arith.xori %36, %true : i1
       scf.condition(%37) %35 : i64
     } do {
@@ -2266,13 +2219,19 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    %10 = llvm.insertvalue %arg3, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %11 = llvm.insertvalue %arg3, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %10 = llvm.insertvalue %arg2, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %11 = llvm.insertvalue %arg2, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %12 = llvm.insertvalue %2, %11[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %13 = llvm.insertvalue %1, %12[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %14 = llvm.insertvalue %0, %13[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %15 = builtin.unrealized_conversion_cast %14 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%arg0, %9, %arg2, %15, %arg4) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    %16 = llvm.insertvalue %arg3, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %17 = llvm.insertvalue %arg3, %16[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %18 = llvm.insertvalue %2, %17[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %19 = llvm.insertvalue %1, %18[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %20 = llvm.insertvalue %0, %19[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+    %21 = builtin.unrealized_conversion_cast %20 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
+    call @master.lifted(%arg0, %9, %15, %21, %arg4) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     return
   }
   llvm.func local_unnamed_addr @omp_get_max_threads() -> i32 attributes {no_unwind, passthrough = [["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
@@ -2351,111 +2310,117 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
             %64 = llvm.insertvalue %21, %63[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
             %65 = builtin.unrealized_conversion_cast %64 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
             %cast = memref.cast %alloc : memref<91xf32> to memref<?xf32>
-            func.call @embedded_fehlberg_7_8(%51, %arg7, %59, %65, %cast, %arg3, %arg4) : (f32, f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, !llvm.ptr, i32) -> ()
-            %66:2 = scf.while (%arg8 = %18, %arg9 = %24) : (i64, i32) -> (i64, i32) {
-              %70 = arith.index_cast %arg8 : i64 to index
-              %71 = memref.load %alloc[%70] : memref<91xf32>
-              %72 = llvm.fcmp "ogt" %71, %25 : f32
-              %73 = llvm.select %72, %22, %arg9 : i1, i32
-              %74 = llvm.add %arg8, %21 overflow<nsw, nuw> : i64
-              %75 = llvm.icmp "eq" %74, %17 : i64
-              %76 = arith.xori %75, %true : i1
-              scf.condition(%76) %74, %73 : i64, i32
+            %66 = llvm.insertvalue %arg3, %1[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %67 = llvm.insertvalue %arg3, %66[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %68 = llvm.insertvalue %18, %67[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %69 = llvm.insertvalue %0, %68[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %70 = llvm.insertvalue %21, %69[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
+            %71 = builtin.unrealized_conversion_cast %70 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
+            func.call @embedded_fehlberg_7_8(%51, %arg7, %59, %65, %cast, %71, %arg4) : (f32, f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
+            %72:2 = scf.while (%arg8 = %18, %arg9 = %24) : (i64, i32) -> (i64, i32) {
+              %76 = arith.index_cast %arg8 : i64 to index
+              %77 = memref.load %alloc[%76] : memref<91xf32>
+              %78 = llvm.fcmp "ogt" %77, %25 : f32
+              %79 = llvm.select %78, %22, %arg9 : i1, i32
+              %80 = llvm.add %arg8, %21 overflow<nsw, nuw> : i64
+              %81 = llvm.icmp "eq" %80, %17 : i64
+              %82 = arith.xori %81, %true : i1
+              scf.condition(%82) %80, %79 : i64, i32
             } do {
             ^bb0(%arg8: i64, %arg9: i32):
               scf.yield %arg8, %arg9 : i64, i32
             }
-            %67 = llvm.icmp "eq" %66#1, %24 : i32
-            %68:5 = scf.if %67 -> (i32, f32, f32, i32, i32) {
+            %73 = llvm.icmp "eq" %72#1, %24 : i32
+            %74:5 = scf.if %73 -> (i32, f32, f32, i32, i32) {
               scf.yield %4, %2, %arg7, %arg6, %c0_i32 : i32, f32, f32, i32, i32
             } else {
-              %70 = llvm.load %43 {alignment = 8 : i64, tbaa = [#tbaa_tag2]} : !llvm.ptr -> !llvm.ptr
-              %71:2 = scf.while (%arg8 = %18, %arg9 = %16) : (i64, f32) -> (i64, f32) {
-                %76 = llvm.getelementptr %70[%arg8] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                %77 = llvm.load %76 : !llvm.ptr -> f32
-                %78 = llvm.fcmp "oeq" %77, %25 : f32
-                %79 = llvm.intr.fabs(%77) : (f32) -> f32
-                %80 = llvm.select %78, %28, %79 : i1, f32
-                %81 = arith.index_cast %arg8 : i64 to index
-                memref.store %80, %alloc_0[%81] : memref<91xf32>
-                %82 = llvm.fmul %28, %80 : f32
-                %83 = arith.index_cast %arg8 : i64 to index
-                %84 = memref.load %alloc[%83] : memref<91xf32>
-                %85 = llvm.fdiv %82, %84 : f32
-                %86 = llvm.fpext %85 : f32 to f64
-                %87 = llvm.call tail @pow(%86, %15) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, tbaa = [#tbaa_tag]} : (f64 {llvm.noundef}, f64 {llvm.noundef}) -> f64
-                %88 = llvm.fmul %87, %14 : f64
-                %89 = llvm.fptrunc %88 : f64 to f32
-                %90 = llvm.fcmp "ogt" %arg9, %89 : f32
-                %91 = llvm.select %90, %89, %arg9 : i1, f32
-                %92 = llvm.add %arg8, %21 overflow<nsw, nuw> : i64
-                %93 = llvm.icmp "eq" %92, %17 : i64
-                %94 = arith.xori %93, %true : i1
-                scf.condition(%94) %92, %91 : i64, f32
+              %76 = llvm.load %43 {alignment = 8 : i64, tbaa = [#tbaa_tag2]} : !llvm.ptr -> !llvm.ptr
+              %77:2 = scf.while (%arg8 = %18, %arg9 = %16) : (i64, f32) -> (i64, f32) {
+                %82 = llvm.getelementptr %76[%arg8] : (!llvm.ptr, i64) -> !llvm.ptr, f32
+                %83 = llvm.load %82 : !llvm.ptr -> f32
+                %84 = llvm.fcmp "oeq" %83, %25 : f32
+                %85 = llvm.intr.fabs(%83) : (f32) -> f32
+                %86 = llvm.select %84, %28, %85 : i1, f32
+                %87 = arith.index_cast %arg8 : i64 to index
+                memref.store %86, %alloc_0[%87] : memref<91xf32>
+                %88 = llvm.fmul %28, %86 : f32
+                %89 = arith.index_cast %arg8 : i64 to index
+                %90 = memref.load %alloc[%89] : memref<91xf32>
+                %91 = llvm.fdiv %88, %90 : f32
+                %92 = llvm.fpext %91 : f32 to f64
+                %93 = llvm.call tail @pow(%92, %15) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none>, no_unwind, tbaa = [#tbaa_tag]} : (f64 {llvm.noundef}, f64 {llvm.noundef}) -> f64
+                %94 = llvm.fmul %93, %14 : f64
+                %95 = llvm.fptrunc %94 : f64 to f32
+                %96 = llvm.fcmp "ogt" %arg9, %95 : f32
+                %97 = llvm.select %96, %95, %arg9 : i1, f32
+                %98 = llvm.add %arg8, %21 overflow<nsw, nuw> : i64
+                %99 = llvm.icmp "eq" %98, %17 : i64
+                %100 = arith.xori %99, %true : i1
+                scf.condition(%100) %98, %97 : i64, f32
               } do {
               ^bb0(%arg8: i64, %arg9: f32):
                 scf.yield %arg8, %arg9 : i64, f32
               }
-              %72:2 = scf.while (%arg8 = %18, %arg9 = %24) : (i64, i32) -> (i64, i32) {
-                %76 = arith.index_cast %arg8 : i64 to index
-                %77 = memref.load %alloc[%76] : memref<91xf32>
-                %78 = arith.index_cast %arg8 : i64 to index
-                %79 = memref.load %alloc_0[%78] : memref<91xf32>
-                %80 = llvm.fmul %28, %79 : f32
-                %81 = llvm.fcmp "ogt" %77, %80 : f32
-                %82 = llvm.select %81, %22, %arg9 : i1, i32
-                %83 = llvm.add %arg8, %21 overflow<nsw, nuw> : i64
-                %84 = llvm.icmp "eq" %83, %17 : i64
-                %85 = arith.xori %84, %true : i1
-                scf.condition(%85) %83, %82 : i64, i32
+              %78:2 = scf.while (%arg8 = %18, %arg9 = %24) : (i64, i32) -> (i64, i32) {
+                %82 = arith.index_cast %arg8 : i64 to index
+                %83 = memref.load %alloc[%82] : memref<91xf32>
+                %84 = arith.index_cast %arg8 : i64 to index
+                %85 = memref.load %alloc_0[%84] : memref<91xf32>
+                %86 = llvm.fmul %28, %85 : f32
+                %87 = llvm.fcmp "ogt" %83, %86 : f32
+                %88 = llvm.select %87, %22, %arg9 : i1, i32
+                %89 = llvm.add %arg8, %21 overflow<nsw, nuw> : i64
+                %90 = llvm.icmp "eq" %89, %17 : i64
+                %91 = arith.xori %90, %true : i1
+                scf.condition(%91) %89, %88 : i64, i32
               } do {
               ^bb0(%arg8: i64, %arg9: i32):
                 scf.yield %arg8, %arg9 : i64, i32
               }
-              %73 = llvm.icmp "eq" %72#1, %24 : i32
-              %74 = arith.select %73, %arg6, %7 : i32
-              %75:4 = scf.if %73 -> (i32, f32, f32, i32) {
+              %79 = llvm.icmp "eq" %78#1, %24 : i32
+              %80 = arith.select %79, %arg6, %7 : i32
+              %81:4 = scf.if %79 -> (i32, f32, f32, i32) {
                 scf.yield %4, %2, %arg7, %c0_i32 : i32, f32, f32, i32
               } else {
-                %76 = llvm.fpext %71#1 : f32 to f64
-                %77 = llvm.fcmp "olt" %76, %13 : f64
-                %78 = llvm.select %77, %13, %76 : i1, f64
-                %79 = llvm.fcmp "olt" %78, %12 : f64
-                %80 = llvm.select %79, %78, %12 : i1, f64
-                %81 = llvm.fptrunc %80 : f64 to f32
-                %82 = llvm.fmul %arg7, %81 : f32
-                %83 = llvm.fpext %82 : f32 to f64
-                %84 = llvm.fcmp "ult" %83, %11 : f64
-                %85 = llvm.select %84, %82, %10 : i1, f32
-                %86 = memref.load %arg1[%42] : memref<?xf32>
-                %87 = llvm.fadd %85, %86 : f32
-                %88 = llvm.fcmp "ogt" %87, %27 : f32
-                %89 = scf.if %88 -> (f32) {
-                  %94 = llvm.fsub %27, %86 : f32
-                  scf.yield %94 : f32
+                %82 = llvm.fpext %77#1 : f32 to f64
+                %83 = llvm.fcmp "olt" %82, %13 : f64
+                %84 = llvm.select %83, %13, %82 : i1, f64
+                %85 = llvm.fcmp "olt" %84, %12 : f64
+                %86 = llvm.select %85, %84, %12 : i1, f64
+                %87 = llvm.fptrunc %86 : f64 to f32
+                %88 = llvm.fmul %arg7, %87 : f32
+                %89 = llvm.fpext %88 : f32 to f64
+                %90 = llvm.fcmp "ult" %89, %11 : f64
+                %91 = llvm.select %90, %88, %10 : i1, f32
+                %92 = memref.load %arg1[%42] : memref<?xf32>
+                %93 = llvm.fadd %91, %92 : f32
+                %94 = llvm.fcmp "ogt" %93, %27 : f32
+                %95 = scf.if %94 -> (f32) {
+                  %100 = llvm.fsub %27, %92 : f32
+                  scf.yield %100 : f32
                 } else {
-                  %94 = llvm.fpext %87 : f32 to f64
-                  %95 = llvm.fpext %85 : f32 to f64
-                  %96 = llvm.intr.fmuladd(%95, %9, %94) : (f64, f64, f64) -> f64
-                  %97 = llvm.fcmp "ogt" %96, %33 : f64
-                  %98 = scf.if %97 -> (f32) {
-                    %99 = llvm.fmul %85, %8 : f32
-                    scf.yield %99 : f32
+                  %100 = llvm.fpext %93 : f32 to f64
+                  %101 = llvm.fpext %91 : f32 to f64
+                  %102 = llvm.intr.fmuladd(%101, %9, %100) : (f64, f64, f64) -> f64
+                  %103 = llvm.fcmp "ogt" %102, %33 : f64
+                  %104 = scf.if %103 -> (f32) {
+                    %105 = llvm.fmul %91, %8 : f32
+                    scf.yield %105 : f32
                   } else {
-                    scf.yield %85 : f32
+                    scf.yield %91 : f32
                   }
-                  scf.yield %98 : f32
+                  scf.yield %104 : f32
                 }
-                %90 = llvm.add %arg6, %22 overflow<nsw, nuw> : i32
-                %91 = llvm.icmp "eq" %90, %7 : i32
-                %92 = arith.xori %91, %true : i1
-                %93 = arith.extui %92 : i1 to i32
-                scf.yield %90, %89, %89, %93 : i32, f32, f32, i32
+                %96 = llvm.add %arg6, %22 overflow<nsw, nuw> : i32
+                %97 = llvm.icmp "eq" %96, %7 : i32
+                %98 = arith.xori %97, %true : i1
+                %99 = arith.extui %98 : i1 to i32
+                scf.yield %96, %95, %95, %99 : i32, f32, f32, i32
               }
-              scf.yield %75#0, %75#1, %75#2, %74, %75#3 : i32, f32, f32, i32, i32
+              scf.yield %81#0, %81#1, %81#2, %80, %81#3 : i32, f32, f32, i32, i32
             }
-            %69 = arith.trunci %68#4 : i32 to i1
-            scf.condition(%69) %68#0, %68#1, %68#2, %68#3 : i32, f32, f32, i32
+            %75 = arith.trunci %74#4 : i32 to i1
+            scf.condition(%75) %74#0, %74#1, %74#2, %74#3 : i32, f32, f32, i32
           } do {
           ^bb0(%arg6: i32, %arg7: f32, %arg8: f32, %arg9: i32):
             scf.yield %arg6, %arg7 : i32, f32
@@ -2511,7 +2476,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     return %10 : i32
   }
   llvm.func local_unnamed_addr @malloc(i64 {llvm.noundef}) -> (!llvm.ptr {llvm.noalias, llvm.noundef}) attributes {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = readwrite>, no_unwind, passthrough = ["mustprogress", "nofree", ["allockind", "9"], ["allocsize", "4294967295"], ["alloc-family", "malloc"], ["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic", will_return}
-  func.func private @embedded_fehlberg_7_8(%arg0: f32 {llvm.noundef}, %arg1: f32 {llvm.noundef}, %arg2: memref<?xf32> {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg3: memref<?xf32> {llvm.nocapture, llvm.noundef, llvm.writeonly}, %arg4: memref<?xf32> {llvm.nocapture, llvm.noundef, llvm.writeonly}, %arg5: !llvm.ptr {llvm.noundef}, %arg6: i32 {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @embedded_fehlberg_7_8(%arg0: f32 {llvm.noundef}, %arg1: f32 {llvm.noundef}, %arg2: memref<?xf32> {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg3: memref<?xf32> {llvm.nocapture, llvm.noundef, llvm.writeonly}, %arg4: memref<?xf32> {llvm.nocapture, llvm.noundef, llvm.writeonly}, %arg5: memref<?xf32> {llvm.noundef}, %arg6: i32 {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
     %true = arith.constant true
     %0 = llvm.mlir.poison : i64
     %1 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
@@ -2616,7 +2581,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %82 = llvm.insertvalue %0, %81[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %83 = llvm.insertvalue %67, %82[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %84 = builtin.unrealized_conversion_cast %83 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%arg0, %cast, %arg5, %84, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%arg0, %cast, %arg5, %84, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %85 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
@@ -2643,7 +2608,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %92 = llvm.insertvalue %0, %91[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %93 = llvm.insertvalue %67, %92[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %94 = builtin.unrealized_conversion_cast %93 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%86, %cast_3, %arg5, %94, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%86, %cast_3, %arg5, %94, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %95 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
@@ -2674,7 +2639,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %102 = llvm.insertvalue %0, %101[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %103 = llvm.insertvalue %67, %102[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %104 = builtin.unrealized_conversion_cast %103 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%96, %cast_4, %arg5, %104, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%96, %cast_4, %arg5, %104, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %105 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
@@ -2705,7 +2670,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %112 = llvm.insertvalue %0, %111[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %113 = llvm.insertvalue %67, %112[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %114 = builtin.unrealized_conversion_cast %113 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%106, %cast_5, %arg5, %114, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%106, %cast_5, %arg5, %114, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %115 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
@@ -2739,7 +2704,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %122 = llvm.insertvalue %0, %121[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %123 = llvm.insertvalue %67, %122[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %124 = builtin.unrealized_conversion_cast %123 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%116, %cast_6, %arg5, %124, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%116, %cast_6, %arg5, %124, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %125 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
@@ -2773,7 +2738,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %132 = llvm.insertvalue %0, %131[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %133 = llvm.insertvalue %67, %132[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %134 = builtin.unrealized_conversion_cast %133 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%126, %cast_7, %arg5, %134, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%126, %cast_7, %arg5, %134, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %135 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
@@ -2810,7 +2775,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %142 = llvm.insertvalue %0, %141[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %143 = llvm.insertvalue %67, %142[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %144 = builtin.unrealized_conversion_cast %143 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%136, %cast_8, %arg5, %144, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%136, %cast_8, %arg5, %144, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %145 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
@@ -2846,7 +2811,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %151 = llvm.insertvalue %0, %150[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %152 = llvm.insertvalue %67, %151[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %153 = builtin.unrealized_conversion_cast %152 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%106, %cast_9, %arg5, %153, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%106, %cast_9, %arg5, %153, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %154 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
@@ -2889,7 +2854,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %161 = llvm.insertvalue %0, %160[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %162 = llvm.insertvalue %67, %161[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %163 = builtin.unrealized_conversion_cast %162 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%155, %cast_10, %arg5, %163, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%155, %cast_10, %arg5, %163, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %164 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
@@ -2935,7 +2900,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %171 = llvm.insertvalue %0, %170[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %172 = llvm.insertvalue %67, %171[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %173 = builtin.unrealized_conversion_cast %172 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%165, %cast_11, %arg5, %173, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%165, %cast_11, %arg5, %173, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %174 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
@@ -2984,7 +2949,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %181 = llvm.insertvalue %0, %180[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %182 = llvm.insertvalue %67, %181[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %183 = builtin.unrealized_conversion_cast %182 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%175, %cast_12, %arg5, %183, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%175, %cast_12, %arg5, %183, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %184 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
@@ -3026,7 +2991,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %190 = llvm.insertvalue %0, %189[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %191 = llvm.insertvalue %67, %190[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %192 = builtin.unrealized_conversion_cast %191 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%arg0, %cast_13, %arg5, %192, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%arg0, %cast_13, %arg5, %192, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %193 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
@@ -3077,7 +3042,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %199 = llvm.insertvalue %0, %198[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %200 = llvm.insertvalue %67, %199[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
     %201 = builtin.unrealized_conversion_cast %200 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @master.lifted(%175, %cast_14, %arg5, %201, %arg6) : (f32, memref<?xf32>, !llvm.ptr, memref<?xf32>, i32) -> ()
+    call @master.lifted(%175, %cast_14, %arg5, %201, %arg6) : (f32, memref<?xf32>, memref<?xf32>, memref<?xf32>, i32) -> ()
     %202 = scf.while (%arg7 = %68) : (i64) -> i64 {
       %204 = arith.index_cast %arg7 : i64 to index
       %205 = memref.load %arg2[%204] : memref<?xf32>
