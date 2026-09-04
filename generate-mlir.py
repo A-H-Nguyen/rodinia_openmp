@@ -38,7 +38,21 @@ PASSES = (
     "lift-llvm-to-func,"
     "lift-llvm-to-cf,"
     "lift-mem-allocs,"
-    "lift-ptr-args{only-internal=true emit-abi-wrappers=true},"
+    # only-internal=false, and NO abi wrappers.
+    #
+    # This output is the shared input to every approach the evaluation compares,
+    # including CMDFG -- and CMDFG phase 1 refuses a module containing ABI
+    # thunks outright: "build-dfg: 'bpnn_train_kernel' has an ABI thunk paired
+    # with 'bpnn_train_kernel.lifted'". With emit-abi-wrappers the whole-program
+    # phase would specialise the thunk rather than the lifted body, so the input
+    # has to be neutral.
+    #
+    # Dropping the thunks means externally visible signatures change without one,
+    # which is only safe under a whole-program assumption -- and that assumption
+    # holds here: every translation unit goes through the same flow, the CMDFG
+    # phase retargets callers itself, and this evaluation measures compilation
+    # rather than linking a binary.
+    "lift-ptr-args{only-internal=false},"
     "lift-gep-ops,"
     "lift-load-stores,"
     "propagate-memrefs,"

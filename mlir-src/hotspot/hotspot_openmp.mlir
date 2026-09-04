@@ -79,7 +79,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     return %9 : i64
   }
   llvm.func local_unnamed_addr @gettimeofday(!llvm.ptr {llvm.nocapture, llvm.noundef}, !llvm.ptr {llvm.nocapture, llvm.noundef}) -> (i32 {llvm.noundef}) attributes {no_unwind, passthrough = ["nofree", ["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
-  func.func private @_Z16single_iterationPfS_S_iifffff.lifted(%arg0: memref<?xf32> {llvm.noundef}, %arg1: memref<?xf32> {llvm.noundef}, %arg2: memref<?xf32> {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: f32 {llvm.noundef}, %arg6: f32 {llvm.noundef}, %arg7: f32 {llvm.noundef}, %arg8: f32 {llvm.noundef}, %arg9: f32) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @_Z16single_iterationPfS_S_iifffff(%arg0: memref<?xf32> {llvm.noundef}, %arg1: memref<?xf32> {llvm.noundef}, %arg2: memref<?xf32> {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: f32 {llvm.noundef}, %arg6: f32 {llvm.noundef}, %arg7: f32 {llvm.noundef}, %arg8: f32 {llvm.noundef}, %arg9: f32) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %true = arith.constant true
     %0 = llvm.mlir.constant(1 : index) : i32
     %c0_i32 = arith.constant 0 : i32
@@ -110,10 +110,10 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %23 = llvm.mlir.constant(dense<-2.000000e+00> : vector<4xf32>) : vector<4xf32>
     %24 = llvm.mlir.constant(dense<8.000000e+01> : vector<4xf32>) : vector<4xf32>
     %25 = llvm.mlir.constant(16 : i64) : i64
-    %intptr = memref.extract_aligned_pointer_as_index %arg2 : memref<?xf32> -> index
+    %intptr = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
     %26 = arith.index_cast %intptr : index to i64
     %27 = llvm.inttoptr %26 : i64 to !llvm.ptr
-    %intptr_0 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
+    %intptr_0 = memref.extract_aligned_pointer_as_index %arg2 : memref<?xf32> -> index
     %28 = arith.index_cast %intptr_0 : index to i64
     %29 = llvm.inttoptr %28 : i64 to !llvm.ptr
     %alloca = memref.alloca() {alignment = 4 : i64} : memref<1xf32>
@@ -336,8 +336,8 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
                 %148 = llvm.mul %arg11, %78 overflow<nsw> : i64
                 %149 = llvm.add %arg11, %17 overflow<nsw> : i64
                 %150 = llvm.mul %149, %56 overflow<nsw> : i64
-                %151 = llvm.getelementptr inbounds|nuw %29[4] : (!llvm.ptr) -> !llvm.ptr, i8
-                %152 = llvm.getelementptr inbounds %29[%52] : (!llvm.ptr, i64) -> !llvm.ptr, i8
+                %151 = llvm.getelementptr inbounds|nuw %27[4] : (!llvm.ptr) -> !llvm.ptr, i8
+                %152 = llvm.getelementptr inbounds %27[%52] : (!llvm.ptr, i64) -> !llvm.ptr, i8
                 %intptr_10 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
                 %153 = arith.index_cast %intptr_10 : index to i64
                 %154 = llvm.inttoptr %153 : i64 to !llvm.ptr
@@ -350,20 +350,20 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
                 %159 = arith.index_cast %intptr_12 : index to i64
                 %160 = llvm.inttoptr %159 : i64 to !llvm.ptr
                 %161 = llvm.getelementptr %160[%134] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                %162 = llvm.getelementptr %29[%93] : (!llvm.ptr, i64) -> !llvm.ptr, i8
+                %162 = llvm.getelementptr %27[%93] : (!llvm.ptr, i64) -> !llvm.ptr, i8
                 %intptr_13 = memref.extract_aligned_pointer_as_index %arg1 : memref<?xf32> -> index
                 %163 = arith.index_cast %intptr_13 : index to i64
                 %164 = llvm.inttoptr %163 : i64 to !llvm.ptr
                 %165 = llvm.getelementptr %164[%150] : (!llvm.ptr, i64) -> !llvm.ptr, f32
-                %166 = llvm.getelementptr %29[%94] : (!llvm.ptr, i64) -> !llvm.ptr, i8
+                %166 = llvm.getelementptr %27[%94] : (!llvm.ptr, i64) -> !llvm.ptr, i8
                 %167:2 = scf.while (%arg13 = %108, %arg14 = %arg12) : (i64, f32) -> (i64, f32) {
                   %169 = llvm.icmp "eq" %arg13, %15 : i64
                   %170 = llvm.or %arg13, %arg11 : i64
                   %171 = llvm.and %170, %19 : i64
                   %172 = llvm.icmp "eq" %171, %15 : i64
-                  %173 = arith.select %172, %27, %138 : !llvm.ptr
+                  %173 = arith.select %172, %29, %138 : !llvm.ptr
                   %174 = arith.select %172, %151, %142 : !llvm.ptr
-                  %175 = arith.select %172, %29, %141 : !llvm.ptr
+                  %175 = arith.select %172, %27, %141 : !llvm.ptr
                   %176 = arith.select %172, %152, %147 : !llvm.ptr
                   %177:2 = scf.if %172 -> (f32, i32) {
                     scf.yield %1, %c0_i32 : f32, i32
@@ -647,37 +647,11 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     }
     return
   }
-  func.func private @_Z16single_iterationPfS_S_iifffff(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: f32 {llvm.noundef}, %arg6: f32 {llvm.noundef}, %arg7: f32 {llvm.noundef}, %arg8: f32 {llvm.noundef}, %arg9: f32) attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    %10 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %11 = llvm.insertvalue %arg1, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %12 = llvm.insertvalue %2, %11[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %13 = llvm.insertvalue %1, %12[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %14 = llvm.insertvalue %0, %13[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %15 = builtin.unrealized_conversion_cast %14 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    %16 = llvm.insertvalue %arg2, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %17 = llvm.insertvalue %arg2, %16[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %18 = llvm.insertvalue %2, %17[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %19 = llvm.insertvalue %1, %18[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %20 = llvm.insertvalue %0, %19[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %21 = builtin.unrealized_conversion_cast %20 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @_Z16single_iterationPfS_S_iifffff.lifted(%9, %15, %21, %arg3, %arg4, %arg5, %arg6, %arg7, %arg8, %arg9) : (memref<?xf32>, memref<?xf32>, memref<?xf32>, i32, i32, f32, f32, f32, f32, f32) -> ()
-    return
-  }
   llvm.func local_unnamed_addr @omp_set_num_threads(i32 {llvm.noundef}) attributes {no_unwind, passthrough = [["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
   llvm.func local_unnamed_addr @__kmpc_for_static_init_4(!llvm.ptr, i32, i32, !llvm.ptr, !llvm.ptr, !llvm.ptr, !llvm.ptr, i32, i32) attributes {no_unwind}
   llvm.func local_unnamed_addr @__kmpc_for_static_fini(!llvm.ptr, i32) attributes {no_unwind}
   llvm.func local_unnamed_addr @__kmpc_fork_call(!llvm.ptr, i32, !llvm.ptr, ...) attributes {no_unwind}
-  func.func private @_Z17compute_tran_tempPfiS_S_ii.lifted(%arg0: !llvm.ptr {llvm.noundef}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}, %arg3: memref<?xf32> {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: i32 {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @_Z17compute_tran_tempPfiS_S_ii(%arg0: !llvm.ptr {llvm.noundef}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}, %arg3: memref<?xf32> {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: i32 {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %true = arith.constant true
     %0 = llvm.mlir.constant(1 : i64) : i64
     %1 = llvm.mlir.poison : i64
@@ -730,7 +704,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
         %47 = llvm.insertvalue %1, %46[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
         %48 = llvm.insertvalue %0, %47[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
         %49 = builtin.unrealized_conversion_cast %48 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-        func.call @_Z16single_iterationPfS_S_iifffff.lifted(%43, %49, %arg3, %arg4, %arg5, %35, %32, %33, %34, %5) : (memref<?xf32>, memref<?xf32>, memref<?xf32>, i32, i32, f32, f32, f32, f32, f32) -> ()
+        func.call @_Z16single_iterationPfS_S_iifffff(%43, %49, %arg3, %arg4, %arg5, %35, %32, %33, %34, %5) : (memref<?xf32>, memref<?xf32>, memref<?xf32>, i32, i32, f32, f32, f32, f32, f32) -> ()
         %50 = llvm.add %arg7, %4 overflow<nsw, nuw> : i32
         %51 = llvm.icmp "eq" %50, %arg1 : i32
         %52 = arith.xori %51, %true : i1
@@ -740,20 +714,6 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
         scf.yield %arg6, %arg7, %arg8 : !llvm.ptr, i32, !llvm.ptr
       }
     }
-    return
-  }
-  func.func private @_Z17compute_tran_tempPfiS_S_ii(%arg0: !llvm.ptr {llvm.noundef}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: i32 {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg3, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg3, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @_Z17compute_tran_tempPfiS_S_ii.lifted(%arg0, %arg1, %arg2, %9, %arg4, %arg5) : (!llvm.ptr, i32, !llvm.ptr, memref<?xf32>, i32, i32) -> ()
     return
   }
   func.func private @_Z5fatalPc(%arg0: !llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
@@ -767,7 +727,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
   }
   llvm.func local_unnamed_addr @fprintf(!llvm.ptr {llvm.nocapture, llvm.noundef}, !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}, ...) -> (i32 {llvm.noundef}) attributes {no_unwind, passthrough = ["nofree", ["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
   llvm.func local_unnamed_addr @exit(i32 {llvm.noundef}) attributes {no_unwind, passthrough = ["nofree", "noreturn", ["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
-  func.func private @_Z11writeoutputPfiiPc.lifted(%arg0: memref<?xf32> {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg1: i32 {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @_Z11writeoutputPfiiPc(%arg0: memref<?xf32> {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg1: i32 {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %true = arith.constant true
     %0 = llvm.mlir.constant(1 : i64) : i64
     %1 = llvm.mlir.addressof @".str.3" : !llvm.ptr
@@ -830,26 +790,12 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %13 = llvm.call tail @fclose(%10) : (!llvm.ptr {llvm.noundef}) -> i32
     return
   }
-  func.func private @_Z11writeoutputPfiiPc(%arg0: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg1: i32 {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}) attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @_Z11writeoutputPfiiPc.lifted(%9, %arg1, %arg2, %arg3) : (memref<?xf32>, i32, i32, !llvm.ptr) -> ()
-    return
-  }
   llvm.func local_unnamed_addr @fopen(!llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}, !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}) -> (!llvm.ptr {llvm.noalias, llvm.noundef}) attributes {no_unwind, passthrough = ["nofree", ["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
   llvm.func local_unnamed_addr @printf(!llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}, ...) -> (i32 {llvm.noundef}) attributes {no_unwind, passthrough = ["nofree", ["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
   llvm.func local_unnamed_addr @sprintf(!llvm.ptr {llvm.noalias, llvm.nocapture, llvm.noundef, llvm.writeonly}, !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}, ...) -> (i32 {llvm.noundef}) attributes {no_unwind, passthrough = ["nofree", ["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
   llvm.func local_unnamed_addr @fputs(!llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}, !llvm.ptr {llvm.nocapture, llvm.noundef}) -> (i32 {llvm.noundef}) attributes {no_unwind, passthrough = ["nofree", ["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
   llvm.func local_unnamed_addr @fclose(!llvm.ptr {llvm.nocapture, llvm.noundef}) -> (i32 {llvm.noundef}) attributes {no_unwind, passthrough = ["nofree", ["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
-  func.func private @_Z10read_inputPfiiPc.lifted(%arg0: memref<?xf32> {llvm.nocapture, llvm.noundef, llvm.writeonly}, %arg1: i32 {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @_Z10read_inputPfiiPc(%arg0: memref<?xf32> {llvm.nocapture, llvm.noundef, llvm.writeonly}, %arg1: i32 {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %true = arith.constant true
     %0 = ub.poison : i32
     %c2_i32 = arith.constant 2 : i32
@@ -949,20 +895,6 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     call @_Z5fatalPc(%20#0) : (!llvm.ptr) -> ()
     llvm.unreachable
   ^bb2:  // pred: ^bb0
-    return
-  }
-  func.func private @_Z10read_inputPfiiPc(%arg0: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.writeonly}, %arg1: i32 {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}) attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-    call @_Z10read_inputPfiiPc.lifted(%9, %arg1, %arg2, %arg3) : (memref<?xf32>, i32, i32, !llvm.ptr) -> ()
     return
   }
   llvm.func local_unnamed_addr @fgets(!llvm.ptr {llvm.noundef, llvm.writeonly}, i32 {llvm.noundef}, !llvm.ptr {llvm.nocapture, llvm.noundef}) -> (!llvm.ptr {llvm.noundef}) attributes {no_unwind, passthrough = ["nofree", ["no-trapping-math", "true"], ["stack-protector-buffer-size", "8"], ["target-cpu", "x86-64"]], target_cpu = "x86-64", target_features = #llvm.target_features<["+cmov", "+cx8", "+fxsr", "+mmx", "+sse", "+sse2", "+x87"]>, tune_cpu = "generic"}
@@ -1086,11 +1018,11 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
                 %58 = llvm.load %57 {alignment = 8 : i64, tbaa = [#tbaa_tag2]} : !llvm.ptr -> !llvm.ptr
                 %59 = llvm.getelementptr inbounds|nuw %arg1[56] : (!llvm.ptr) -> !llvm.ptr, i8
                 %60 = llvm.load %59 {alignment = 8 : i64, tbaa = [#tbaa_tag2]} : !llvm.ptr -> !llvm.ptr
-                func.call @_Z10read_inputPfiiPc.lifted(%alloc, %22, %27, %56) : (memref<?xf32>, i32, i32, !llvm.ptr) -> ()
-                func.call @_Z10read_inputPfiiPc.lifted(%alloc_0, %22, %27, %58) : (memref<?xf32>, i32, i32, !llvm.ptr) -> ()
+                func.call @_Z10read_inputPfiiPc(%alloc, %22, %27, %56) : (memref<?xf32>, i32, i32, !llvm.ptr) -> ()
+                func.call @_Z10read_inputPfiiPc(%alloc_0, %22, %27, %58) : (memref<?xf32>, i32, i32, !llvm.ptr) -> ()
                 %61 = llvm.call tail @puts(%11) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull}) -> i32
                 %62 = func.call @_Z8get_timev() : () -> i64
-                func.call @_Z17compute_tran_tempPfiS_S_ii.lifted(%50, %32, %44, %alloc_0, %22, %27) : (!llvm.ptr, i32, !llvm.ptr, memref<?xf32>, i32, i32) -> ()
+                func.call @_Z17compute_tran_tempPfiS_S_ii(%50, %32, %44, %alloc_0, %22, %27) : (!llvm.ptr, i32, !llvm.ptr, memref<?xf32>, i32, i32) -> ()
                 %63 = func.call @_Z8get_timev() : () -> i64
                 %64 = llvm.call tail @puts(%12) : (!llvm.ptr {llvm.dereferenceable = 1 : i64, llvm.nonnull}) -> i32
                 %65 = llvm.sub %63, %62 overflow<nsw> : i64
@@ -1107,7 +1039,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
                 %76 = llvm.insertvalue %1, %75[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
                 %77 = llvm.insertvalue %0, %76[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
                 %78 = builtin.unrealized_conversion_cast %77 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xf32>
-                func.call @_Z11writeoutputPfiiPc.lifted(%78, %22, %27, %60) : (memref<?xf32>, i32, i32, !llvm.ptr) -> ()
+                func.call @_Z11writeoutputPfiiPc(%78, %22, %27, %60) : (memref<?xf32>, i32, i32, !llvm.ptr) -> ()
                 memref.dealloc %alloc : memref<?xf32>
                 memref.dealloc %alloc_0 : memref<?xf32>
               } else {

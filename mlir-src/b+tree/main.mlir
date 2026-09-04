@@ -2287,7 +2287,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     llvm.store %0, %2 : i8, !llvm.ptr
     return %1 : !llvm.ptr
   }
-  func.func private @get_left_index.lifted(%arg0: memref<?xi32> {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg1: !llvm.ptr {llvm.noundef, llvm.readnone}) -> i32 attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @get_left_index(%arg0: memref<?xi32> {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg1: !llvm.ptr {llvm.noundef, llvm.readnone}) -> i32 attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %true = arith.constant true
     %c2_i32 = arith.constant 2 : i32
     %0 = ub.poison : i64
@@ -2340,20 +2340,6 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
       scf.yield %15 : i32
     }
     return %9 : i32
-  }
-  func.func private @get_left_index(%arg0: !llvm.ptr {llvm.nocapture, llvm.noundef, llvm.readonly}, %arg1: !llvm.ptr {llvm.noundef, llvm.readnone}) -> i32 attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-    %10 = call @get_left_index.lifted(%9, %arg1) : (memref<?xi32>, !llvm.ptr) -> i32
-    return %10 : i32
   }
   func.func private @insert_into_leaf(%arg0: !llvm.ptr {llvm.noundef, llvm.returned}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %true = arith.constant true
@@ -2670,7 +2656,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
         %80 = llvm.insertvalue %0, %79[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
         %81 = llvm.insertvalue %10, %80[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
         %82 = builtin.unrealized_conversion_cast %81 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-        %83 = func.call @insert_into_parent.lifted(%arg0, %82, %76, %18) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
+        %83 = func.call @insert_into_parent(%arg0, %82, %76, %18) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
         scf.yield %83 : !llvm.ptr
       }
       scf.yield %35, %34 : !llvm.ptr, i32
@@ -2687,7 +2673,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
   ^bb2:  // pred: ^bb0
     return %27#0 : !llvm.ptr
   }
-  func.func private @insert_into_parent.lifted(%arg0: !llvm.ptr {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @insert_into_parent(%arg0: !llvm.ptr {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %0 = llvm.mlir.constant(1 : i64) : i64
     %1 = llvm.mlir.poison : i64
     %2 = llvm.mlir.constant(0 : i64) : i64
@@ -2711,7 +2697,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
       %16 = llvm.insertvalue %1, %15[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
       %17 = llvm.insertvalue %0, %16[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
       %18 = builtin.unrealized_conversion_cast %17 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-      %19 = func.call @get_left_index.lifted(%18, %8) : (memref<?xi32>, !llvm.ptr) -> i32
+      %19 = func.call @get_left_index(%18, %8) : (memref<?xi32>, !llvm.ptr) -> i32
       %20 = llvm.getelementptr %10[7] : (!llvm.ptr) -> !llvm.ptr, i32
       %21 = llvm.load %20 : !llvm.ptr -> i32
       %22 = llvm.load %5 : !llvm.ptr -> i32
@@ -2724,7 +2710,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
         %29 = llvm.insertvalue %1, %28[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
         %30 = llvm.insertvalue %0, %29[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
         %31 = builtin.unrealized_conversion_cast %30 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-        %32 = func.call @insert_into_node.lifted(%arg0, %31, %19, %arg2, %arg3) : (!llvm.ptr, memref<?xi32>, i32, i32, !llvm.ptr) -> !llvm.ptr
+        %32 = func.call @insert_into_node(%arg0, %31, %19, %arg2, %arg3) : (!llvm.ptr, memref<?xi32>, i32, i32, !llvm.ptr) -> !llvm.ptr
         scf.yield %arg0 : !llvm.ptr
       } else {
         %26 = llvm.insertvalue %10, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
@@ -2733,28 +2719,14 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
         %29 = llvm.insertvalue %1, %28[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
         %30 = llvm.insertvalue %0, %29[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
         %31 = builtin.unrealized_conversion_cast %30 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-        %32 = func.call @insert_into_node_after_splitting.lifted(%arg0, %31, %19, %arg2, %arg3) : (!llvm.ptr, memref<?xi32>, i32, i32, !llvm.ptr) -> !llvm.ptr
+        %32 = func.call @insert_into_node_after_splitting(%arg0, %31, %19, %arg2, %arg3) : (!llvm.ptr, memref<?xi32>, i32, i32, !llvm.ptr) -> !llvm.ptr
         scf.yield %32 : !llvm.ptr
       }
       scf.yield %25 : !llvm.ptr
     }
     return %12 : !llvm.ptr
   }
-  func.func private @insert_into_parent(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-    %10 = call @insert_into_parent.lifted(%arg0, %9, %arg2, %arg3) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
-    return %10 : !llvm.ptr
-  }
-  func.func private @insert_into_node.lifted(%arg0: !llvm.ptr {llvm.noundef, llvm.readnone, llvm.returned}, %arg1: memref<?xi32> {llvm.nocapture, llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: !llvm.ptr {llvm.noundef}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @insert_into_node(%arg0: !llvm.ptr {llvm.noundef, llvm.readnone, llvm.returned}, %arg1: memref<?xi32> {llvm.nocapture, llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: !llvm.ptr {llvm.noundef}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %c7 = arith.constant 7 : index
     %0 = llvm.mlir.constant(1 : i32) : i32
     %1 = llvm.mlir.constant(-1 : i64) : i64
@@ -2801,21 +2773,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     memref.store %14, %arg1[%c7] : memref<?xi32>
     return %arg0 : !llvm.ptr
   }
-  func.func private @insert_into_node(%arg0: !llvm.ptr {llvm.noundef, llvm.readnone, llvm.returned}, %arg1: !llvm.ptr {llvm.nocapture, llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-    %10 = call @insert_into_node.lifted(%arg0, %9, %arg2, %arg3, %arg4) : (!llvm.ptr, memref<?xi32>, i32, i32, !llvm.ptr) -> !llvm.ptr
-    return %10 : !llvm.ptr
-  }
-  func.func private @insert_into_node_after_splitting.lifted(%arg0: !llvm.ptr {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @insert_into_node_after_splitting(%arg0: !llvm.ptr {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %true = arith.constant true
     %0 = ub.poison : !llvm.ptr
     %c0_i32 = arith.constant 0 : i32
@@ -3039,7 +2997,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
             scf.yield %arg5 : i64
           }
         }
-        %74 = func.call @insert_into_parent.lifted(%arg0, %arg1, %58, %47) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
+        %74 = func.call @insert_into_parent(%arg0, %arg1, %58, %47) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
         scf.yield %74 : !llvm.ptr
       }
       scf.yield %38, %37 : !llvm.ptr, i32
@@ -3055,20 +3013,6 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     llvm.unreachable
   ^bb2:  // pred: ^bb0
     return %27#0 : !llvm.ptr
-  }
-  func.func private @insert_into_node_after_splitting(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-    %10 = call @insert_into_node_after_splitting.lifted(%arg0, %9, %arg2, %arg3, %arg4) : (!llvm.ptr, memref<?xi32>, i32, i32, !llvm.ptr) -> !llvm.ptr
-    return %10 : !llvm.ptr
   }
   func.func private @insert_into_new_root(%arg0: !llvm.ptr {llvm.noundef}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}) -> (!llvm.ptr {llvm.nonnull, llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %0 = llvm.mlir.constant(1 : i32) : i32
@@ -3154,7 +3098,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     }
     return %6 : !llvm.ptr
   }
-  func.func private @get_neighbor_index.lifted(%arg0: memref<?xi32> {llvm.noundef, llvm.readonly}) -> (i32 {llvm.range = #llvm.constant_range<i32, -2147483648, 2147483647>}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @get_neighbor_index(%arg0: memref<?xi32> {llvm.noundef, llvm.readonly}) -> (i32 {llvm.range = #llvm.constant_range<i32, -2147483648, 2147483647>}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %true = arith.constant true
     %0 = ub.poison : i32
     %c2_i32 = arith.constant 2 : i32
@@ -3224,21 +3168,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
   ^bb2:  // pred: ^bb0
     return %15#0 : i32
   }
-  func.func private @get_neighbor_index(%arg0: !llvm.ptr {llvm.noundef, llvm.readonly}) -> i32 attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-    %10 = call @get_neighbor_index.lifted(%9) : (memref<?xi32>) -> i32
-    return %10 : i32
-  }
-  func.func private @remove_entry_from_node.lifted(%arg0: memref<?xi32> {llvm.noundef, llvm.returned}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef, llvm.readnone}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @remove_entry_from_node(%arg0: memref<?xi32> {llvm.noundef, llvm.returned}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef, llvm.readnone}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %true = arith.constant true
     %c24 = arith.constant 24 : index
     %c7 = arith.constant 7 : index
@@ -3372,20 +3302,6 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     }
     return %8 : !llvm.ptr
   }
-  func.func private @remove_entry_from_node(%arg0: !llvm.ptr {llvm.noundef, llvm.returned}, %arg1: i32 {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef, llvm.readnone}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg0, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg0, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-    %10 = call @remove_entry_from_node.lifted(%9, %arg1, %arg2) : (memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
-    return %10 : !llvm.ptr
-  }
   func.func private @adjust_root(%arg0: !llvm.ptr {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %0 = llvm.mlir.constant(0 : i32) : i32
     %1 = llvm.mlir.zero : !llvm.ptr
@@ -3417,7 +3333,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     }
     return %5 : !llvm.ptr
   }
-  func.func private @coalesce_nodes.lifted(%arg0: !llvm.ptr {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: memref<?xi32> {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @coalesce_nodes(%arg0: !llvm.ptr {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: memref<?xi32> {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %true = arith.constant true
     %0 = llvm.mlir.poison : i64
     %1 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
@@ -3702,7 +3618,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
       %33 = llvm.insertvalue %0, %32[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
       %34 = llvm.insertvalue %5, %33[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
       %35 = builtin.unrealized_conversion_cast %34 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-      %36 = func.call @delete_entry.lifted(%arg0, %35, %arg4, %19) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
+      %36 = func.call @delete_entry(%arg0, %35, %arg4, %19) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
       %37 = llvm.getelementptr inbounds|nuw %19[8] : (!llvm.ptr) -> !llvm.ptr, i8
       %38 = llvm.load %37 {alignment = 8 : i64, tbaa = [#tbaa_tag16]} : !llvm.ptr -> !llvm.ptr
       llvm.call tail @free(%38) {memory_effects = #llvm.memory_effects<other = none, argMem = readwrite, inaccessibleMem = readwrite>, no_unwind} : (!llvm.ptr {llvm.noundef}) -> ()
@@ -3713,27 +3629,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     }
     return %29 : !llvm.ptr
   }
-  func.func private @coalesce_nodes(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: !llvm.ptr {llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-    %10 = llvm.insertvalue %arg2, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %11 = llvm.insertvalue %arg2, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %12 = llvm.insertvalue %2, %11[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %13 = llvm.insertvalue %1, %12[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %14 = llvm.insertvalue %0, %13[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %15 = builtin.unrealized_conversion_cast %14 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-    %16 = call @coalesce_nodes.lifted(%arg0, %9, %15, %arg3, %arg4) : (!llvm.ptr, memref<?xi32>, memref<?xi32>, i32, i32) -> !llvm.ptr
-    return %16 : !llvm.ptr
-  }
-  func.func private @delete_entry.lifted(%arg0: !llvm.ptr {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef, llvm.readnone}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @delete_entry(%arg0: !llvm.ptr {llvm.noundef}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef, llvm.readnone}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %0 = llvm.mlir.constant(1 : i64) : i64
     %1 = llvm.mlir.poison : i64
     %2 = llvm.mlir.constant(0 : i64) : i64
@@ -3745,7 +3641,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     %6 = llvm.mlir.constant(-1 : i32) : i32
     %7 = llvm.mlir.addressof @order : !llvm.ptr
     %8 = lifter.memref2pointer(%arg1) : memref<?xi32> -> !llvm.ptr
-    %9 = call @remove_entry_from_node.lifted(%arg1, %arg2, %arg3) : (memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
+    %9 = call @remove_entry_from_node(%arg1, %arg2, %arg3) : (memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
     %10 = llvm.icmp "eq" %8, %arg0 : !llvm.ptr
     %11 = scf.if %10 -> (!llvm.ptr) {
       %12 = func.call @adjust_root(%arg0) : (!llvm.ptr) -> !llvm.ptr
@@ -3767,7 +3663,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
       %17 = memref.load %arg1[%c7] : memref<?xi32>
       %18 = llvm.icmp "slt" %17, %16 : i32
       %19 = scf.if %18 -> (!llvm.ptr) {
-        %20 = func.call @get_neighbor_index.lifted(%arg1) : (memref<?xi32>) -> i32
+        %20 = func.call @get_neighbor_index(%arg1) : (memref<?xi32>) -> i32
         %21 = llvm.icmp "eq" %20, %6 : i32
         %22 = llvm.select %21, %5, %20 : i1, i32
         %23 = llvm.getelementptr inbounds|nuw %8[16] : (!llvm.ptr) -> !llvm.ptr, i8
@@ -3801,7 +3697,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
           %51 = llvm.insertvalue %1, %50[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
           %52 = llvm.insertvalue %0, %51[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
           %53 = builtin.unrealized_conversion_cast %52 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-          %54 = func.call @coalesce_nodes.lifted(%arg0, %arg1, %53, %20, %29) : (!llvm.ptr, memref<?xi32>, memref<?xi32>, i32, i32) -> !llvm.ptr
+          %54 = func.call @coalesce_nodes(%arg0, %arg1, %53, %20, %29) : (!llvm.ptr, memref<?xi32>, memref<?xi32>, i32, i32) -> !llvm.ptr
           scf.yield %54 : !llvm.ptr
         } else {
           %48 = llvm.insertvalue %35, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
@@ -3810,7 +3706,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
           %51 = llvm.insertvalue %1, %50[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
           %52 = llvm.insertvalue %0, %51[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
           %53 = builtin.unrealized_conversion_cast %52 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-          %54 = func.call @redistribute_nodes.lifted(%arg0, %arg1, %53, %20, %22, %29) : (!llvm.ptr, memref<?xi32>, memref<?xi32>, i32, i32, i32) -> !llvm.ptr
+          %54 = func.call @redistribute_nodes(%arg0, %arg1, %53, %20, %22, %29) : (!llvm.ptr, memref<?xi32>, memref<?xi32>, i32, i32, i32) -> !llvm.ptr
           scf.yield %arg0 : !llvm.ptr
         }
         scf.yield %47 : !llvm.ptr
@@ -3821,21 +3717,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     }
     return %11 : !llvm.ptr
   }
-  func.func private @delete_entry(%arg0: !llvm.ptr {llvm.noundef}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: i32 {llvm.noundef}, %arg3: !llvm.ptr {llvm.noundef, llvm.readnone}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-    %10 = call @delete_entry.lifted(%arg0, %9, %arg2, %arg3) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
-    return %10 : !llvm.ptr
-  }
-  func.func private @redistribute_nodes.lifted(%arg0: !llvm.ptr {llvm.noundef, llvm.readnone, llvm.returned}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: memref<?xi32> {llvm.nocapture, llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: i32 {llvm.noundef}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<internal>, no_inline} {
+  func.func private @redistribute_nodes(%arg0: !llvm.ptr {llvm.noundef, llvm.readnone, llvm.returned}, %arg1: memref<?xi32> {llvm.noundef}, %arg2: memref<?xi32> {llvm.nocapture, llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: i32 {llvm.noundef}) -> (!llvm.ptr {llvm.noundef}) attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %c7 = arith.constant 7 : index
     %c24 = arith.constant 24 : index
     %0 = llvm.mlir.constant(1 : i32) : i32
@@ -4046,26 +3928,6 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
     memref.store %18, %arg2[%c7] : memref<?xi32>
     return %arg0 : !llvm.ptr
   }
-  func.func private @redistribute_nodes(%arg0: !llvm.ptr {llvm.noundef, llvm.readnone, llvm.returned}, %arg1: !llvm.ptr {llvm.noundef}, %arg2: !llvm.ptr {llvm.nocapture, llvm.noundef}, %arg3: i32 {llvm.noundef}, %arg4: i32 {llvm.noundef}, %arg5: i32 {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>} {
-    %0 = llvm.mlir.constant(1 : i64) : i64
-    %1 = llvm.mlir.poison : i64
-    %2 = llvm.mlir.constant(0 : i64) : i64
-    %3 = llvm.mlir.undef : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)>
-    %4 = llvm.insertvalue %arg1, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %5 = llvm.insertvalue %arg1, %4[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %6 = llvm.insertvalue %2, %5[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %7 = llvm.insertvalue %1, %6[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %8 = llvm.insertvalue %0, %7[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %9 = builtin.unrealized_conversion_cast %8 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-    %10 = llvm.insertvalue %arg2, %3[0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %11 = llvm.insertvalue %arg2, %10[1] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %12 = llvm.insertvalue %2, %11[2] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %13 = llvm.insertvalue %1, %12[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %14 = llvm.insertvalue %0, %13[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
-    %15 = builtin.unrealized_conversion_cast %14 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-    %16 = call @redistribute_nodes.lifted(%arg0, %9, %15, %arg3, %arg4, %arg5) : (!llvm.ptr, memref<?xi32>, memref<?xi32>, i32, i32, i32) -> !llvm.ptr
-    return %16 : !llvm.ptr
-  }
   func.func private @deleteVal(%arg0: !llvm.ptr {llvm.noundef}, %arg1: i32 {llvm.noundef}) -> !llvm.ptr attributes {llvm.linkage = #llvm.linkage<external>, no_inline} {
     %0 = llvm.mlir.constant(1 : i64) : i64
     %1 = llvm.mlir.poison : i64
@@ -4086,7 +3948,7 @@ module attributes {dlti.dl_spec = #dlti.dl_spec<!llvm.ptr<270> = dense<32> : vec
       %15 = llvm.insertvalue %1, %14[3, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
       %16 = llvm.insertvalue %0, %15[4, 0] : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> 
       %17 = builtin.unrealized_conversion_cast %16 : !llvm.struct<(ptr, ptr, i64, array<1 x i64>, array<1 x i64>)> to memref<?xi32>
-      %18 = func.call @delete_entry.lifted(%arg0, %17, %arg1, %6) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
+      %18 = func.call @delete_entry(%arg0, %17, %arg1, %6) : (!llvm.ptr, memref<?xi32>, i32, !llvm.ptr) -> !llvm.ptr
       scf.yield %18 : !llvm.ptr
     } else {
       scf.yield %arg0 : !llvm.ptr
