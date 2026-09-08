@@ -205,7 +205,11 @@ def main():
 
         for bench in benches:
             print("--- %s / %s ---" % (config, bench))
-            bench_dir = os.path.join("./src", bench)
+            # ./csrc, not ./src. The tree was reorganised into csrc/ (the C
+            # sources, now with .ll beside them) and mlir-src/ (the lifted MLIR)
+            # and this path was not updated, so every benchmark under every
+            # configuration failed in 0.0s with no diagnostic.
+            bench_dir = os.path.join("./csrc", bench)
 
             # Attribute every manifest row to a benchmark. Without this the
             # lifter's manifest reads "?" throughout and cannot answer which
