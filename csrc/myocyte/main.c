@@ -327,6 +327,14 @@ int main(int argc, char *argv []){
 	// }
 
 	time4 = get_time();
+	// The answer: each instance's state at the end of the interval, which
+	// the program otherwise never prints or writes (write() in file.c is
+	// never called). Printed after time4, so it is not timed as computation.
+	for(i=0; i<workload; i++){
+		for(j=0; j<EQUATIONS; j++){
+			printf("y[%d][%d] = %.8e\n", i, j, y[i][xmax][j]);
+		}
+	}
 
 	//================================================================================80
 	//	DEALLOCATION
