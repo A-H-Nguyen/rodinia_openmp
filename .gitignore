@@ -27,3 +27,5 @@ others/
 csrc/cfd/density
 csrc/cfd/density_energy
 csrc/cfd/momentum
+
+__pycache__/
