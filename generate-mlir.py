@@ -38,21 +38,24 @@ PASSES = (
     "lift-llvm-to-func,"
     "lift-llvm-to-cf,"
     "lift-mem-allocs,"
-    # only-internal=false, and NO abi wrappers.
+    # only-internal=true, and NO abi wrappers.
     #
-    # This output is the shared input to every approach the evaluation compares,
-    # including CMDFG -- and CMDFG phase 1 refuses a module containing ABI
-    # thunks outright: "build-dfg: 'bpnn_train_kernel' has an ABI thunk paired
-    # with 'bpnn_train_kernel.lifted'". With emit-abi-wrappers the whole-program
-    # phase would specialise the thunk rather than the lifted body, so the input
-    # has to be neutral.
+    # Only internal (static) functions get memref parameters; every signature
+    # another unit can see keeps its pointers. The harnesses link and RUN what
+    # this produces (omp-lifting's tools/bench-rodinia.py, and bench-fortran.py's
+    # xmo arms for a Fortran workload's C), so a changed external signature is a
+    # wrong program, not a compile-time figure: with only-internal=false a
+    # definition takes memrefs while its callers in other units still pass
+    # pointers, and backprop, kmeans, lavaMD and lud crash or hang. C called from
+    # Fortran needs it too: Fortran calls through declarations no lift sees.
     #
-    # Dropping the thunks means externally visible signatures change without one,
-    # which is only safe under a whole-program assumption -- and that assumption
-    # holds here: every translation unit goes through the same flow, the CMDFG
-    # phase retargets callers itself, and this evaluation measures compilation
-    # rather than linking a binary.
-    "lift-ptr-args{only-internal=false},"
+    # No ABI wrappers either: XMO phase 1 refuses a module containing ABI
+    # thunks ("build-dfg: 'bpnn_train_kernel' has an ABI thunk paired with
+    # 'bpnn_train_kernel.lifted'"), so the input every approach starts from
+    # stays neutral. The cost is that a pointer parameter of an external
+    # function is invisible to XMO's graph (writeups/task-docs/
+    # xmo-update-phase-6.md, G4).
+    "lift-ptr-args{only-internal=true},"
     "lift-gep-ops,"
     "lift-load-stores,"
     "propagate-memrefs,"
